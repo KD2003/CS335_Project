@@ -9,7 +9,7 @@ int yyerror(const char *str);
 %}
 
 %locations
-%token KEYWORD IDENTIFIER LITERAL ESCSEQ OPERATOR SEP INTTYPE FPTYPE BOOLTYPE
+%token KEYWORD IDENTIFIER LITERAL ESCSEQ OPERATOR SEP INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP
 
 %type <lit> LITERAL 
 
@@ -23,18 +23,8 @@ prog:
     | KEYWORD		{cout << "keyword\n";}
 ;
 
-start:
-    word start
-    | word
-;
 
-word:
-    '('			{cout << "Bracket open\n";}
-    | ')'		{cout << "Bracket close\n";}
-;
-
-
-primitivetype:
+PrimitiveType:
     annotations numerictype
     | annotations BOOLTYPE
 ;
@@ -73,7 +63,100 @@ ElementValuePair:
 ;
 
 ElementValue:
-    
+    Annotation			// left here
+;
+
+Expression:
+    AssignmentExpression
+;
+
+AssignmentExpression:
+    ConditionalExpression
+    | LeftHandSide ASSIGNOP Expression		// or Assignment
+;
+
+AmbigiousName:
+    AmbigiousName '.' IDENTIFIER
+    | IDENTIFIER
+;
+
+ExpressionName:
+    AmbigiousName '.' IDENTIFIER
+    | IDENTIFIER
+;
+
+ConditionalExpression:
+    ConditionalOrExpression
+    | ConditionalOrExpression '?' Expression ':' ConditionalExpression
+    | ConditionalOrExpression '?' Expression ':' LambdaExpression
+;
+
+ConditionalOrExpression:
+    ConditionalAndExpression
+    | ConditionalOrExpression CONDOR ConditionalAndExpression
+;
+
+ConditionalAndExpression:
+    InclusiveOrExpression
+    | ConditionalAndExpression CONDAND InclusiveOrExpression
+;
+
+AndExpression:
+    EqualityExpression
+    | AndExpression '&' EqualityExpression
+;
+
+ExclusiveOrExpression:
+    AndExpression
+    | ExclusiveOrExpression '^' AndExpression
+;
+
+InclusiveOrExpression:
+    ExclusiveOrExpression
+    | InclusiveOrExpression '|' ExclusiveOrExpression
+;
+
+EqualityExpression:
+    RelationalExpression
+    | EqualityExpression EQALITYOP RelationalExpression
+;
+
+RelationalExpression:
+    ShiftExpression
+    | RelationalExpression RELATIONOP ShiftExpression
+;
+
+ShiftExpression:
+    AdditiveExpression
+    | ShiftExpression SHIFTOP AdditiveExpression
+;
+
+AdditiveExpression:
+    MultiplicativeExpression
+    | AdditiveExpression ADDOP MultiplicativeExpression
+;
+
+MultiplicativeExpression:
+    UnaryExpression
+    | MultiplicativeExpression MULTOP UnaryExpression
+;
+
+UnaryExpression:
+    ADDOP2 UnaryExpression
+    | ADDOP UnaryExpression
+    | PostfixExpression
+    | UNARYOP UnaryExpression
+    | CastExpression
+;
+
+CastExpression:
+    '(' PrimitiveType ')' UnaryExpression
+;
+
+PostfixExpression:
+    Primary			// need to make primary
+    | ExpressionName
+    | PostfixExpression ADDOP2
 ;
 
 %%
