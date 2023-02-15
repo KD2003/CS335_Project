@@ -159,6 +159,10 @@ PostfixExpression:
     | PostfixExpression ADDOP2
 ;
 
+Primary:
+
+;
+
 %%
 
 int main(){
