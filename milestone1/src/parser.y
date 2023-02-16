@@ -252,9 +252,9 @@ MethodReference:
 
 ArrayCreationExpression:
     "new" PrimitiveType DimExprs Zeroorone_Dims
-    | "new" ClassOrInterfaceType DimExprs Zeroorone_Dims
+    | "new" ClassType DimExprs Zeroorone_Dims // ClassOrInterfaceType ---> ClassType
     | "new" PrimitiveType Dims ArrayInitializer
-    | "new" ClassOrInterfaceType Dims ArrayInitializer
+    | "new" ClassType Dims ArrayInitializer
 ;
 
 Zeroorone_Dims:
@@ -277,7 +277,6 @@ DimExpr:
     '[' Expression ']'
 ;
 
-///////// not completed
 
 
 
