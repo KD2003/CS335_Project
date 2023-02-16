@@ -128,11 +128,109 @@ PostfixExpression:
     | ExpressionName
     | PostfixExpression ADDOP2
 ;
-//15  expressions 
+//Productions from §15 (Expressions)
 Primary:
     PrimaryNoNewArray
     | ArrayCreationExpression 
 ;
+
+
+PrimaryNoNewArray:
+    Literal
+    | ClassLiteral
+    | "this"
+    | TypeName '.' "this"
+    | ( Expression )  // may be some change.............
+    | ClassInstanceCreationExpression
+    | FieldAccess
+    | ArrayAccess
+    | MethodInvocation
+    | MethodReference
+;
+
+
+ClassLiteral: //confirm once
+    | TypeName Zero_or_moreSquarebracket '.' "class" 
+    | NumericType Zero_or_moreSquarebracket '.' "class"
+    | "boolean" Zero_or_moreSquarebracket '.' "class"
+    | "void" '.' "class"
+;
+
+Zero_or_moreSquarebracket:
+    Zero_or_moreSquarebracket "[ ]" 
+    |   
+;
+
+ClassInstanceCreationExpression:
+    UnqualifiedClassInstanceCreationExpression
+    | ExpressionName '.' UnqualifiedClassInstanceCreationExpression
+    | Primary '.' UnqualifiedClassInstanceCreationExpression
+;
+
+
+UnqualifiedClassInstanceCreationExpression:
+    "new" ZerooroneTypeArguments ClassOrInterfaceTypeToInstantiate '(' ZerooroneArgumentList ')' ZerooroneClassBody
+;
+
+ZerooroneTypeArguments:
+    TypeArguments | 
+;
+
+ZerooroneArgumentList:
+    ArgumentList | 
+;
+
+ZerooroneClassBody:
+    ClassBody | 
+;
+
+
+ClassOrInterfaceTypeToInstantiate:
+    Identifier Zeroormore_DotIdentifier Zeroorone_TypeArguments //ignoring diamond <>
+;
+
+Zeroormore_DotIdentifier:
+    '.' Identifier | 
+;
+
+Zeroorone_TypeArguments:
+    TypeArguments |  
+;
+
+
+FieldAccess:
+    Primary '.' Identifier  
+    | "super" '.' Identifier
+    | TypeName '.' "super" '.' Identifier
+;
+
+
+ArrayAccess:
+    ExpressionName '[' Expression ']'
+    | PrimaryNoNewArray '[' Expression ']'
+;
+
+
+MethodInvocation:
+    MethodName '(' Zeroorone_ArgumentList ')'
+    | TypeName '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | ExpressionName '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | Primary '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | "super" '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | TypeName '.' "super" '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+;
+
+Zeroorone_ArgumentList:
+    ArgumentList | 
+;
+
+Zeroorone_TypeArguments:
+    TypeArguments | 
+;
+
+///////// not completed
+
+
 
 // 15 end
 
