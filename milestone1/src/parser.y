@@ -340,6 +340,7 @@ StatementWithoutTrailingSubstatement:		// left try statement
     | KEY_sync '(' Expression ')' Block
 ;
 
+
 StatementExpression:
     Assignment
     | ADDOP2 UnaryExpression
@@ -347,6 +348,23 @@ StatementExpression:
     | MethodInvocation
     | ClassInstanceCreationExpression
 ;
+
+Assignment:
+    LeftHandSide AssignmentOperator Expression 
+;
+
+
+LeftHandSide:
+    ExpressionName
+    | FieldAccess
+    | ArrayAccess
+;
+
+AssignmentOperator:
+    '=' | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|="
+;
+
+
 
 AssertStatement:
     KEY_assert Expression ';'
