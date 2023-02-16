@@ -31,7 +31,7 @@ TEXTBLK ["]{3}[ \t\f]*[\r\n]([^"\\]|(["]{2}+[^"\\\n]+)|(["]+[^"\\\n]+)|{ESCSEQ}|
 SEP1 ";"|","|"."|"@"|"("|"{"|"["|")"|"}"|"]"
 SEP2 "..."|"::"
 ASSIGNOP "="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|">>>="|"&="|"\^="|"\|="
-SINGLEOP "&"|"^"|"|"
+SINGLEOP "&"|"^"|"|"|":"
 OPERATOR "="|">"|"<"|"!"|"~"|"?"|":"|"->"|"=="|">="|"<="|"!="|"&&"|"|"{2}|"++"|"--"|"+"|"-"|"*"|"/"|"&"|"|"|"^"|"%"|"<<"|">>"|">>>"|"+="|"-="|"*="|"/="|"&="|"\|="|"\^="|"%="|"<<="|">>="|">>>="
 
 %option yylineno
@@ -59,6 +59,18 @@ OPERATOR "="|">"|"<"|"!"|"~"|"?"|":"|"->"|"=="|">="|"<="|"!="|"&&"|"|"{2}|"++"|"
 {FPTYPE} {return(FPTYPE);}
 
 {BOOLTYPE} {return(BOOLTYPE);}
+
+var {return(KEY_VAR);}
+assert {return(KEY_assert);}
+yield|throw {return(KEY_yiethr);}
+break|continue {return(KEY_breacon);}
+return {return(KEY_return);}
+if {return(KEY_if);}
+else {return(KEY_else);}
+while {return(KEY_while);}
+for {return(KEY_for);}
+synchronized {return(KEY_sync);}
+final {return(KEY_final);}
 
 {KEYWORD} {
     return(KEYWORD);

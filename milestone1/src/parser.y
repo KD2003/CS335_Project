@@ -9,7 +9,7 @@ int yyerror(const char *str);
 %}
 
 %locations
-%token KEYWORD IDENTIFIER LITERAL ESCSEQ OPERATOR SEP INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP
+%token KEYWORD IDENTIFIER LITERAL ESCSEQ OPERATOR SEP INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yiethr KEY_brecon KEY_return KEY_if KEY_else KEY_for KEY_while KEY_sync KEY_final
 
 %type <lit> LITERAL 
 
@@ -25,8 +25,8 @@ prog:
 
 
 PrimitiveType:
-    annotations numerictype
-    | annotations BOOLTYPE
+    numerictype
+    | BOOLTYPE
 ;
 
 numerictype:
@@ -34,37 +34,7 @@ numerictype:
     | FPTYPE
 ;
 
-annotations:
-    annotations Annotation
-    | Annotation
-;
-
-Annotation:
-    NormalAnnotation
-    | MarkerAnnotation
-    | SingleElementAnnotation
-;
-
-NormalAnnotation:
-    '@' TypeName '(' ElementValuePairList ')'
-    | '@' TypeName
-;
-
-ElementValuePairList:
-    ElementValuePair ElementValuePairMore
-;
-
-ElementValuePairMore:
-    ElementValuePairMore ',' ElementValuePair |
-;
-
-ElementValuePair:
-    IDENTIFIER '=' ElementValue
-;
-
-ElementValue:
-    Annotation			// left here
-;
+// 15 Expressions
 
 Expression:
     AssignmentExpression
@@ -162,6 +132,122 @@ PostfixExpression:
 Primary:
 
 ;
+
+// 15 end
+
+// Productions from §14 (Blocks, Statements, and Patterns)
+
+Block:
+    '{' BlockStatements '}'
+;
+
+BlockStatements:
+    BlockStatements BlockStatement |
+;
+
+BlockStatement:
+    ClassDeclaration
+    | LocalVariableDeclaration ';'
+    | Statement
+;
+
+VariableModifier:
+    VariableModifier KEY_final |
+;
+
+LocalVariableDeclaration:
+    VariableModifier LocalVariableType VariableDeclaratorList
+;
+
+LocalVariableType:
+    UnannType
+    | KEY_VAR
+;
+
+Statement:
+    StatementWithoutTrailingSubstatement
+    | IDENTIFIER ':' Statement
+    | KEY_if '(' Expression ')' Statement
+    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement 
+    | KEY_while '(' Expression ')' Statement
+    | ForStatement
+;
+
+StatementNoShortIf:
+    StatementWithoutTrailingSubstatement
+    | IDENTIFIER ':' StatementNoShortIf
+    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf 
+    | KEY_while '(' Expression ')' StatementNoShortIf 
+    | ForStatementNoShortIf
+;
+
+StatementWithoutTrailingSubstatement:		// left try statement
+    Block
+    | ';'
+    | StatementExpression ';'
+    | AssertStatement
+    | BreakContinueStatement
+    | KEY_return ';'
+    | KEY_return Expression ';'
+    | KEY_yiethr Expression ';'
+    | KEY_sync '(' Expression ')' Block
+;
+
+StatementExpression:
+    Assignment
+    | ADDOP2 UnaryExpression
+    | PostfixExpression ADDOP2
+    | MethodInvocation
+    | ClassInstanceCreationExpression
+;
+
+AssertStatement:
+    KEY_assert Expression ';'
+    | KEY_assert Expression ':' Expression ';'
+;
+
+BreakContinueStatement:
+    KEY_brecon IDENTIFIER ';'
+    | KEY_brecon ';'
+;
+
+ForStatement:
+    KEY_for '(' ';' ';' ')' Statement
+    | KEY_for '(' ForInit ';' ';' ')' Statement
+    | KEY_for '(' ';' Expression ';' ')' Statement
+    | KEY_for '(' ';' ';' StatementExpressionList ')' Statement
+    | KEY_for '(' ';' Expression ';' StatementExpressionList ')' Statement
+    | KEY_for '(' ForInit ';' Expression ';' ')' Statement
+    | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement
+    | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement
+    | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement
+;
+
+ForStatementNoShortIf:
+    KEY_for '(' ';' ';' ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf
+    | KEY_for '(' ';' Expression ';' ')' StatementNoShortIf
+    | KEY_for '(' ';' ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' LocalVariableDeclaration ':' Expression ')' StatementNoShortIf
+;
+
+ForInit:
+    StatementExpressionList
+    | LocalVariableDeclaration;
+
+StatementExpressionList:
+    StatementExpression StatementExpressionMore
+;
+
+StatementExpressionMore:
+    ',' StatementExpression |
+;
+
+// 14 end
 
 ArrayInitialiser:
     VariableInitialisers
