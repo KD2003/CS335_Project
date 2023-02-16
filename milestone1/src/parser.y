@@ -163,32 +163,32 @@ Primary:
 
 ;
 
-ArrayInitialiser:
-    VariableInitialisers
+ArrayInitializer:
+    VariableInitializers
 ;
 
-VariableInitialisers:
-    VariableInitialiser_question ',' VariableInitialisers
+VariableInitializers:
+    VariableInitializer_question ',' VariableInitializers
     | 
 ;
 
-VariableInitialiser_question:
-    VariableInitialiser
+VariableInitializer_question:
+    VariableInitializer
     | 
 ;
 
 VariableInitializerList:
-    VariableInitialiser cVariableInitialiser
+    VariableInitializer cVariableInitializer
 ;
 
-cVariableInitialiser:
-    ',' VariableInitialiser cVariableInitialiser
+cVariableInitializer:
+    ',' VariableInitializer cVariableInitializer
     |
 ;
 
-VariableInitialiser:
+VariableInitializer:
     Expression
-    | ArrayInitialiser
+    | ArrayInitializer
 ;
 
 // Method 
