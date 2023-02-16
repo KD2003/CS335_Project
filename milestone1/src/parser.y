@@ -290,10 +290,6 @@ Zeroorone_Dims:
     Dims | 
 ;
 
-Dims:
-    '[' ']'
-;
-
 DimExprs:
     DimExpr Zeroormore_DimExpr
 ;
@@ -306,6 +302,7 @@ DimExpr:
     '[' Expression ']'
 ;
 
+///////// not completed
 
 
 
@@ -369,7 +366,6 @@ StatementWithoutTrailingSubstatement:		// left try statement
     | KEY_sync '(' Expression ')' Block
 ;
 
-
 StatementExpression:
     Assignment
     | ADDOP2 UnaryExpression
@@ -378,22 +374,11 @@ StatementExpression:
     | ClassInstanceCreationExpression
 ;
 
-Assignment:
-    LeftHandSide AssignmentOperator Expression 
-;
-
-
 LeftHandSide:
     ExpressionName
     | FieldAccess
     | ArrayAccess
 ;
-
-AssignmentOperator:
-    '=' | "*=" | "/=" | "%=" | "+=" | "-=" | "<<=" | ">>=" | ">>>=" | "&=" | "^=" | "|="
-;
-
-
 
 AssertStatement:
     KEY_assert Expression ';'
@@ -564,6 +549,143 @@ ExceptionType:
     ClassType
     | TypeVariable
 ;
+MethodBody:
+    Block
+    | ';'
+;
+InstanceInitializer:
+    Block
+;
+StaticInitializer:
+    "static" Block
+;
+ConstructorDeclaration:
+    zeroormore_ConstructorModifier ConstructorDeclarator Throws_s ConstructorBody
+;
+zeroormore_ConstructorModifier:
+    ConstructorModifier zeroormore_ConstructorModifier
+    | 
+;
+ConstructorModifier:
+    "public" 
+    | "protected" 
+    | "private"
+;
+ConstructorDeclarator:
+    zeroorone_TypeParameters Identifier '(' recieveparameters formalparameters ')'
+;
+zeroorone_TypeParameters:
+    TypeParameters
+    |
+;
+ConstructorBody:
+    '{' zerooroneExplicitConstructorInvocation zerooroneBlockStatements '}'
+;
+zerooroneBlockStatements:
+    BlockStatements
+    |
+;
+zerooroneExplicitConstructorInvocation:
+    ExplicitConstructorInvocation
+    |
+;
+ExplicitConstructorInvocation:
+    ZerooroneTypeArguments "this" ( ZerooroneArgumentList ) ';'
+    Zeroorone_TypeArguments "super" ( ZerooroneArgumentList ) ';'
+    ExpressionName . zeroorone_TypeParameters "super" ( ZerooroneArgumentList ) ';'
+    Primary '.' zeroorone_TypeParameters "super" '(' ZerooroneArgumentList ')' ';'
+;
+EnumDeclaration:
+    zeroormoreClassModifier "enum" Identifier zerooroneClassImplements EnumBody
+;
+zeroormoreClassModifier:
+    ClassModifier zeroormoreClassModifier
+    |
+;
+zerooroneClassImplements:
+    ClassImplements
+    |
+;
+EnumBody:
+    '{' zerooroneEnumConstantList zerooronecomma zerooroneEnumBodyDeclarations '}'
+;
+zerooronecomma;
+    ',' zerooronecomma
+    |
+;
+zerooroneEnumConstantList:
+    EnumConstantList
+    |
+;
+zerooroneEnumBodyDeclarations:
+    EnumBodyDeclarations
+    |
+;
+EnumConstantList:
+    EnumConstant cEnumConstant
+;
+cEnumConstant:
+    EnumConstant cEnumConstant
+    |
+;
+EnumConstant:
+    Identifier bracketZeroorone_ArgumentList ZerooroneClassBody
+;
+bracketZeroorone_ArgumentList:
+    '(' Zeroorone_ArgumentList ')' bracketZeroorone_ArgumentList
+    |
+; 
+EnumBodyDeclarations:
+    ';' zeroormoreClassBodyDeclaration
+;
+zeroormoreClassBodyDeclaration:
+    ClassBodyDeclaration zeroormoreClassBodyDeclaration
+    |
+;
+RecordDeclaration:
+    zeroormoreClassModifier record TypeIdentifier zeroorone_TypeParameters RecordHeader zerooroneClassImplements RecordBody
+;
+RecordHeader:
+    '(' zerooroneRecordComponentList ')'
+;
+zerooroneRecordComponentList:
+    RecordComponentList
+    |
+;
+RecordComponentList:
+    RecordComponent cRecordComponent
+;
+cRecordComponent:
+    ',' RecordComponent cRecordComponent
+    |
+;
+RecordComponent:
+    zeroormoreRecordComponentModifier UnannType Identifier
+    | VariableArityRecordComponent
+;
+zeroormoreRecordComponentModifier:
+    RecordComponentModifier zeroormoreRecordComponentModifier
+    |
+;
+VariableArityRecordComponent:
+    UnannType '...' Identifier
+;
+RecordBody:
+    '{' zeroormoreRecordBodyDeclaration '}'
+;
+zeroormoreRecordBodyDeclaration:
+    RecordBodyDeclaration zeroormoreRecordBodyDeclaration
+    |
+;
+RecordBodyDeclaration:
+    ClassBodyDeclaration
+    CompactConstructorDeclaration
+;
+CompactConstructorDeclaration:
+    zeroormore_ConstructorModifier Identifier ConstructorBody
+;
+
+
 
 //Classes
 ClassDeclaration:
@@ -586,6 +708,137 @@ ClassPermits:
 ;
 ClassBody:
     '{' ClassBodyDeclarations '}'
+;
+ClassBodyDeclarations:
+    ClassBodyDeclaration ClassBodyDeclarations
+    | 
+;
+ClassBodyDeclaration:
+    ClassMemberDeclaration
+    | InstanceInitializer
+    | StaticInitializer
+    | ConstructorDeclaration
+;
+ClassMemberDeclaration:
+    FieldDeclaration
+    | MethodDeclaration
+    | ClassDeclaration
+    | InterfaceDeclaration
+    ";"
+;
+FieldDeclaration:
+    FieldModifiers UnannType VariableDeclaratorList ";"
+;
+FieldModifiers:
+    FieldModifier FieldModifiers
+    |
+;
+FieldModifier:
+    "public" 
+    | "protected" 
+    | "private"
+    | "static" 
+    | "final" 
+    | "transient" 
+    | "volatile"
+;
+VariableDeclaratorList:
+    VariableDeclarator cVariableDeclarator
+;
+cVariableDeclarator:
+    "," VariableDeclarator cVariableDeclarator
+    |
+;
+VariableDeclarator:
+    VariableDeclaratorId VariableInitializer_eq
+;
+VariableInitializer_eq:
+    "=" VariableInitializer 
+    |
+;
+VariableDeclaratorId:
+    Identifier Dims_s
+;
+UnannType:
+    UnannPrimitiveType
+    | UnannReferenceType
+;
+UnannPrimitiveType:
+    NumericType
+    | "boolean"
+;
+UnannReferenceType:
+    UnannClassOrInterfaceType
+    | UnannTypeVariable
+    | UnannArrayType
+;
+UnannClassOrInterfaceType:
+    UnannClassType
+;
+UnannClassType:
+    Identifier Zeroorone_TypeArguments
+    PackageName . Identifier Zeroorone_TypeArguments
+    UnannClassOrInterfaceType . Identifier Zeroorone_TypeArguments
+;
+TypeVariable:
+    Identifier
+;
+UnannTypeVariable:
+    Identifier
+;
+UnannArrayType:
+    UnannPrimitiveType Dims
+    | UnannTypeVariable Dims
+;
+
+
+
+ArrayType:
+    PrimitiveType Dims
+    ClassOrInterfaceType Dims
+    TypeVariable Dims
+;
+Dims:
+    '[' ']'
+    | Dims '[' ']'
+;
+TypeParameter:
+    Identifier Zeroorone_TypeBound
+;
+Zeroorone_TypeBound:
+    TypeBound
+    | 
+;
+TypeBound:
+    "extends" TypeVariable
+    | "extends" ClassOrInterfaceType
+;
+TypeArguments:
+    '<' TypeArgumentList '>'
+;
+TypeArgumentList:
+    TypeArgument cTypeArgument
+;
+cTypeArgument:
+    ',' TypeArgument cTypeArgument
+    | 
+;
+TypeArgument:
+    ReferenceType
+    | Wildcard
+;
+Wildcard:
+    '?' zerooroneWildcardBounds
+;
+zerooroneWildcardBounds:
+    WildcardBounds
+    |
+;
+WildcardBounds:
+    extends ReferenceType
+    super ReferenceType
+;
+
 %%
 
 int main(){
