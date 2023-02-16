@@ -9,7 +9,7 @@ int yyerror(const char *str);
 %}
 
 %locations
-%token KEYWORD IDENTIFIER LITERAL ESCSEQ OPERATOR SEP INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP
+%token KEYWORD IDENTIFIER LITERAL ESCSEQ OPERATOR SEP INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yiethr KEY_brecon KEY_return KEY_if KEY_else KEY_for KEY_while KEY_sync KEY_final
 
 %type <lit> LITERAL 
 
@@ -25,8 +25,8 @@ prog:
 
 
 PrimitiveType:
-    annotations numerictype
-    | annotations BOOLTYPE
+    numerictype
+    | BOOLTYPE
 ;
 
 numerictype:
@@ -34,37 +34,7 @@ numerictype:
     | FPTYPE
 ;
 
-annotations:
-    annotations Annotation
-    | Annotation
-;
-
-Annotation:
-    NormalAnnotation
-    | MarkerAnnotation
-    | SingleElementAnnotation
-;
-
-NormalAnnotation:
-    '@' TypeName '(' ElementValuePairList ')'
-    | '@' TypeName
-;
-
-ElementValuePairList:
-    ElementValuePair ElementValuePairMore
-;
-
-ElementValuePairMore:
-    ElementValuePairMore ',' ElementValuePair |
-;
-
-ElementValuePair:
-    IDENTIFIER '=' ElementValue
-;
-
-ElementValue:
-    Annotation			// left here
-;
+// 15 Expressions
 
 Expression:
     AssignmentExpression
@@ -158,10 +128,274 @@ PostfixExpression:
     | ExpressionName
     | PostfixExpression ADDOP2
 ;
-
+//Productions from §15 (Expressions)
 Primary:
-
+    PrimaryNoNewArray
+    | ArrayCreationExpression 
 ;
+
+
+PrimaryNoNewArray:
+    Literal
+    | ClassLiteral
+    | "this"
+    | TypeName '.' "this"
+    | '(' Expression ')'  
+    | ClassInstanceCreationExpression
+    | FieldAccess
+    | ArrayAccess
+    | MethodInvocation
+    | MethodReference
+;
+
+
+ClassLiteral: //confirm once
+    | TypeName Zero_or_moreSquarebracket '.' "class" 
+    | NumericType Zero_or_moreSquarebracket '.' "class"
+    | "boolean" Zero_or_moreSquarebracket '.' "class"
+    | "void" '.' "class"
+;
+
+Zero_or_moreSquarebracket:
+    Zero_or_moreSquarebracket "[ ]" 
+    |   
+;
+
+ClassInstanceCreationExpression:
+    UnqualifiedClassInstanceCreationExpression
+    | ExpressionName '.' UnqualifiedClassInstanceCreationExpression
+    | Primary '.' UnqualifiedClassInstanceCreationExpression
+;
+
+
+UnqualifiedClassInstanceCreationExpression:
+    "new" ZerooroneTypeArguments ClassOrInterfaceTypeToInstantiate '(' ZerooroneArgumentList ')' ZerooroneClassBody
+;
+
+ZerooroneTypeArguments:
+    TypeArguments | 
+;
+
+ZerooroneArgumentList:
+    ArgumentList | 
+;
+
+ZerooroneClassBody:
+    ClassBody | 
+;
+
+
+ClassOrInterfaceTypeToInstantiate:
+    Identifier Zeroormore_DotIdentifier Zeroorone_TypeArguments //ignoring diamond <>
+;
+
+Zeroormore_DotIdentifier:
+    '.' Identifier | 
+;
+
+Zeroorone_TypeArguments:
+    TypeArguments |  
+;
+
+
+FieldAccess:
+    Primary '.' Identifier  
+    | "super" '.' Identifier
+    | TypeName '.' "super" '.' Identifier
+;
+
+
+ArrayAccess:
+    ExpressionName '[' Expression ']'
+    | PrimaryNoNewArray '[' Expression ']'
+;
+
+
+MethodInvocation:
+    MethodName '(' Zeroorone_ArgumentList ')'
+    | TypeName '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | ExpressionName '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | Primary '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | "super" '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+    | TypeName '.' "super" '.' Zeroorone_TypeArguments Identifier '(' Zeroorone_ArgumentList ')'
+;
+
+Zeroorone_ArgumentList:
+    ArgumentList | 
+;
+
+Zeroorone_TypeArguments:
+    TypeArguments | 
+;
+
+
+ArgumentList:
+    Expression Zeroormore_CommaExpression
+;
+
+Zeroormore_CommaExpression:
+    Zeroormore_CommaExpression ',' Expression
+    | 
+;
+
+
+MethodReference:
+    ExpressionName "::" Zeroorone_TypeArguments Identifier
+    | Primary "::" Zeroorone_TypeArguments Identifier
+    | ReferenceType "::" Zeroorone_TypeArguments Identifier
+    | "super" "::" Zeroorone_TypeArguments Identifier
+    | TypeName '.' "super" "::" Zeroorone_TypeArguments Identifier
+    | ClassType "::" Zeroorone_TypeArguments "new"
+    | ArrayType "::" "new"
+;
+
+
+ArrayCreationExpression:
+    "new" PrimitiveType DimExprs Zeroorone_Dims
+    | "new" ClassOrInterfaceType DimExprs Zeroorone_Dims
+    | "new" PrimitiveType Dims ArrayInitializer
+    | "new" ClassOrInterfaceType Dims ArrayInitializer
+;
+
+Zeroorone_Dims:
+    Dims | 
+;
+
+Dims:
+    '[' ']'
+;
+
+DimExprs:
+    DimExpr Zeroormore_DimExpr
+;
+
+Zeroormore_DimExpr:
+    Zeroormore_DimExpr DimExpr | 
+;
+
+DimExpr:
+    '[' Expression ']'
+;
+
+///////// not completed
+
+
+
+// 15 end
+
+// Productions from §14 (Blocks, Statements, and Patterns)
+
+Block:
+    '{' BlockStatements '}'
+;
+
+BlockStatements:
+    BlockStatements BlockStatement |
+;
+
+BlockStatement:
+    ClassDeclaration
+    | LocalVariableDeclaration ';'
+    | Statement
+;
+
+VariableModifier:
+    VariableModifier KEY_final |
+;
+
+LocalVariableDeclaration:
+    VariableModifier LocalVariableType VariableDeclaratorList
+;
+
+LocalVariableType:
+    UnannType
+    | KEY_VAR
+;
+
+Statement:
+    StatementWithoutTrailingSubstatement
+    | IDENTIFIER ':' Statement
+    | KEY_if '(' Expression ')' Statement
+    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement 
+    | KEY_while '(' Expression ')' Statement
+    | ForStatement
+;
+
+StatementNoShortIf:
+    StatementWithoutTrailingSubstatement
+    | IDENTIFIER ':' StatementNoShortIf
+    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf 
+    | KEY_while '(' Expression ')' StatementNoShortIf 
+    | ForStatementNoShortIf
+;
+
+StatementWithoutTrailingSubstatement:		// left try statement
+    Block
+    | ';'
+    | StatementExpression ';'
+    | AssertStatement
+    | BreakContinueStatement
+    | KEY_return ';'
+    | KEY_return Expression ';'
+    | KEY_yiethr Expression ';'
+    | KEY_sync '(' Expression ')' Block
+;
+
+StatementExpression:
+    Assignment
+    | ADDOP2 UnaryExpression
+    | PostfixExpression ADDOP2
+    | MethodInvocation
+    | ClassInstanceCreationExpression
+;
+
+AssertStatement:
+    KEY_assert Expression ';'
+    | KEY_assert Expression ':' Expression ';'
+;
+
+BreakContinueStatement:
+    KEY_brecon IDENTIFIER ';'
+    | KEY_brecon ';'
+;
+
+ForStatement:
+    KEY_for '(' ';' ';' ')' Statement
+    | KEY_for '(' ForInit ';' ';' ')' Statement
+    | KEY_for '(' ';' Expression ';' ')' Statement
+    | KEY_for '(' ';' ';' StatementExpressionList ')' Statement
+    | KEY_for '(' ';' Expression ';' StatementExpressionList ')' Statement
+    | KEY_for '(' ForInit ';' Expression ';' ')' Statement
+    | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement
+    | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement
+    | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement
+;
+
+ForStatementNoShortIf:
+    KEY_for '(' ';' ';' ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf
+    | KEY_for '(' ';' Expression ';' ')' StatementNoShortIf
+    | KEY_for '(' ';' ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
+    | KEY_for '(' LocalVariableDeclaration ':' Expression ')' StatementNoShortIf
+;
+
+ForInit:
+    StatementExpressionList
+    | LocalVariableDeclaration;
+
+StatementExpressionList:
+    StatementExpression StatementExpressionMore
+;
+
+StatementExpressionMore:
+    ',' StatementExpression |
+;
+
+// 14 end
 
 ArrayInitializer:
     VariableInitializers
@@ -306,6 +540,89 @@ ClassPermits:
 ;
 ClassBody:
     '{' ClassBodyDeclarations '}'
+;
+ClassBodyDeclarations:
+    ClassBodyDeclaration ClassBodyDeclarations
+    | 
+;
+ClassBodyDeclaration:
+    ClassMemberDeclaration
+    | InstanceInitializer
+    | StaticInitializer
+    | ConstructorDeclaration
+;
+ClassMemberDeclaration:
+    FieldDeclaration
+    | MethodDeclaration
+    | ClassDeclaration
+    | InterfaceDeclaration
+    ";"
+;
+FieldDeclaration:
+    FieldModifiers UnannType VariableDeclaratorList ";"
+;
+FieldModifiers:
+    FieldModifier FieldModifiers
+    |
+;
+FieldModifier:
+    "public" 
+    | "protected" 
+    | "private"
+    | "static" 
+    | "final" 
+    | "transient" 
+    | "volatile"
+;
+VariableDeclaratorList:
+    VariableDeclarator cVariableDeclarator
+;
+cVariableDeclarator:
+    "," VariableDeclarator cVariableDeclarator
+    |
+;
+VariableDeclarator:
+    VariableDeclaratorId VariableInitializer_eq
+;
+VariableInitializer_eq:
+    "=" VariableInitializer 
+    |
+;
+VariableDeclaratorId:
+    Identifier Dims_s
+;
+UnannType:
+    UnannPrimitiveType
+    | UnannReferenceType
+;
+UnannPrimitiveType:
+    NumericType
+    | "boolean"
+;
+UnannReferenceType:
+    UnannClassOrInterfaceType
+    | UnannTypeVariable
+    | UnannArrayType
+;
+UnannClassOrInterfaceType:
+    UnannClassType
+;
+UnannClassType:
+    Identifier Zeroorone_TypeArguments
+    PackageName . Identifier Zeroorone_TypeArguments
+    UnannClassOrInterfaceType . Identifier Zeroorone_TypeArguments
+;
+TypeVariable:
+    Identifier
+;
+ArrayType:
+    PrimitiveType Dims
+    ClassOrInterfaceType Dims
+    TypeVariable Dims
+;
+Dims:
+    '[' ']'
+    | Dims '[' ']'
 %%
 
 int main(){
