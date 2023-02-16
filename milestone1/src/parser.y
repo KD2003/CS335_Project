@@ -270,10 +270,6 @@ Variablemodifiers:
 VariableArityParameter:
     Variablemodifiers UnannType annotations '...' Identifier
 ;
-Variablemodifier:
-    Annotation
-    | "final"    
-;
 Throws:
 "throws" ExceptionTypeList
 ;
@@ -289,6 +285,27 @@ ExceptionType:
     | TypeVariable
 ;
 
+//Classes
+ClassDeclaration:
+    NormalClassDeclaration
+    | EnumDeclaration
+    | RecordDeclaration
+;
+NormalClassDeclaration:
+    ClassModifiers class Identifier [ClassExtends] [ClassPermits] ClassBody
+;
+ClassModifiers:
+    ClassModifier ClassModifiers
+    |
+;
+ClassExtends:
+    "extend" ClassType
+;
+ClassPermits:
+    permits TypeName {, TypeName}
+;
+ClassBody:
+    '{' ClassBodyDeclarations '}'
 %%
 
 int main(){
