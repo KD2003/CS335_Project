@@ -128,9 +128,10 @@ PostfixExpression:
     | ExpressionName
     | PostfixExpression ADDOP2
 ;
-
+//15  expressions 
 Primary:
-
+    PrimaryNoNewArray
+    | ArrayCreationExpression 
 ;
 
 // 15 end
