@@ -24,6 +24,11 @@ prog:
 ;
 
 
+Type:
+    PrimitiveType
+    | ReferenceType
+;
+
 PrimitiveType:
     numerictype
     | BOOLTYPE
@@ -33,6 +38,30 @@ numerictype:
     INTTYPE
     | FPTYPE
 ;
+
+//reference type
+
+
+ReferenceType:
+    ClassType  // ClassorInterfaceType -> CLassType
+    | TypeVariable
+    | ArrayType
+;
+
+
+ClassType:
+    TypeIdentifier Zeroorone_TypeArguments
+    | PackageName . TypeIdentifier Zeroorone_TypeArguments
+    | ClassType '.' TypeIdentifier Zeroorone_TypeArguments
+;
+
+Zeroorone_TypeArguments:
+    TypeArguments | 
+;
+// till Interface_type
+// aage ka sourabh ki branch me
+
+
 
 // 15 Expressions
 
