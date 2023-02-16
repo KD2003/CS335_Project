@@ -24,6 +24,11 @@ prog:
 ;
 
 
+Type:
+    PrimitiveType
+    | ReferenceType
+;
+
 PrimitiveType:
     numerictype
     | BOOLTYPE
@@ -33,6 +38,30 @@ numerictype:
     INTTYPE
     | FPTYPE
 ;
+
+//reference type
+
+
+ReferenceType:
+    ClassType  // ClassorInterfaceType -> CLassType
+    | TypeVariable
+    | ArrayType
+;
+
+
+ClassType:
+    TypeIdentifier Zeroorone_TypeArguments
+    | PackageName . TypeIdentifier Zeroorone_TypeArguments
+    | ClassType '.' TypeIdentifier Zeroorone_TypeArguments
+;
+
+Zeroorone_TypeArguments:
+    TypeArguments | 
+;
+// till Interface_type
+// aage ka sourabh ki branch me
+
+
 
 // 15 Expressions
 
@@ -252,9 +281,9 @@ MethodReference:
 
 ArrayCreationExpression:
     "new" PrimitiveType DimExprs Zeroorone_Dims
-    | "new" ClassOrInterfaceType DimExprs Zeroorone_Dims
+    | "new" ClassType DimExprs Zeroorone_Dims // ClassOrInterfaceType ---> ClassType
     | "new" PrimitiveType Dims ArrayInitializer
-    | "new" ClassOrInterfaceType Dims ArrayInitializer
+    | "new" ClassType Dims ArrayInitializer
 ;
 
 Zeroorone_Dims:
@@ -343,6 +372,12 @@ StatementExpression:
     | PostfixExpression ADDOP2
     | MethodInvocation
     | ClassInstanceCreationExpression
+;
+
+LeftHandSide:
+    ExpressionName
+    | FieldAccess
+    | ArrayAccess
 ;
 
 AssertStatement:
