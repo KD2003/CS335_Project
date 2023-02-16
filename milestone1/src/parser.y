@@ -140,7 +140,7 @@ PrimaryNoNewArray:
     | ClassLiteral
     | "this"
     | TypeName '.' "this"
-    | ( Expression )  // may be some change.............
+    | '(' Expression ')'  
     | ClassInstanceCreationExpression
     | FieldAccess
     | ArrayAccess
@@ -226,6 +226,55 @@ Zeroorone_ArgumentList:
 
 Zeroorone_TypeArguments:
     TypeArguments | 
+;
+
+
+ArgumentList:
+    Expression Zeroormore_CommaExpression
+;
+
+Zeroormore_CommaExpression:
+    Zeroormore_CommaExpression ',' Expression
+    | 
+;
+
+
+MethodReference:
+    ExpressionName "::" Zeroorone_TypeArguments Identifier
+    | Primary "::" Zeroorone_TypeArguments Identifier
+    | ReferenceType "::" Zeroorone_TypeArguments Identifier
+    | "super" "::" Zeroorone_TypeArguments Identifier
+    | TypeName '.' "super" "::" Zeroorone_TypeArguments Identifier
+    | ClassType "::" Zeroorone_TypeArguments "new"
+    | ArrayType "::" "new"
+;
+
+
+ArrayCreationExpression:
+    "new" PrimitiveType DimExprs Zeroorone_Dims
+    | "new" ClassOrInterfaceType DimExprs Zeroorone_Dims
+    | "new" PrimitiveType Dims ArrayInitializer
+    | "new" ClassOrInterfaceType Dims ArrayInitializer
+;
+
+Zeroorone_Dims:
+    Dims | 
+;
+
+Dims:
+    '[' ']'
+;
+
+DimExprs:
+    DimExpr Zeroormore_DimExpr
+;
+
+Zeroormore_DimExpr:
+    Zeroormore_DimExpr DimExpr | 
+;
+
+DimExpr:
+    '[' Expression ']'
 ;
 
 ///////// not completed
