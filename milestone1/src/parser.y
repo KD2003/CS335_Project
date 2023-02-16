@@ -163,6 +163,132 @@ Primary:
 
 ;
 
+ArrayInitialiser:
+    VariableInitialisers
+;
+
+VariableInitialisers:
+    VariableInitialiser_question ',' VariableInitialisers
+    | 
+;
+
+VariableInitialiser_question:
+    VariableInitialiser
+    | 
+;
+
+VariableInitializerList:
+    VariableInitialiser cVariableInitialiser
+;
+
+cVariableInitialiser:
+    ',' VariableInitialiser cVariableInitialiser
+    |
+;
+
+VariableInitialiser:
+    Expression
+    | ArrayInitialiser
+;
+
+// Method 
+Methodname:
+    UnqualifiedMethodIdentifier
+;
+
+UnqualifiedMethodIdentifier:
+    (Identifier but not Yield)
+;
+
+MethodDeclaration:
+    Methodmodifiers Methodheader Methodbody
+;
+
+Methodmodifiers:
+    Methodmodifier Methodmodifiers
+    |
+;
+
+Methodmodifier:
+    (Annotation public protected private
+abstract static final synchronized native strictf) //Keywords mein change karna hain
+;
+
+Methodheader:
+    Result Methodeclarator Throws_s
+    | TypeParameter annotations Result Methodeclarator Throws_s
+;
+
+Throws_s:
+    Throws Throws_s
+    |
+;
+
+Result:
+    Unanntype
+    | void 
+;
+
+Methodeclarator:
+    Identifier '(' recieveparameters formalparameters ')' Dims_s 
+;
+
+Dims_s:
+    Dims
+    |
+;
+recieveparameters:
+    recieveparameter ','
+    |
+;
+formalparameters:
+    formalparameterlist
+    |
+;
+
+recieveparameter:
+    annotations UnannType identifier_dot "this"
+;
+identifier_dot:
+    Identifier '.'
+    |
+;
+formalparameterlist:
+    formalparameter cformalparameter
+;
+cformalparameter:
+    ',' formalparameter cformalparameter
+    |
+;
+formalparameter:
+    Variablemodifiers UnannType VariableDeclaratorId VariableArityParameter
+;
+Variablemodifiers:
+    Variablemodifier Variablemodifiers
+    |
+;
+VariableArityParameter:
+    Variablemodifiers UnannType annotations '...' Identifier
+;
+Variablemodifier:
+    Annotation
+    | "final"    
+;
+Throws:
+"throws" ExceptionTypeList
+;
+ExceptionTypeList:
+    ExceptionType cExceptionType
+;
+cExceptionType:
+    ',' ExceptionType cExceptionType
+    | 
+;
+ExceptionType:
+    ClassType
+    | TypeVariable
+;
+
 %%
 
 int main(){
