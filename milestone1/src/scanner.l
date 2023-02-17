@@ -29,9 +29,9 @@ CHARLIT [']([^\'\\]|{ESCSEQ})[']
 STRLIT ["]([^"\\\n]|\\(.|\n))*["]
 TEXTBLK ["]{3}[ \t\f]*[\r\n]([^"\\]|(["]{2}+[^"\\\n]+)|(["]+[^"\\\n]+)|{ESCSEQ}|[\r\n])*["]{3}
 SEP1 ";"|","|"."|"@"|"("|"{"|"["|")"|"}"|"]"
-SEP2 "..."|"::"
+DOT3 "..."
 ASSIGNOP "="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|">>>="|"&="|"\^="|"\|="
-SINGLEOP "&"|"^"|"|"|":"
+SINGLEOP "&"|"^"|"|"|":"|'?'
 OPERATOR "="|">"|"<"|"!"|"~"|"?"|":"|"->"|"=="|">="|"<="|"!="|"&&"|"|"{2}|"++"|"--"|"+"|"-"|"*"|"/"|"&"|"|"|"^"|"%"|"<<"|">>"|">>>"|"+="|"-="|"*="|"/="|"&="|"\|="|"\^="|"%="|"<<="|">>="|">>>="
 
 %option yylineno
@@ -71,6 +71,21 @@ while {return(KEY_while);}
 for {return(KEY_for);}
 synchronized {return(KEY_sync);}
 final {return(KEY_final);}
+extends {return(KEY_extends);}
+super {return(KEY_super);}
+class {return(KEY_class);}
+void {return(KEY_void);}
+this {return(KEY_this);}
+new {return(KEY_new);}
+throws {return(KEY_throws);}
+static {return(KEY_static);}
+enum {return(KEY_enum);}
+public {return(KEY_public);}
+protected {return(KEY_protected);}
+private {return(KEY_private);}
+abstract {return(KEY_abstract);}
+native {return(KEY_native);}
+strictf {return(KEY_strictf);}
 
 {KEYWORD} {
     return(KEYWORD);
@@ -122,7 +137,6 @@ final {return(KEY_final);}
 
 "|"{2} {return(CONDOR);}
 
-"?" {return((int)yytext[0]);}
 "&&" {return(CONDAND);}
 "=="|"!=" {return(EQALITYOP);}
 "<"|">"|"<="|">=" {return(RELATIONOP);}
@@ -131,6 +145,7 @@ final {return(KEY_final);}
 "++"|"--" {return(ADDOP2);}
 "~"|"!" {return(UNARYOP);}
 "*"|"/"|"%" {return(MULTOP);}
+"::" {return(COLON2);}
 {SINGLEOP} {return((int)yytext[0]);}
 
 {OPERATOR} {
@@ -141,8 +156,8 @@ final {return(KEY_final);}
     return((int)yytext[0]);
 }
 
-{SEP2} {
-    return(SEP);
+{DOT3} {
+    return(DOT3);
 }
 
 <<EOF>> {
