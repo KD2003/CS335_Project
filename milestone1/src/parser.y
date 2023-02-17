@@ -23,7 +23,7 @@ prog:
     | KEYWORD		{cout << "keyword\n";}
 ;
 
-
+// §4 (Types, Values, and Variables) Start
 Type:
     PrimitiveType
     | ReferenceType
@@ -58,106 +58,55 @@ ClassType:
 Zeroorone_TypeArguments:
     TypeArguments | 
 ;
-// till Interface_type
-// aage ka sourabh ki branch me
 
-
-
-// 15 Expressions
-
-Expression:
-    AssignmentExpression
+ArrayType:
+    PrimitiveType Dims
+    ClassOrInterfaceType Dims
+    TypeVariable Dims
 ;
-
-AssignmentExpression:
-    ConditionalExpression
-    | LeftHandSide ASSIGNOP Expression		// or Assignment
+Dims:
+    '[' ']'
+    | Dims '[' ']'
 ;
-
-AmbigiousName:
-    AmbigiousName '.' IDENTIFIER
-    | IDENTIFIER
+TypeParameter:
+    Identifier Zeroorone_TypeBound
 ;
-
-ExpressionName:
-    AmbigiousName '.' IDENTIFIER
-    | IDENTIFIER
+Zeroorone_TypeBound:
+    TypeBound
+    | 
 ;
-
-ConditionalExpression:
-    ConditionalOrExpression
-    | ConditionalOrExpression '?' Expression ':' ConditionalExpression
-    | ConditionalOrExpression '?' Expression ':' LambdaExpression
+TypeBound:
+    "extends" TypeVariable
+    | "extends" ClassOrInterfaceType
 ;
-
-ConditionalOrExpression:
-    ConditionalAndExpression
-    | ConditionalOrExpression CONDOR ConditionalAndExpression
+TypeArguments:
+    '<' TypeArgumentList '>'
 ;
-
-ConditionalAndExpression:
-    InclusiveOrExpression
-    | ConditionalAndExpression CONDAND InclusiveOrExpression
+TypeArgumentList:
+    TypeArgument cTypeArgument
 ;
-
-AndExpression:
-    EqualityExpression
-    | AndExpression '&' EqualityExpression
+cTypeArgument:
+    ',' TypeArgument cTypeArgument
+    | 
 ;
-
-ExclusiveOrExpression:
-    AndExpression
-    | ExclusiveOrExpression '^' AndExpression
+TypeArgument:
+    ReferenceType
+    | Wildcard
 ;
-
-InclusiveOrExpression:
-    ExclusiveOrExpression
-    | InclusiveOrExpression '|' ExclusiveOrExpression
+Wildcard:
+    '?' zerooroneWildcardBounds
 ;
-
-EqualityExpression:
-    RelationalExpression
-    | EqualityExpression EQALITYOP RelationalExpression
+zerooroneWildcardBounds:
+    WildcardBounds
+    |
 ;
-
-RelationalExpression:
-    ShiftExpression
-    | RelationalExpression RELATIONOP ShiftExpression
+WildcardBounds:
+    extends ReferenceType
+    super ReferenceType
 ;
+// §4 (Types, Values, and Variables) END
 
-ShiftExpression:
-    AdditiveExpression
-    | ShiftExpression SHIFTOP AdditiveExpression
-;
-
-AdditiveExpression:
-    MultiplicativeExpression
-    | AdditiveExpression ADDOP MultiplicativeExpression
-;
-
-MultiplicativeExpression:
-    UnaryExpression
-    | MultiplicativeExpression MULTOP UnaryExpression
-;
-
-UnaryExpression:
-    ADDOP2 UnaryExpression
-    | ADDOP UnaryExpression
-    | PostfixExpression
-    | UNARYOP UnaryExpression
-    | CastExpression
-;
-
-CastExpression:
-    '(' PrimitiveType ')' UnaryExpression
-;
-
-PostfixExpression:
-    Primary			// need to make primary
-    | ExpressionName
-    | PostfixExpression ADDOP2
-;
-//Productions from §15 (Expressions)
+//Productions from §15 (Expressions) START
 Primary:
     PrimaryNoNewArray
     | ArrayCreationExpression 
@@ -302,11 +251,100 @@ DimExpr:
     '[' Expression ']'
 ;
 
-///////// not completed
+Expression:
+    AssignmentExpression
+;
 
+AssignmentExpression:
+    ConditionalExpression
+    | LeftHandSide ASSIGNOP Expression		// or Assignment
+;
 
+AmbigiousName:
+    AmbigiousName '.' IDENTIFIER
+    | IDENTIFIER
+;
 
+ExpressionName:
+    AmbigiousName '.' IDENTIFIER
+    | IDENTIFIER
+;
+
+ConditionalExpression:
+    ConditionalOrExpression
+    | ConditionalOrExpression '?' Expression ':' ConditionalExpression
+    | ConditionalOrExpression '?' Expression ':' LambdaExpression
+;
+
+ConditionalOrExpression:
+    ConditionalAndExpression
+    | ConditionalOrExpression CONDOR ConditionalAndExpression
+;
+
+ConditionalAndExpression:
+    InclusiveOrExpression
+    | ConditionalAndExpression CONDAND InclusiveOrExpression
+;
+
+AndExpression:
+    EqualityExpression
+    | AndExpression '&' EqualityExpression
+;
+
+ExclusiveOrExpression:
+    AndExpression
+    | ExclusiveOrExpression '^' AndExpression
+;
+
+InclusiveOrExpression:
+    ExclusiveOrExpression
+    | InclusiveOrExpression '|' ExclusiveOrExpression
+;
+
+EqualityExpression:
+    RelationalExpression
+    | EqualityExpression EQALITYOP RelationalExpression
+;
+
+RelationalExpression:
+    ShiftExpression
+    | RelationalExpression RELATIONOP ShiftExpression
+;
+
+ShiftExpression:
+    AdditiveExpression
+    | ShiftExpression SHIFTOP AdditiveExpression
+;
+
+AdditiveExpression:
+    MultiplicativeExpression
+    | AdditiveExpression ADDOP MultiplicativeExpression
+;
+
+MultiplicativeExpression:
+    UnaryExpression
+    | MultiplicativeExpression MULTOP UnaryExpression
+;
+
+UnaryExpression:
+    ADDOP2 UnaryExpression
+    | ADDOP UnaryExpression
+    | PostfixExpression
+    | UNARYOP UnaryExpression
+    | CastExpression
+;
+
+CastExpression:
+    '(' PrimitiveType ')' UnaryExpression
+;
+
+PostfixExpression:
+    Primary			// need to make primary
+    | ExpressionName
+    | PostfixExpression ADDOP2
+;
 // 15 end
+
 
 // Productions from §14 (Blocks, Statements, and Patterns)
 
@@ -428,6 +466,7 @@ StatementExpressionMore:
 
 // 14 end
 
+// §10 (Arrays) START
 ArrayInitializer:
     VariableInitializers
 ;
@@ -455,8 +494,112 @@ VariableInitializer:
     Expression
     | ArrayInitializer
 ;
+// §10 (Arrays) END
 
-// Method 
+//Classes
+ClassDeclaration:
+    NormalClassDeclaration
+    | EnumDeclaration
+    | RecordDeclaration
+;
+NormalClassDeclaration:
+    ClassModifiers class Identifier [ClassExtends] [ClassPermits] ClassBody
+;
+ClassModifiers:
+    ClassModifier ClassModifiers
+    |
+;
+ClassExtends:
+    "extend" ClassType
+;
+ClassPermits:
+    permits TypeName {, TypeName}
+;
+ClassBody:
+    '{' ClassBodyDeclarations '}'
+;
+ClassBodyDeclarations:
+    ClassBodyDeclaration ClassBodyDeclarations
+    | 
+;
+ClassBodyDeclaration:
+    ClassMemberDeclaration
+    | InstanceInitializer
+    | StaticInitializer
+    | ConstructorDeclaration
+;
+ClassMemberDeclaration:
+    FieldDeclaration
+    | MethodDeclaration
+    | ClassDeclaration
+    | InterfaceDeclaration
+    ";"
+;
+FieldDeclaration:
+    FieldModifiers UnannType VariableDeclaratorList ";"
+;
+FieldModifiers:
+    FieldModifier FieldModifiers
+    |
+;
+FieldModifier:
+    "public" 
+    | "protected" 
+    | "private"
+    | "static" 
+    | "final" 
+    | "transient" 
+    | "volatile"
+;
+VariableDeclaratorList:
+    VariableDeclarator cVariableDeclarator
+;
+cVariableDeclarator:
+    "," VariableDeclarator cVariableDeclarator
+    |
+;
+VariableDeclarator:
+    VariableDeclaratorId VariableInitializer_eq
+;
+VariableInitializer_eq:
+    "=" VariableInitializer 
+    |
+;
+VariableDeclaratorId:
+    Identifier Dims_s
+;
+UnannType:
+    UnannPrimitiveType
+    | UnannReferenceType
+;
+UnannPrimitiveType:
+    NumericType
+    | "boolean"
+;
+UnannReferenceType:
+    UnannClassOrInterfaceType
+    | UnannTypeVariable
+    | UnannArrayType
+;
+UnannClassOrInterfaceType:
+    UnannClassType
+;
+UnannClassType:
+    Identifier Zeroorone_TypeArguments
+    PackageName . Identifier Zeroorone_TypeArguments
+    UnannClassOrInterfaceType . Identifier Zeroorone_TypeArguments
+;
+TypeVariable:
+    Identifier
+;
+UnannTypeVariable:
+    Identifier
+;
+UnannArrayType:
+    UnannPrimitiveType Dims
+    | UnannTypeVariable Dims
+;
+//Method inside class
 Methodname:
     UnqualifiedMethodIdentifier
 ;
@@ -685,160 +828,7 @@ CompactConstructorDeclaration:
     zeroormore_ConstructorModifier Identifier ConstructorBody
 ;
 
-
-
-//Classes
-ClassDeclaration:
-    NormalClassDeclaration
-    | EnumDeclaration
-    | RecordDeclaration
-;
-NormalClassDeclaration:
-    ClassModifiers class Identifier [ClassExtends] [ClassPermits] ClassBody
-;
-ClassModifiers:
-    ClassModifier ClassModifiers
-    |
-;
-ClassExtends:
-    "extend" ClassType
-;
-ClassPermits:
-    permits TypeName {, TypeName}
-;
-ClassBody:
-    '{' ClassBodyDeclarations '}'
-;
-ClassBodyDeclarations:
-    ClassBodyDeclaration ClassBodyDeclarations
-    | 
-;
-ClassBodyDeclaration:
-    ClassMemberDeclaration
-    | InstanceInitializer
-    | StaticInitializer
-    | ConstructorDeclaration
-;
-ClassMemberDeclaration:
-    FieldDeclaration
-    | MethodDeclaration
-    | ClassDeclaration
-    | InterfaceDeclaration
-    ";"
-;
-FieldDeclaration:
-    FieldModifiers UnannType VariableDeclaratorList ";"
-;
-FieldModifiers:
-    FieldModifier FieldModifiers
-    |
-;
-FieldModifier:
-    "public" 
-    | "protected" 
-    | "private"
-    | "static" 
-    | "final" 
-    | "transient" 
-    | "volatile"
-;
-VariableDeclaratorList:
-    VariableDeclarator cVariableDeclarator
-;
-cVariableDeclarator:
-    "," VariableDeclarator cVariableDeclarator
-    |
-;
-VariableDeclarator:
-    VariableDeclaratorId VariableInitializer_eq
-;
-VariableInitializer_eq:
-    "=" VariableInitializer 
-    |
-;
-VariableDeclaratorId:
-    Identifier Dims_s
-;
-UnannType:
-    UnannPrimitiveType
-    | UnannReferenceType
-;
-UnannPrimitiveType:
-    NumericType
-    | "boolean"
-;
-UnannReferenceType:
-    UnannClassOrInterfaceType
-    | UnannTypeVariable
-    | UnannArrayType
-;
-UnannClassOrInterfaceType:
-    UnannClassType
-;
-UnannClassType:
-    Identifier Zeroorone_TypeArguments
-    PackageName . Identifier Zeroorone_TypeArguments
-    UnannClassOrInterfaceType . Identifier Zeroorone_TypeArguments
-;
-TypeVariable:
-    Identifier
-;
-UnannTypeVariable:
-    Identifier
-;
-UnannArrayType:
-    UnannPrimitiveType Dims
-    | UnannTypeVariable Dims
-;
-
-
-
-ArrayType:
-    PrimitiveType Dims
-    ClassOrInterfaceType Dims
-    TypeVariable Dims
-;
-Dims:
-    '[' ']'
-    | Dims '[' ']'
-;
-TypeParameter:
-    Identifier Zeroorone_TypeBound
-;
-Zeroorone_TypeBound:
-    TypeBound
-    | 
-;
-TypeBound:
-    "extends" TypeVariable
-    | "extends" ClassOrInterfaceType
-;
-TypeArguments:
-    '<' TypeArgumentList '>'
-;
-TypeArgumentList:
-    TypeArgument cTypeArgument
-;
-cTypeArgument:
-    ',' TypeArgument cTypeArgument
-    | 
-;
-TypeArgument:
-    ReferenceType
-    | Wildcard
-;
-Wildcard:
-    '?' zerooroneWildcardBounds
-;
-zerooroneWildcardBounds:
-    WildcardBounds
-    |
-;
-WildcardBounds:
-    extends ReferenceType
-    super ReferenceType
-;
-
+// Class and Method END
 %%
 
 int main(){
