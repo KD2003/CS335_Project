@@ -63,7 +63,7 @@ OPERATOR "="|">"|"<"|"!"|"~"|"?"|":"|"->"|"=="|">="|"<="|"!="|"&&"|"|"{2}|"++"|"
 var {return(KEY_VAR);}
 assert {return(KEY_assert);}
 yield|throw {return(KEY_yiethr);}
-break|continue {return(KEY_breacon);}
+break|continue {return(KEY_brecon);}
 return {return(KEY_return);}
 if {return(KEY_if);}
 else {return(KEY_else);}
@@ -86,6 +86,8 @@ private {return(KEY_private);}
 abstract {return(KEY_abstract);}
 native {return(KEY_native);}
 strictf {return(KEY_strictf);}//This is a new change 
+permits {return(KEY_permits);}
+record {return(KEY_record);}
 
 {KEYWORD} {
     return(KEYWORD);
