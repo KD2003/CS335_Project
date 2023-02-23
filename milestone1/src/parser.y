@@ -55,15 +55,11 @@ PackageName:
 ;
 TypeName:
     IDENTIFIER
-    | PackageorTypeName '.' IDENTIFIER
+    | TypeName '.' IDENTIFIER
 ;
 ExpressionName:
     IDENTIFIER
     | AmbigiousName
-;
-PackageorTypeName:
-    PackageorTypeName '.' IDENTIFIER
-    | IDENTIFIER
 ;
 NumericType:
     INTTYPE
@@ -74,7 +70,7 @@ MethodName:
     IDENTIFIER
 ;
 ClassModifier:
-    KEY_public | KEY_protected | KEY_private | KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
+    KEY_public | KEY_private //Keywords mein change karna hain
 ;
 
 ClassType:
@@ -97,12 +93,10 @@ Dims:
     | Dims '[' ']'
 ;
 TypeParameter:
-    IDENTIFIER Zeroorone_TypeBound
+    IDENTIFIER TypeBound
+    | IDENTIFIER
 ;
-Zeroorone_TypeBound:
-    TypeBound
-    | 
-;
+
 TypeBound:
     KEY_extends IDENTIFIER
     | KEY_extends ClassType
@@ -257,14 +251,12 @@ MethodReference:
 
 
 ArrayCreationExpression:
-    KEY_new PrimitiveType DimExprs Zeroorone_Dims
-    | KEY_new ClassType DimExprs Zeroorone_Dims // ClassOrInterfaceType ---> ClassType
+    KEY_new PrimitiveType DimExprs Dims
+    | KEY_new PrimitiveType DimExprs
+    | KEY_new ClassType DimExprs Dims
+    | KEY_new ClassType DimExprs
     | KEY_new PrimitiveType Dims ArrayInitializer
     | KEY_new ClassType Dims ArrayInitializer
-;
-
-Zeroorone_Dims:
-    Dims | 
 ;
 
 DimExprs:
@@ -559,8 +551,7 @@ ClassBodyDeclaration:
 ClassMemberDeclaration:
     FieldDeclaration
     | MethodDeclaration
-    | ClassDeclaration
-    ';'
+    | ';'
 ;
 FieldDeclaration:
     FieldModifiers Type VariableDeclaratorList ';'
@@ -570,9 +561,7 @@ FieldModifiers:
     |
 ;
 FieldModifier:
-    KEY_public | KEY_protected | KEY_private | KEY_static | KEY_final
-    | "transient" 
-    | "volatile"
+    KEY_public | KEY_private
 ;
 VariableDeclaratorList:
     VariableDeclarator cVariableDeclarator
@@ -589,7 +578,8 @@ VariableInitializer_eq:
     |
 ;
 VariableDeclaratorId:
-    IDENTIFIER Dims_s
+    IDENTIFIER Dims
+    | IDENTIFIER
 ;
 //Method inside class
 
@@ -622,13 +612,10 @@ Result:
 ;
 
 Methodeclarator:
-    IDENTIFIER '(' recieveparameters formalparameters ')' Dims_s 
+    IDENTIFIER '(' recieveparameters formalparameters ')' Dims
+    | IDENTIFIER '(' recieveparameters formalparameters ')'
 ;
 
-Dims_s:
-    Dims
-    |
-;
 recieveparameters:
     recieveparameter ','
     |
@@ -639,12 +626,10 @@ formalparameters:
 ;
 
 recieveparameter:
-    Type identifier_dot KEY_this
+    Type IDENTIFIER '.' KEY_this
+    | Type KEY_this
 ;
-identifier_dot:
-    IDENTIFIER '.'
-    |
-;
+
 formalparameterlist:
     formalparameter cformalparameter
 ;
@@ -695,7 +680,7 @@ zeroormore_ConstructorModifier:
     | 
 ;
 ConstructorModifier:
-    KEY_public | KEY_protected | KEY_private
+    KEY_public | KEY_private
 ;
 ConstructorDeclarator:
     zeroorone_TypeParameters IDENTIFIER '(' recieveparameters formalparameters ')'
@@ -728,9 +713,9 @@ zerooroneExplicitConstructorInvocation:
 ;
 ExplicitConstructorInvocation:
     ZerooroneTypeArguments KEY_this '(' ZerooroneArgumentList ')' ';'
-    Zeroorone_TypeArguments KEY_super '(' ZerooroneArgumentList ')' ';'
-    ExpressionName '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
-    Primary '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
+    | Zeroorone_TypeArguments KEY_super '(' ZerooroneArgumentList ')' ';'
+    | ExpressionName '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
+    | Primary '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
 ;
 EnumDeclaration:
     zeroormoreClassModifier KEY_enum IDENTIFIER EnumBody
