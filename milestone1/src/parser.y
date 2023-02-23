@@ -49,33 +49,52 @@ ReferenceType:
 
 
 // Added after compilation errors
-PackageName:
-    IDENTIFIER
-    | PackageName '.' IDENTIFIER
+IDENdotIDEN:
+    IDENdotIDEN '.' IDENTIFIER
+    | IDENTIFIER
 ;
-TypeName:
-    IDENTIFIER
-    | TypeName '.' IDENTIFIER
+
+IDENdotIDENdot:
+    IDENdotIDEN '.'
 ;
-ExpressionName:
-    IDENTIFIER
-    | AmbigiousName
-;
+
+// PackageName:
+//     IDENTIFIER
+//     | PackageName '.' IDENTIFIER
+// ;
+// TypeName:
+//     IDENTIFIER
+//     | TypeName '.' IDENTIFIER
+// ;
+// ExpressionName:
+//     IDENTIFIER
+//     | AmbigiousName
+// ;
+
+// AmbigiousName:
+//     AmbigiousName '.' IDENTIFIER
+//     | IDENTIFIER
+// ;
+
+// ExpressionName:
+//     AmbigiousName '.' IDENTIFIER
+//     | IDENTIFIER
+// ;
+
 NumericType:
     INTTYPE
     | FPTYPE
 ;
 
-MethodName:
-    IDENTIFIER
-;
+// MethodName:
+//     IDENTIFIER
+// ;
 ClassModifier:
     KEY_public | KEY_private //Keywords mein change karna hain
 ;
 
 ClassType:
-    IDENTIFIER Zeroorone_TypeArguments
-    | PackageName '.' IDENTIFIER Zeroorone_TypeArguments
+    IDENdotIDEN Zeroorone_TypeArguments
     | ClassType '.' IDENTIFIER Zeroorone_TypeArguments
 ;
 
@@ -139,7 +158,7 @@ PrimaryNoNewArray:
     LITERAL
     | ClassLiteral
     | KEY_this
-    | TypeName '.' KEY_this
+    | IDENdotIDENdot KEY_this
     | '(' Expression ')'  
     | ClassInstanceCreationExpression
     | FieldAccess
@@ -150,7 +169,7 @@ PrimaryNoNewArray:
 
 
 ClassLiteral: //confirm once
-    | TypeName Zero_or_moreSquarebracket '.' KEY_class
+    | IDENdotIDEN Zero_or_moreSquarebracket '.' KEY_class
     | NumericType Zero_or_moreSquarebracket '.' KEY_class
     | BOOLTYPE Zero_or_moreSquarebracket '.' KEY_class
     | KEY_void '.' KEY_class
@@ -163,7 +182,7 @@ Zero_or_moreSquarebracket:
 
 ClassInstanceCreationExpression:
     UnqualifiedClassInstanceCreationExpression
-    | ExpressionName '.' UnqualifiedClassInstanceCreationExpression
+    | IDENdotIDENdot UnqualifiedClassInstanceCreationExpression
     | Primary '.' UnqualifiedClassInstanceCreationExpression
 ;
 
@@ -201,23 +220,23 @@ Zeroorone_TypeArguments:
 FieldAccess:
     Primary '.' IDENTIFIER  
     | KEY_super '.' IDENTIFIER
-    | TypeName '.' KEY_super '.' IDENTIFIER
+    | IDENdotIDENdot KEY_super '.' IDENTIFIER
 ;
 
 
 ArrayAccess:
-    ExpressionName '[' Expression ']'
+    IDENdotIDEN '[' Expression ']'
     | PrimaryNoNewArray '[' Expression ']'
 ;
 
 
 MethodInvocation:
-    MethodName '(' Zeroorone_ArgumentList ')'
-    | TypeName '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
-    | ExpressionName '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
+    IDENTIFIER '(' Zeroorone_ArgumentList ')'
+    | IDENdotIDENdot Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
+    | IDENdotIDENdot Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | Primary '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
-    | TypeName '.' KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
+    | IDENdotIDENdot KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
 ;
 
 Zeroorone_ArgumentList:
@@ -240,11 +259,11 @@ Zeroormore_CommaExpression:
 
 
 MethodReference:
-    ExpressionName COLON2 Zeroorone_TypeArguments IDENTIFIER
+    IDENdotIDEN COLON2 Zeroorone_TypeArguments IDENTIFIER
     | Primary COLON2 Zeroorone_TypeArguments IDENTIFIER
     | ReferenceType COLON2 Zeroorone_TypeArguments IDENTIFIER
     | KEY_super COLON2 Zeroorone_TypeArguments IDENTIFIER
-    | TypeName '.' KEY_super COLON2 Zeroorone_TypeArguments IDENTIFIER
+    | IDENdotIDENdot KEY_super COLON2 Zeroorone_TypeArguments IDENTIFIER
     | ClassType COLON2 Zeroorone_TypeArguments KEY_new
     | ArrayType COLON2 KEY_new
 ;
@@ -278,16 +297,7 @@ Expression:
 AssignmentExpression:
     ConditionalExpression
     | LeftHandSide ASSIGNOP Expression		// or Assignment
-;
-
-AmbigiousName:
-    AmbigiousName '.' IDENTIFIER
-    | IDENTIFIER
-;
-
-ExpressionName:
-    AmbigiousName '.' IDENTIFIER
-    | IDENTIFIER
+    | LeftHandSide '=' Expression
 ;
 
 ConditionalExpression:
@@ -359,7 +369,7 @@ CastExpression:
 
 PostfixExpression:
     Primary			// need to make primary
-    | ExpressionName
+    | IDENdotIDEN
     | PostfixExpression ADDOP2
 ;
 // 15 end
@@ -379,10 +389,6 @@ BlockStatement:
     ClassDeclaration
     | LocalVariableDeclaration ';'
     | Statement
-;
-
-VariableModifier:
-    VariableModifier KEY_final |
 ;
 
 LocalVariableDeclaration:
@@ -425,14 +431,14 @@ StatementWithoutTrailingSubstatement:		// left try statement
 
 StatementExpression:
     AssignmentExpression
-    | ADDOP2 UnaryExpression
-    | PostfixExpression ADDOP2
+    // | ADDOP2 UnaryExpression
+    // | PostfixExpression ADDOP2
     | MethodInvocation
     | ClassInstanceCreationExpression
 ;
 
 LeftHandSide:
-    ExpressionName
+    IDENdotIDEN
     | FieldAccess
     | ArrayAccess
 ;
@@ -487,7 +493,7 @@ StatementExpressionMore:
 
 // §10 (Arrays) START
 ArrayInitializer:
-    zerooroneVariableInitializerList zerooronecomma
+    '{' zerooroneVariableInitializerList zerooronecomma '}'
 ;
 zerooroneVariableInitializerList:
     VariableInitializerList
@@ -498,8 +504,7 @@ VariableInitializerList:
 ;
 
 cVariableInitializer:
-    ',' VariableInitializer cVariableInitializer
-    |
+    cVariableInitializer ',' VariableInitializer |
 ;
 
 VariableInitializer:
@@ -528,11 +533,11 @@ ClassExtends:
     KEY_extends ClassType
 ;
 ClassPermits:
-    KEY_permits TypeName cTypeName
+    KEY_permits IDENdotIDEN cTypeName
 ;
 
 cTypeName:
-    ',' TypeName cTypeName | 
+    ',' IDENdotIDEN cTypeName | 
 ;
 
 ClassBody:
@@ -571,12 +576,10 @@ cVariableDeclarator:
     |
 ;
 VariableDeclarator:
-    VariableDeclaratorId VariableInitializer_eq
+    VariableDeclaratorId '=' VariableInitializer
+    | VariableDeclaratorId
 ;
-VariableInitializer_eq:
-    "=" VariableInitializer 
-    |
-;
+
 VariableDeclaratorId:
     IDENTIFIER Dims
     | IDENTIFIER
@@ -637,16 +640,14 @@ cformalparameter:
     ',' formalparameter cformalparameter |
 ;
 formalparameter:
-    Variablemodifiers Type VariableDeclaratorId VariableArityParameter
+    VariableModifier Type VariableDeclaratorId VariableArityParameter
 ;
-Variablemodifiers:
-    VariableModifier Variablemodifiers |
-;
+
 VariableModifier:
-    KEY_final
+    VariableModifier KEY_final |
 ;
 VariableArityParameter:
-    Variablemodifiers Type DOT3 IDENTIFIER
+    VariableModifier Type DOT3 IDENTIFIER
 ;
 Throws:
     KEY_throws ExceptionTypeList
@@ -660,7 +661,6 @@ cExceptionType:
 ;
 ExceptionType:
     ClassType
-    | IDENTIFIER
 ;
 MethodBody:
     Block
@@ -701,12 +701,9 @@ TypeParameterc:
 ;
 
 ConstructorBody:
-    '{' zerooroneExplicitConstructorInvocation zerooroneBlockStatements '}'
+    '{' zerooroneExplicitConstructorInvocation BlockStatements '}'
 ;
-zerooroneBlockStatements:
-    BlockStatements
-    |
-;
+
 zerooroneExplicitConstructorInvocation:
     ExplicitConstructorInvocation
     |
@@ -714,7 +711,7 @@ zerooroneExplicitConstructorInvocation:
 ExplicitConstructorInvocation:
     ZerooroneTypeArguments KEY_this '(' ZerooroneArgumentList ')' ';'
     | Zeroorone_TypeArguments KEY_super '(' ZerooroneArgumentList ')' ';'
-    | ExpressionName '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
+    | IDENdotIDENdot zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
     | Primary '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
 ;
 EnumDeclaration:
