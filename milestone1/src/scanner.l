@@ -85,7 +85,7 @@ protected {return(KEY_protected);}
 private {return(KEY_private);}
 abstract {return(KEY_abstract);}
 native {return(KEY_native);}
-strictf {return(KEY_strictf);}//This is a change
+strictf {return(KEY_strictf);}//This is a new change 
 
 {KEYWORD} {
     return(KEYWORD);
