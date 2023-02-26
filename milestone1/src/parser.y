@@ -98,6 +98,12 @@ ClassType:
     | ClassType '.' IDENTIFIER Zeroorone_TypeArguments
 ;
 
+// ClassType1:
+//     IDENdotIDEN
+//     | ClassType1 TypeArgument '.' IDENTIFIER
+//     | ClassType1 TypeArgument '.' IDENTIFIER TypeArgument
+// ;
+
 Zeroorone_TypeArguments:
     TypeArguments | 
 ;
@@ -117,8 +123,7 @@ TypeParameter:
 ;
 
 TypeBound:
-    KEY_extends IDENTIFIER
-    | KEY_extends ClassType
+    KEY_extends ClassType
 ;
 TypeArguments:
     '<' TypeArgumentList '>'
@@ -127,7 +132,7 @@ TypeArgumentList:
     TypeArgument cTypeArgument
 ;
 cTypeArgument:
-    ',' TypeArgument cTypeArgument
+    cTypeArgument ',' TypeArgument 
     | 
 ;
 TypeArgument:
@@ -188,14 +193,10 @@ ClassInstanceCreationExpression:
 
 
 UnqualifiedClassInstanceCreationExpression:
-    KEY_new ZerooroneTypeArguments ClassOrInterfaceTypeToInstantiate '(' ZerooroneArgumentList ')' ZerooroneClassBody
+    KEY_new Zeroorone_TypeArguments ClassOrInterfaceTypeToInstantiate '(' Zeroorone_ArgumentList ')' ZerooroneClassBody
 ;
 
-ZerooroneTypeArguments:
-    TypeArguments | 
-;
-
-ZerooroneArgumentList:
+Zeroorone_ArgumentList:
     ArgumentList | 
 ;
 
@@ -205,17 +206,8 @@ ZerooroneClassBody:
 
 
 ClassOrInterfaceTypeToInstantiate:
-    IDENTIFIER Zeroormore_DotIdentifier Zeroorone_TypeArguments //ignoring diamond <>
+    IDENdotIDEN Zeroorone_TypeArguments //ignoring diamond <>
 ;
-
-Zeroormore_DotIdentifier:
-    '.' IDENTIFIER | 
-;
-
-Zeroorone_TypeArguments:
-    TypeArguments |  
-;
-
 
 FieldAccess:
     Primary '.' IDENTIFIER  
@@ -233,20 +225,10 @@ ArrayAccess:
 MethodInvocation:
     IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | IDENdotIDENdot Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
-    | IDENdotIDENdot Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | Primary '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | IDENdotIDENdot KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
 ;
-
-Zeroorone_ArgumentList:
-    ArgumentList | 
-;
-
-Zeroorone_TypeArguments:
-    TypeArguments | 
-;
-
 
 ArgumentList:
     Expression Zeroormore_CommaExpression
@@ -256,7 +238,6 @@ Zeroormore_CommaExpression:
     Zeroormore_CommaExpression ',' Expression
     | 
 ;
-
 
 MethodReference:
     IDENdotIDEN COLON2 Zeroorone_TypeArguments IDENTIFIER
@@ -486,7 +467,7 @@ StatementExpressionList:
 ;
 
 StatementExpressionMore:
-    ',' StatementExpression |
+    StatementExpressionMore ',' StatementExpression |
 ;
 
 // 14 end
@@ -526,8 +507,7 @@ NormalClassDeclaration:
     | ClassModifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody
 ;
 ClassModifiers:
-    ClassModifier ClassModifiers
-    |
+    ClassModifiers ClassModifier |
 ;
 ClassExtends:
     KEY_extends ClassType
@@ -537,14 +517,14 @@ ClassPermits:
 ;
 
 cTypeName:
-    ',' IDENdotIDEN cTypeName | 
+    cTypeName ',' IDENdotIDEN | 
 ;
 
 ClassBody:
     '{' ClassBodyDeclarations '}'
 ;
 ClassBodyDeclarations:
-    ClassBodyDeclaration ClassBodyDeclarations
+    ClassBodyDeclarations ClassBodyDeclaration
     | 
 ;
 ClassBodyDeclaration:
@@ -562,7 +542,7 @@ FieldDeclaration:
     FieldModifiers Type VariableDeclaratorList ';'
 ;
 FieldModifiers:
-    FieldModifier FieldModifiers
+    FieldModifiers FieldModifier
     |
 ;
 FieldModifier:
@@ -572,7 +552,7 @@ VariableDeclaratorList:
     VariableDeclarator cVariableDeclarator
 ;
 cVariableDeclarator:
-    ',' VariableDeclarator cVariableDeclarator
+    cVariableDeclarator ',' VariableDeclarator 
     |
 ;
 VariableDeclarator:
@@ -591,7 +571,7 @@ MethodDeclaration:
 ;
 
 Methodmodifiers:
-    Methodmodifier Methodmodifiers
+    Methodmodifiers Methodmodifier
     |
 ;
 
@@ -600,14 +580,14 @@ Methodmodifier:
 ;
 
 Methodheader:
-    Result Methodeclarator Throws_s
-    | TypeParameter Result Methodeclarator Throws_s
+    Result Methodeclarator
+    | TypeParameter Result Methodeclarator
 ;
 
-Throws_s:
-    Throws Throws_s
-    |
-;
+// Throws_s:
+//     Throws_s Throws
+//     |
+// ;
 
 Result:
     Type
@@ -637,7 +617,7 @@ formalparameterlist:
     formalparameter cformalparameter
 ;
 cformalparameter:
-    ',' formalparameter cformalparameter |
+    cformalparameter ',' formalparameter |
 ;
 formalparameter:
     VariableModifier Type VariableDeclaratorId VariableArityParameter
@@ -649,19 +629,19 @@ VariableModifier:
 VariableArityParameter:
     VariableModifier Type DOT3 IDENTIFIER
 ;
-Throws:
-    KEY_throws ExceptionTypeList
-;
-ExceptionTypeList:
-    ExceptionType cExceptionType
-;
-cExceptionType:
-    ',' ExceptionType cExceptionType
-    | 
-;
-ExceptionType:
-    ClassType
-;
+// Throws:
+//     KEY_throws ExceptionTypeList
+// ;
+// ExceptionTypeList:
+//     ExceptionType cExceptionType
+// ;
+// cExceptionType:
+//     cExceptionType ',' ExceptionType 
+//     | 
+// ;
+// ExceptionType:
+//     ClassType
+// ;
 MethodBody:
     Block
     | ';'
@@ -673,10 +653,10 @@ StaticInitializer:
     KEY_static Block
 ;
 ConstructorDeclaration:
-    zeroormore_ConstructorModifier ConstructorDeclarator Throws_s ConstructorBody
+    zeroormore_ConstructorModifier ConstructorDeclarator ConstructorBody
 ;
 zeroormore_ConstructorModifier:
-    ConstructorModifier zeroormore_ConstructorModifier
+    zeroormore_ConstructorModifier ConstructorModifier 
     | 
 ;
 ConstructorModifier:
@@ -696,8 +676,8 @@ TypeParamerList:
     TypeParameter TypeParameterc
 ;
 TypeParameterc:
-    ',' TypeParameter TypeParameterc
-    | ',' TypeParameter
+    TypeParameterc ',' TypeParameter 
+    | 
 ;
 
 ConstructorBody:
@@ -709,17 +689,13 @@ zerooroneExplicitConstructorInvocation:
     |
 ;
 ExplicitConstructorInvocation:
-    ZerooroneTypeArguments KEY_this '(' ZerooroneArgumentList ')' ';'
-    | Zeroorone_TypeArguments KEY_super '(' ZerooroneArgumentList ')' ';'
-    | IDENdotIDENdot zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
-    | Primary '.' zeroorone_TypeParameters KEY_super '(' ZerooroneArgumentList ')' ';'
+    Zeroorone_TypeArguments KEY_this '(' Zeroorone_ArgumentList ')' ';'
+    | Zeroorone_TypeArguments KEY_super '(' Zeroorone_ArgumentList ')' ';'
+    | IDENdotIDENdot zeroorone_TypeParameters KEY_super '(' Zeroorone_ArgumentList ')' ';'
+    | Primary '.' zeroorone_TypeParameters KEY_super '(' Zeroorone_ArgumentList ')' ';'
 ;
 EnumDeclaration:
-    zeroormoreClassModifier KEY_enum IDENTIFIER EnumBody
-;
-zeroormoreClassModifier:
-    ClassModifier zeroormoreClassModifier
-    |
+    ClassModifiers KEY_enum IDENTIFIER EnumBody
 ;
 EnumBody:
     '{' zerooroneEnumConstantList zerooronecomma zerooroneEnumBodyDeclarations '}'
@@ -740,7 +716,7 @@ EnumConstantList:
     EnumConstant cEnumConstant
 ;
 cEnumConstant:
-    EnumConstant cEnumConstant
+    cEnumConstant ',' EnumConstant
     |
 ;
 EnumConstant:
@@ -754,11 +730,11 @@ EnumBodyDeclarations:
     ';' zeroormoreClassBodyDeclaration
 ;
 zeroormoreClassBodyDeclaration:
-    ClassBodyDeclaration zeroormoreClassBodyDeclaration
+    zeroormoreClassBodyDeclaration ClassBodyDeclaration 
     |
 ;
 RecordDeclaration:
-    zeroormoreClassModifier KEY_record IDENTIFIER zeroorone_TypeParameters RecordHeader RecordBody
+    ClassModifiers KEY_record IDENTIFIER zeroorone_TypeParameters RecordHeader RecordBody
 ;
 RecordHeader:
     '(' zerooroneRecordComponentList ')'
@@ -771,7 +747,7 @@ RecordComponentList:
     RecordComponent cRecordComponent
 ;
 cRecordComponent:
-    ',' RecordComponent cRecordComponent
+    cRecordComponent ',' RecordComponent 
     |
 ;
 RecordComponent:
@@ -785,12 +761,12 @@ RecordBody:
     '{' zeroormoreRecordBodyDeclaration '}'
 ;
 zeroormoreRecordBodyDeclaration:
-    RecordBodyDeclaration zeroormoreRecordBodyDeclaration
+    zeroormoreRecordBodyDeclaration RecordBodyDeclaration 
     |
 ;
 RecordBodyDeclaration:
     ClassBodyDeclaration
-    CompactConstructorDeclaration
+    | CompactConstructorDeclaration
 ;
 CompactConstructorDeclaration:
     zeroormore_ConstructorModifier IDENTIFIER ConstructorBody
