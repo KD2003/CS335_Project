@@ -29,17 +29,16 @@ Type:
 ;
 
 PrimitiveType:
-    numerictype
+    NumericType
     | BOOLTYPE
 ;
 
-numerictype:
+NumericType:
     INTTYPE
     | FPTYPE
 ;
 
 //reference type
-
 
 ReferenceType:
     ClassType  // ClassorInterfaceType -> CLassType
@@ -47,15 +46,9 @@ ReferenceType:
     | ArrayType
 ;
 
-
-// Added after compilation errors
 IDENdotIDEN:
     IDENdotIDEN '.' IDENTIFIER
     | IDENTIFIER
-;
-
-IDENdotIDENdot:
-    IDENdotIDEN '.'
 ;
 
 // PackageName:
@@ -81,11 +74,6 @@ IDENdotIDENdot:
 //     | IDENTIFIER
 // ;
 
-NumericType:
-    INTTYPE
-    | FPTYPE
-;
-
 // MethodName:
 //     IDENTIFIER
 // ;
@@ -96,13 +84,16 @@ ClassModifier:
 ClassType:
     IDENdotIDEN Zeroorone_TypeArguments
     | ClassType '.' IDENTIFIER Zeroorone_TypeArguments
+    /* ClassType1
+    | ClassType1 TypeArgument */
 ;
 
-// ClassType1:
-//     IDENdotIDEN
-//     | ClassType1 TypeArgument '.' IDENTIFIER
-//     | ClassType1 TypeArgument '.' IDENTIFIER TypeArgument
-// ;
+/* ClassType1:
+    IDENdotIDEN
+    | IDENdotIDEN TypeArgument
+    | ClassType1 TypeArgument '.' IDENdotIDEN
+    | ClassType1 TypeArgument '.' IDENdotIDEN TypeArgument
+; */
 
 Zeroorone_TypeArguments:
     TypeArguments | 
@@ -140,11 +131,8 @@ TypeArgument:
     | Wildcard
 ;
 Wildcard:
-    '?' zerooroneWildcardBounds
-;
-zerooroneWildcardBounds:
-    WildcardBounds
-    |
+    '?' WildcardBounds
+    | '?'
 ;
 WildcardBounds:
     KEY_extends ReferenceType
@@ -155,7 +143,7 @@ WildcardBounds:
 //Productions from §15 (Expressions) START
 Primary:
     PrimaryNoNewArray
-    | ArrayCreationExpression 
+    | ArrayCreationExpression
 ;
 
 
@@ -163,7 +151,7 @@ PrimaryNoNewArray:
     LITERAL
     | ClassLiteral
     | KEY_this
-    | IDENdotIDENdot KEY_this
+    | IDENdotIDEN '.' KEY_this
     | '(' Expression ')'  
     | ClassInstanceCreationExpression
     | FieldAccess
@@ -174,9 +162,8 @@ PrimaryNoNewArray:
 
 
 ClassLiteral: //confirm once
-    | IDENdotIDEN Zero_or_moreSquarebracket '.' KEY_class
-    | NumericType Zero_or_moreSquarebracket '.' KEY_class
-    | BOOLTYPE Zero_or_moreSquarebracket '.' KEY_class
+    IDENdotIDEN Zero_or_moreSquarebracket '.' KEY_class
+    | PrimitiveType Zero_or_moreSquarebracket '.' KEY_class
     | KEY_void '.' KEY_class
 ;
 
@@ -187,7 +174,7 @@ Zero_or_moreSquarebracket:
 
 ClassInstanceCreationExpression:
     UnqualifiedClassInstanceCreationExpression
-    | IDENdotIDENdot UnqualifiedClassInstanceCreationExpression
+    | IDENdotIDEN '.' UnqualifiedClassInstanceCreationExpression
     | Primary '.' UnqualifiedClassInstanceCreationExpression
 ;
 
@@ -212,7 +199,7 @@ ClassOrInterfaceTypeToInstantiate:
 FieldAccess:
     Primary '.' IDENTIFIER  
     | KEY_super '.' IDENTIFIER
-    | IDENdotIDENdot KEY_super '.' IDENTIFIER
+    | IDENdotIDEN '.' KEY_super '.' IDENTIFIER
 ;
 
 
@@ -223,11 +210,11 @@ ArrayAccess:
 
 
 MethodInvocation:
-    IDENTIFIER '(' Zeroorone_ArgumentList ')'
-    | IDENdotIDENdot Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
+    IDENdotIDEN '(' Zeroorone_ArgumentList ')'
+    | IDENdotIDEN '.' TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | Primary '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
     | KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
-    | IDENdotIDENdot KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
+    | IDENdotIDEN '.' KEY_super '.' Zeroorone_TypeArguments IDENTIFIER '(' Zeroorone_ArgumentList ')'
 ;
 
 ArgumentList:
@@ -244,7 +231,7 @@ MethodReference:
     | Primary COLON2 Zeroorone_TypeArguments IDENTIFIER
     | ReferenceType COLON2 Zeroorone_TypeArguments IDENTIFIER
     | KEY_super COLON2 Zeroorone_TypeArguments IDENTIFIER
-    | IDENdotIDENdot KEY_super COLON2 Zeroorone_TypeArguments IDENTIFIER
+    | IDENdotIDEN '.' KEY_super COLON2 Zeroorone_TypeArguments IDENTIFIER
     | ClassType COLON2 Zeroorone_TypeArguments KEY_new
     | ArrayType COLON2 KEY_new
 ;
@@ -260,11 +247,7 @@ ArrayCreationExpression:
 ;
 
 DimExprs:
-    DimExpr Zeroormore_DimExpr
-;
-
-Zeroormore_DimExpr:
-    Zeroormore_DimExpr DimExpr | 
+    DimExprs DimExpr | DimExpr
 ;
 
 DimExpr:
@@ -349,9 +332,10 @@ CastExpression:
 ;
 
 PostfixExpression:
-    Primary			// need to make primary
+    Primary
     | IDENdotIDEN
-    | PostfixExpression ADDOP2
+    | Primary ADDOP2
+    | IDENdotIDEN ADDOP2
 ;
 // 15 end
 
@@ -460,7 +444,8 @@ ForStatementNoShortIf:
 
 ForInit:
     StatementExpressionList
-    | LocalVariableDeclaration;
+    | LocalVariableDeclaration
+;
 
 StatementExpressionList:
     StatementExpression StatementExpressionMore
@@ -691,7 +676,7 @@ zerooroneExplicitConstructorInvocation:
 ExplicitConstructorInvocation:
     Zeroorone_TypeArguments KEY_this '(' Zeroorone_ArgumentList ')' ';'
     | Zeroorone_TypeArguments KEY_super '(' Zeroorone_ArgumentList ')' ';'
-    | IDENdotIDENdot zeroorone_TypeParameters KEY_super '(' Zeroorone_ArgumentList ')' ';'
+    | IDENdotIDEN '.' zeroorone_TypeParameters KEY_super '(' Zeroorone_ArgumentList ')' ';'
     | Primary '.' zeroorone_TypeParameters KEY_super '(' Zeroorone_ArgumentList ')' ';'
 ;
 EnumDeclaration:
