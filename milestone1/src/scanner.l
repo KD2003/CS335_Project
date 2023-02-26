@@ -135,6 +135,8 @@ record {return(KEY_record);}
     return(LITERAL);
 }
 
+"=" {return((int)yytext[0]);}
+
 {ASSIGNOP} {return(ASSIGNOP);}
 
 "|"{2} {return(CONDOR);}

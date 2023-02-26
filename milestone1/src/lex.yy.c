@@ -370,8 +370,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 65
-#define YY_END_OF_BUFFER 66
+#define YY_NUM_RULES 66
+#define YY_END_OF_BUFFER 67
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -381,26 +381,26 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[434] =
     {   0,
-        0,    0,    0,    0,   44,   44,   66,   64,    1,    1,
-       57,   64,   58,   60,   60,   62,   58,   55,   55,   62,
-       58,   38,   38,   60,   53,   49,   53,   61,   41,   64,
-       60,   37,   41,   41,   41,   41,   41,   41,   41,   41,
+        0,    0,    0,    0,   44,   44,   67,   65,    1,    1,
+       58,   65,   59,   61,   61,   63,   59,   56,   56,   63,
+       59,   38,   38,   61,   54,   49,   54,   62,   41,   65,
+       61,   37,   41,   41,   41,   41,   41,   41,   41,   41,
        41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
-       41,   41,   60,   57,   42,    5,    5,    5,   44,   44,
-       65,   65,    1,   52,    0,   48,    0,   49,   51,    0,
-       60,    0,    0,   56,   61,    0,   39,    3,    2,   39,
+       41,   41,   61,   58,   42,    5,    5,    5,   44,   44,
+       66,   66,    1,   53,    0,   48,    0,   50,   52,    0,
+       61,    0,    0,   57,   62,    0,   39,    3,    2,   39,
        38,    0,    0,   39,    0,   38,    0,    0,   38,    0,
-       59,   54,   53,   54,   41,   42,   42,   42,   41,   41,
+       60,   55,   54,   55,   41,   42,   42,   42,   41,   41,
 
        41,   41,   41,   41,   41,   41,   41,   41,   37,   41,
        41,   41,   41,   41,   41,   41,   41,   14,   41,   41,
        41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
        41,   41,   41,   41,   41,   41,   41,   41,   41,   37,
-       41,   41,   41,   41,   41,   41,   41,   50,    5,    5,
+       41,   41,   41,   41,   41,   41,   41,   51,    5,    5,
         4,   44,   44,    0,   45,   45,    0,   44,   44,   48,
-        0,   47,    0,    0,   63,   39,   39,    0,    0,    2,
+        0,   47,    0,    0,   64,   39,   39,    0,    0,    2,
        39,    0,   38,   38,    0,    0,   38,    0,   39,    0,
-       38,   54,   42,   42,   41,   41,   41,   41,   41,   41,
+       38,   55,   42,   42,   41,   41,   41,   41,   41,   41,
        41,   41,   41,   41,   41,   41,   41,   41,   41,   41,
 
        41,   41,   41,   17,   41,   41,   41,    6,   41,   41,
@@ -820,12 +820,12 @@ static const flex_int16_t yy_chk[1043] =
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static const flex_int32_t yy_rule_can_match_eol[66] =
+static const flex_int32_t yy_rule_can_match_eol[67] =
     {   0,
 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
     0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 0, 0, 0,     };
+    0, 0, 0, 0, 0, 0, 0,     };
 
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
@@ -1426,104 +1426,109 @@ YY_RULE_SETUP
 case 49:
 YY_RULE_SETUP
 #line 138 "scanner.l"
-{return(ASSIGNOP);}
+{return((int)yytext[0]);}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
 #line 140 "scanner.l"
-{return(CONDOR);}
+{return(ASSIGNOP);}
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
 #line 142 "scanner.l"
-{return(CONDAND);}
+{return(CONDOR);}
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 143 "scanner.l"
-{return(EQALITYOP);}
+#line 144 "scanner.l"
+{return(CONDAND);}
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 144 "scanner.l"
-{return(RELATIONOP);}
+#line 145 "scanner.l"
+{return(EQALITYOP);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 145 "scanner.l"
-{return(SHIFTOP);}
+#line 146 "scanner.l"
+{return(RELATIONOP);}
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 146 "scanner.l"
-{return(ADDOP);}
+#line 147 "scanner.l"
+{return(SHIFTOP);}
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 147 "scanner.l"
-{return(ADDOP2);}
+#line 148 "scanner.l"
+{return(ADDOP);}
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 148 "scanner.l"
-{return(UNARYOP);}
+#line 149 "scanner.l"
+{return(ADDOP2);}
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 149 "scanner.l"
-{return(MULTOP);}
+#line 150 "scanner.l"
+{return(UNARYOP);}
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 150 "scanner.l"
-{return(COLON2);}
+#line 151 "scanner.l"
+{return(MULTOP);}
 	YY_BREAK
 case 60:
 YY_RULE_SETUP
-#line 151 "scanner.l"
-{return((int)yytext[0]);}
+#line 152 "scanner.l"
+{return(COLON2);}
 	YY_BREAK
 case 61:
 YY_RULE_SETUP
 #line 153 "scanner.l"
+{return((int)yytext[0]);}
+	YY_BREAK
+case 62:
+YY_RULE_SETUP
+#line 155 "scanner.l"
 {
     return(OPERATOR);
 }
 	YY_BREAK
-case 62:
+case 63:
 YY_RULE_SETUP
-#line 157 "scanner.l"
+#line 159 "scanner.l"
 {
     return((int)yytext[0]);
 }
 	YY_BREAK
-case 63:
+case 64:
 YY_RULE_SETUP
-#line 161 "scanner.l"
+#line 163 "scanner.l"
 {
     return(DOT3);
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 165 "scanner.l"
+#line 167 "scanner.l"
 {
-    return 0;
-}
-	YY_BREAK
-case 64:
-YY_RULE_SETUP
-#line 169 "scanner.l"
-{
-    printf("Line number: %d Error: Illegal Character: %s", yylineno, yytext);
     return 0;
 }
 	YY_BREAK
 case 65:
 YY_RULE_SETUP
-#line 175 "scanner.l"
+#line 171 "scanner.l"
+{
+    printf("Line number: %d Error: Illegal Character: %s", yylineno, yytext);
+    return 0;
+}
+	YY_BREAK
+case 66:
+YY_RULE_SETUP
+#line 177 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1527 "lex.yy.c"
+#line 1532 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2538,7 +2543,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 175 "scanner.l"
+#line 177 "scanner.l"
 
 
 void showError(){
