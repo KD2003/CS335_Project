@@ -80,7 +80,6 @@ PrimaryNoNewArray:
     | MethodReference
 ;
 
-
 ClassLiteral: //confirm once
     IDENdotIDEN Zero_or_moreSquarebracket '.' KEY_class
     | PrimitiveType Zero_or_moreSquarebracket '.' KEY_class
@@ -427,12 +426,9 @@ ClassBodyDeclaration:
     | MethodDeclaration
 ;
 FieldDeclaration:
-    FieldModifiers Type VariableDeclaratorList ';'
+    ConstructorModifiers Type VariableDeclaratorList ';'
 ;
-FieldModifiers:
-    FieldModifiers PublicPrivate
-    |
-;
+
 VariableDeclaratorList:
     VariableDeclarator cVariableDeclarator
 ;
@@ -449,10 +445,13 @@ VariableDeclaratorId:
     IDENTIFIER Dims
     | IDENTIFIER
 ;
-//Method inside class
+
+MethodConstructor:
+    
+;
 
 MethodDeclaration:
-    Methodmodifiers MethodHeader MethodBody
+    ConstructorModifiers Methodmodifiers MethodHeader MethodBody
 ;
 
 Methodmodifiers:
@@ -460,7 +459,7 @@ Methodmodifiers:
 ;
 
 Methodmodifier:
-    PublicPrivate | KEY_protected | KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
+    KEY_protected | KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
 ;
 
 MethodHeader:
@@ -469,28 +468,22 @@ MethodHeader:
 
 Result:
     PrimitiveType
-    /* | VariableDeclaratorId */
+    | VariableDeclaratorId
     | PrimitiveType Dims
     | KEY_void 
 ;
 
 Methodeclarator:
-    IDENTIFIER '(' recieveparameters formalparameters ')' Dims
-    | IDENTIFIER '(' recieveparameters formalparameters ')'
+    IdenPara Dims
+    | IdenPara
 ;
 
-recieveparameters:
-    recieveparameter ','
-    |
+IdenPara:
+    IDENTIFIER '(' formalparameters ')'
 ;
 formalparameters:
     formalparameterlist
     |
-;
-
-recieveparameter:
-    Type IDENTIFIER '.' KEY_this
-    | Type KEY_this
 ;
 
 formalparameterlist:
@@ -500,7 +493,8 @@ cformalparameter:
     cformalparameter ',' formalparameter |
 ;
 formalparameter:
-    VariableModifier Type VariableDeclaratorId VariableArityParameter
+    VariableModifier Type VariableDeclaratorId
+    | VariableArityParameter
 ;
 
 VariableModifier:
@@ -515,7 +509,7 @@ MethodBody:
     | ';'
 ;
 ConstructorDeclaration:
-    ConstructorModifiers IDENTIFIER '(' recieveparameters formalparameters ')' ConstructorBody
+    ConstructorModifiers IdenPara ConstructorBody
 ;
 ConstructorModifiers:
     PublicPrivate | 
@@ -526,8 +520,7 @@ ConstructorBody:
 ;
 
 zerooroneExplicitConstructorInvocation:
-    ExplicitConstructorInvocation
-    |
+    ExplicitConstructorInvocation |
 ;
 ExplicitConstructorInvocation:
     KEY_this '(' Zeroorone_ArgumentList ')' ';'
