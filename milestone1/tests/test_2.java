@@ -1,5 +1,5 @@
 public class SyntaxCheck {
-    public static void main(int[] args) {
+    public static void main(String[] args) {
         int a;
         a = 5;
         a++;

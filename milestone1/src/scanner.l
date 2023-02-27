@@ -76,17 +76,14 @@ class {return(KEY_class);}
 void {return(KEY_void);}
 this {return(KEY_this);}
 new {return(KEY_new);}
-throws {return(KEY_throws);}
 static {return(KEY_static);}
-enum {return(KEY_enum);}
 public {return(KEY_public);}
-protected {return(KEY_protected);}
 private {return(KEY_private);}
 abstract {return(KEY_abstract);}
 native {return(KEY_native);}
-strictf {return(KEY_strictf);}//This is a new change 
+strictf {return(KEY_strictf);}
 permits {return(KEY_permits);}
-record {return(KEY_record);}
+import {return(KEY_import);}
 
 {KEYWORD} {
     return(KEYWORD);
@@ -145,7 +142,6 @@ record {return(KEY_record);}
 "++"|"--" {return(ADDOP2);}
 "~"|"!" {return(UNARYOP);}
 "*"|"/"|"%" {return(MULTOP);}
-"::" {return(COLON2);}
 {SINGLEOP} {return((int)yytext[0]);}
 
 {OPERATOR} {

@@ -80,27 +80,23 @@ extern int yydebug;
     KEY_else = 281,                /* KEY_else  */
     KEY_for = 282,                 /* KEY_for  */
     KEY_permits = 283,             /* KEY_permits  */
-    KEY_record = 284,              /* KEY_record  */
-    KEY_while = 285,               /* KEY_while  */
-    KEY_sync = 286,                /* KEY_sync  */
-    KEY_final = 287,               /* KEY_final  */
-    KEY_extends = 288,             /* KEY_extends  */
-    KEY_super = 289,               /* KEY_super  */
-    KEY_this = 290,                /* KEY_this  */
-    KEY_class = 291,               /* KEY_class  */
-    KEY_void = 292,                /* KEY_void  */
-    KEY_public = 293,              /* KEY_public  */
-    KEY_new = 294,                 /* KEY_new  */
-    COLON2 = 295,                  /* COLON2  */
-    KEY_throws = 296,              /* KEY_throws  */
-    KEY_static = 297,              /* KEY_static  */
-    KEY_enum = 298,                /* KEY_enum  */
-    DOT3 = 299,                    /* DOT3  */
-    KEY_abstract = 300,            /* KEY_abstract  */
-    KEY_native = 301,              /* KEY_native  */
-    KEY_strictf = 302,             /* KEY_strictf  */
-    KEY_protected = 303,           /* KEY_protected  */
-    KEY_private = 304              /* KEY_private  */
+    KEY_while = 284,               /* KEY_while  */
+    KEY_sync = 285,                /* KEY_sync  */
+    KEY_final = 286,               /* KEY_final  */
+    KEY_extends = 287,             /* KEY_extends  */
+    KEY_super = 288,               /* KEY_super  */
+    KEY_this = 289,                /* KEY_this  */
+    KEY_class = 290,               /* KEY_class  */
+    KEY_void = 291,                /* KEY_void  */
+    KEY_public = 292,              /* KEY_public  */
+    KEY_new = 293,                 /* KEY_new  */
+    KEY_static = 294,              /* KEY_static  */
+    DOT3 = 295,                    /* DOT3  */
+    KEY_abstract = 296,            /* KEY_abstract  */
+    KEY_native = 297,              /* KEY_native  */
+    KEY_strictf = 298,             /* KEY_strictf  */
+    KEY_private = 299,             /* KEY_private  */
+    KEY_import = 300               /* KEY_import  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -113,7 +109,7 @@ union YYSTYPE
 
     std::string *lit;
 
-#line 117 "parser.tab.h"
+#line 113 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

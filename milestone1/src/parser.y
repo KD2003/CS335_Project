@@ -9,7 +9,7 @@ int yyerror(const char *str);
 %}
 
 %locations
-%token KEYWORD IDENTIFIER LITERAL OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yiethr KEY_brecon KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_record KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new COLON2 KEY_throws KEY_static KEY_enum DOT3 KEY_abstract KEY_native KEY_strictf KEY_protected KEY_private
+%token KEYWORD IDENTIFIER LITERAL OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yiethr KEY_brecon KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_abstract KEY_native KEY_strictf KEY_private KEY_import
 
 %type <lit> LITERAL 
 
@@ -19,23 +19,37 @@ int yyerror(const char *str);
 
 %%
 prog:
-    ClassDeclaration		{cout << "Program Completed\n";}
+    ImportList ClassDeclarationList		{cout << "Program Completed\n";}
+;
+
+ImportList:
+    ImportList Imports
+    |
+;
+
+ClassDeclarationList:
+    ClassDeclarationList ClassDeclaration
+    | ClassDeclaration
+;
+
+Imports:
+    KEY_import IDENdotIDEN ';'
+    | KEY_import KEY_static IDENdotIDEN ';'
+    | KEY_import IDENdotIDEN '.' '*' ';'
+    | KEY_import KEY_static IDENdotIDEN '.' '*' ';'
 ;
 
 // §4 (Types, Values, and Variables) Start
 Type:
     PrimitiveType
     | ArrayType
+    | ClassType
 ;
 
 PrimitiveType:
-    NumericType
-    | BOOLTYPE
-;
-
-NumericType:
     INTTYPE
     | FPTYPE
+    | BOOLTYPE
 ;
 
 IDENdotIDEN:
@@ -53,6 +67,7 @@ ClassType:
 
 ArrayType:
     PrimitiveType Dims
+    | ClassType Dims
 ;
 Dims:
     '[' ']'
@@ -69,7 +84,7 @@ Primary:
 
 PrimaryNoNewArray:
     LITERAL
-    | ClassLiteral
+    /* | ClassLiteral */
     | KEY_this
     | IDENdotIDEN '.' KEY_this
     | '(' Expression ')'  
@@ -77,7 +92,6 @@ PrimaryNoNewArray:
     | FieldAccess
     | ArrayAccess
     | MethodInvocation
-    | MethodReference
 ;
 
 ClassLiteral: //confirm once
@@ -92,22 +106,12 @@ Zero_or_moreSquarebracket:
 ;
 
 ClassInstanceCreationExpression:
-    UnqualifiedClassInstanceCreationExpression
-    | IDENdotIDEN '.' UnqualifiedClassInstanceCreationExpression
-    | Primary '.' UnqualifiedClassInstanceCreationExpression
-;
-
-
-UnqualifiedClassInstanceCreationExpression:
-    KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')' ZerooroneClassBody
+    KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')' ClassBody
+    | KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'
 ;
 
 Zeroorone_ArgumentList:
     ArgumentList | 
-;
-
-ZerooroneClassBody:
-    ClassBody | 
 ;
 
 FieldAccess:
@@ -116,12 +120,10 @@ FieldAccess:
     | IDENdotIDEN '.' KEY_super '.' IDENTIFIER
 ;
 
-
 ArrayAccess:
     IDENdotIDEN '[' Expression ']'
     | PrimaryNoNewArray '[' Expression ']'
 ;
-
 
 MethodInvocation:
     IDENdotIDEN '(' Zeroorone_ArgumentList ')'
@@ -131,36 +133,21 @@ MethodInvocation:
 ;
 
 ArgumentList:
-    Expression Zeroormore_CommaExpression
+    ArgumentList ',' Expression
+    | Expression
 ;
 
-Zeroormore_CommaExpression:
-    Zeroormore_CommaExpression ',' Expression
-    | 
-;
-
-MethodReference:
-    IDENdotIDEN COLON2  IDENTIFIER
-    | Primary COLON2 IDENTIFIER
-    | KEY_super COLON2 IDENTIFIER
-    | IDENdotIDEN '.' KEY_super COLON2 IDENTIFIER
-    | ClassType COLON2 KEY_new
-    | ArrayType COLON2 KEY_new
-;
-
-
-ArrayCreationExpression:
-    KEY_new PrimitiveType DimExprs Dims
-    | KEY_new PrimitiveType DimExprs
-    | KEY_new PrimitiveType Dims ArrayInitializer
-;
-
-DimExprs:
-    DimExprs DimExpr | DimExpr
+ArrayCreationExpression:        // array initiaizer to do
+    KEY_new PrimitiveType DimExpr Dims
+    | KEY_new PrimitiveType DimExpr
+    | KEY_new IDENdotIDEN DimExpr Dims
+    | KEY_new IDENdotIDEN DimExpr
+    /* | KEY_new PrimitiveType Dims ArrayInitializer */
 ;
 
 DimExpr:
-    '[' Expression ']'
+    DimExpr '[' Expression ']'
+    | '[' Expression ']'
 ;
 
 Expression:
@@ -169,7 +156,11 @@ Expression:
 
 AssignmentExpression:
     ConditionalExpression
-    | LeftHandSide ASSIGNOP Expression		// or Assignment
+    | Assignment
+;
+
+Assignment:
+    LeftHandSide ASSIGNOP Expression		// or Assignment
     | LeftHandSide '=' Expression
 ;
 
@@ -231,9 +222,13 @@ MultiplicativeExpression:
 UnaryExpression:
     ADDOP2 UnaryExpression
     | ADDOP UnaryExpression
-    | PostfixExpression
-    | UNARYOP UnaryExpression
+    | UnaryExpressionNotPlusMinus
     | CastExpression
+;
+
+UnaryExpressionNotPlusMinus:
+    PostfixExpression
+    | UNARYOP UnaryExpression
 ;
 
 CastExpression:
@@ -243,8 +238,7 @@ CastExpression:
 PostfixExpression:
     Primary
     | IDENdotIDEN
-    | Primary ADDOP2
-    | IDENdotIDEN ADDOP2
+    | PostfixExpression ADDOP2
 ;
 // 15 end
 
@@ -259,18 +253,16 @@ BlockStatements:
 ;
 
 BlockStatement:
-    ClassDeclaration
-    | LocalVariableDeclaration ';'
+    LocalVariableDeclaration ';'
     | Statement
 ;
 
 LocalVariableDeclaration:
-    VariableModifier LocalVariableType VariableDeclaratorList
+    LocalVariableType VariableDeclaratorList   {cout << "local var dec";}
 ;
 
 LocalVariableType:
-    Type
-    | ClassType
+    Type        {cout <<"type";}
     | KEY_VAR
 ;
 
@@ -304,9 +296,11 @@ StatementWithoutTrailingSubstatement:		// left try statement
 ;
 
 StatementExpression:
-    AssignmentExpression
+    Assignment
     | MethodInvocation
-    | ClassInstanceCreationExpression
+    | ADDOP2 UnaryExpression
+    | PostfixExpression ADDOP2
+    /* | ClassInstanceCreationExpression */
 ;
 
 LeftHandSide:
@@ -326,40 +320,30 @@ BreakContinueStatement:
 ;
 
 ForStatement:
-    KEY_for '(' ';' ';' ')' Statement
-    | KEY_for '(' ForInit ';' ';' ')' Statement
-    | KEY_for '(' ';' Expression ';' ')' Statement
-    | KEY_for '(' ';' ';' StatementExpressionList ')' Statement
-    | KEY_for '(' ';' Expression ';' StatementExpressionList ')' Statement
+    KEY_for '(' ForInit ';' ';' ')' Statement
     | KEY_for '(' ForInit ';' Expression ';' ')' Statement
     | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement
     | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement
-    | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement
+    /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement */
 ;
 
 ForStatementNoShortIf:
-    KEY_for '(' ';' ';' ')' StatementNoShortIf
-    | KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf
-    | KEY_for '(' ';' Expression ';' ')' StatementNoShortIf
-    | KEY_for '(' ';' ';' StatementExpressionList ')' StatementNoShortIf
-    | KEY_for '(' ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
+    KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf
     | KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf
     | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf
     | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
-    | KEY_for '(' LocalVariableDeclaration ':' Expression ')' StatementNoShortIf
+    /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' StatementNoShortIf */
 ;
 
 ForInit:
     StatementExpressionList
     | LocalVariableDeclaration
+    |
 ;
 
 StatementExpressionList:
-    StatementExpression StatementExpressionMore
-;
-
-StatementExpressionMore:
-    StatementExpressionMore ',' StatementExpression |
+    StatementExpressionList ',' StatementExpression
+    | StatementExpression
 ;
 
 // 14 end
@@ -392,13 +376,10 @@ ClassDeclaration:
     NormalClassDeclaration
 ;
 NormalClassDeclaration:
-    ClassModifiers KEY_class IDENTIFIER ClassBody
-    | ClassModifiers KEY_class IDENTIFIER ClassExtends ClassBody
-    | ClassModifiers KEY_class IDENTIFIER ClassPermits ClassBody
-    | ClassModifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody
-;
-ClassModifiers:
-    ClassModifiers PublicPrivate |
+    Modifiers KEY_class IDENTIFIER ClassBody
+    | Modifiers KEY_class IDENTIFIER ClassExtends ClassBody
+    | Modifiers KEY_class IDENTIFIER ClassPermits ClassBody
+    | Modifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody
 ;
 ClassExtends:
     KEY_extends ClassType
@@ -419,39 +400,71 @@ ClassBodyDeclarations:
     | 
 ;
 ClassBodyDeclaration:
-    FieldDeclaration
+    Modifiers Type VariableDeclaratorList ';'
+    | ClassDeclaration
     | ';'
     | Block
-    | ConstructorDeclaration
+    | Modifiers IdenPara Block
     | MethodDeclaration
-;
-FieldDeclaration:
-    ConstructorModifiers Type VariableDeclaratorList ';'
 ;
 
 VariableDeclaratorList:
-    VariableDeclarator cVariableDeclarator
+    VariableDeclaratorList ',' VariableDeclarator
+    | VariableDeclarator
 ;
-cVariableDeclarator:
-    cVariableDeclarator ',' VariableDeclarator 
-    |
-;
+
 VariableDeclarator:
-    VariableDeclaratorId '=' VariableInitializer
-    | VariableDeclaratorId
+    VariableDeclarator1
+    | VariableDeclarator2
 ;
 
-VariableDeclaratorId:
-    IDENTIFIER Dims
-    | IDENTIFIER
+zerooroneExpression:
+    Expression | 
 ;
 
-MethodConstructor:
-    
+VariableDeclarator1:
+    IDENTIFIER
+    | IDENTIFIER '[' zerooroneExpression ']'
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']'
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']'
+;
+
+VariableDeclarator2:
+    IDENTIFIER '=' Expression
+    | IDENTIFIER '[' zerooroneExpression ']' '=' List1
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+;
+
+List1:
+    '{' ArrEle1 '}'
+;
+
+ArrEle1:
+    ArrEle1 ',' Expression
+    | Expression
+;
+
+List2:
+    '{' ArrEle2 '}'
+;
+
+ArrEle2:
+    ArrEle2 ',' List1
+    | List1
+;
+
+List3:
+    '{' ArrEle3 '}'
+;
+
+ArrEle3:
+    ArrEle3 ',' List2
+    | List2
 ;
 
 MethodDeclaration:
-    ConstructorModifiers Methodmodifiers MethodHeader MethodBody
+    Modifiers Methodmodifiers MethodHeader MethodBody
 ;
 
 Methodmodifiers:
@@ -459,18 +472,12 @@ Methodmodifiers:
 ;
 
 Methodmodifier:
-    KEY_protected | KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
+    KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
 ;
 
 MethodHeader:
-    Result Methodeclarator
-;
-
-Result:
-    PrimitiveType
-    | VariableDeclaratorId
-    | PrimitiveType Dims
-    | KEY_void 
+    Type Methodeclarator      {cout << "MethodHeader";}
+    | KEY_void Methodeclarator
 ;
 
 Methodeclarator:
@@ -480,53 +487,29 @@ Methodeclarator:
 
 IdenPara:
     IDENTIFIER '(' formalparameters ')'
+    | IDENTIFIER '(' ')'
 ;
 formalparameters:
-    formalparameterlist
-    |
+    formalparameters ',' formalparameter
+    | formalparameter
 ;
 
-formalparameterlist:
-    formalparameter cformalparameter
-;
-cformalparameter:
-    cformalparameter ',' formalparameter |
-;
 formalparameter:
-    VariableModifier Type VariableDeclaratorId
-    | VariableArityParameter
+    Type VariableDeclarator1
+    | Type DOT3 IDENTIFIER
 ;
 
-VariableModifier:
+/* VariableModifier:
     VariableModifier KEY_final |
-;
-VariableArityParameter:
-    VariableModifier Type DOT3 IDENTIFIER
-;
+; */
 
 MethodBody:
-    Block
-    | ';'
+    Block       {cout <<"MEthodBlock";}
+    | ';'       {cout << "MethodBody;";}
 ;
-ConstructorDeclaration:
-    ConstructorModifiers IdenPara ConstructorBody
-;
-ConstructorModifiers:
+
+Modifiers:
     PublicPrivate | 
-;
-
-ConstructorBody:
-    '{' zerooroneExplicitConstructorInvocation BlockStatements '}'
-;
-
-zerooroneExplicitConstructorInvocation:
-    ExplicitConstructorInvocation |
-;
-ExplicitConstructorInvocation:
-    KEY_this '(' Zeroorone_ArgumentList ')' ';'
-    | KEY_super '(' Zeroorone_ArgumentList ')' ';'
-    | IDENdotIDEN '.' KEY_super '(' Zeroorone_ArgumentList ')' ';'
-    | Primary '.' KEY_super '(' Zeroorone_ArgumentList ')' ';'
 ;
 
 // Class and Method END
