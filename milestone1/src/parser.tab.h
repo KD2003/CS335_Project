@@ -57,52 +57,50 @@ extern int yydebug;
     KEYWORD = 258,                 /* KEYWORD  */
     IDENTIFIER = 259,              /* IDENTIFIER  */
     LITERAL = 260,                 /* LITERAL  */
-    ESCSEQ = 261,                  /* ESCSEQ  */
-    OPERATOR = 262,                /* OPERATOR  */
-    SEP = 263,                     /* SEP  */
-    INTTYPE = 264,                 /* INTTYPE  */
-    FPTYPE = 265,                  /* FPTYPE  */
-    BOOLTYPE = 266,                /* BOOLTYPE  */
-    ASSIGNOP = 267,                /* ASSIGNOP  */
-    CONDOR = 268,                  /* CONDOR  */
-    CONDAND = 269,                 /* CONDAND  */
-    EQALITYOP = 270,               /* EQALITYOP  */
-    RELATIONOP = 271,              /* RELATIONOP  */
-    SHIFTOP = 272,                 /* SHIFTOP  */
-    ADDOP = 273,                   /* ADDOP  */
-    MULTOP = 274,                  /* MULTOP  */
-    ADDOP2 = 275,                  /* ADDOP2  */
-    UNARYOP = 276,                 /* UNARYOP  */
-    KEY_VAR = 277,                 /* KEY_VAR  */
-    KEY_assert = 278,              /* KEY_assert  */
-    KEY_yiethr = 279,              /* KEY_yiethr  */
-    KEY_brecon = 280,              /* KEY_brecon  */
-    KEY_return = 281,              /* KEY_return  */
-    KEY_if = 282,                  /* KEY_if  */
-    KEY_else = 283,                /* KEY_else  */
-    KEY_for = 284,                 /* KEY_for  */
-    KEY_permits = 285,             /* KEY_permits  */
-    KEY_record = 286,              /* KEY_record  */
-    KEY_while = 287,               /* KEY_while  */
-    KEY_sync = 288,                /* KEY_sync  */
-    KEY_final = 289,               /* KEY_final  */
-    KEY_extends = 290,             /* KEY_extends  */
-    KEY_super = 291,               /* KEY_super  */
-    KEY_this = 292,                /* KEY_this  */
-    KEY_class = 293,               /* KEY_class  */
-    KEY_void = 294,                /* KEY_void  */
-    KEY_public = 295,              /* KEY_public  */
-    KEY_new = 296,                 /* KEY_new  */
-    COLON2 = 297,                  /* COLON2  */
-    KEY_throws = 298,              /* KEY_throws  */
-    KEY_static = 299,              /* KEY_static  */
-    KEY_enum = 300,                /* KEY_enum  */
-    DOT3 = 301,                    /* DOT3  */
-    KEY_abstract = 302,            /* KEY_abstract  */
-    KEY_native = 303,              /* KEY_native  */
-    KEY_strictf = 304,             /* KEY_strictf  */
-    KEY_protected = 305,           /* KEY_protected  */
-    KEY_private = 306              /* KEY_private  */
+    OPERATOR = 261,                /* OPERATOR  */
+    INTTYPE = 262,                 /* INTTYPE  */
+    FPTYPE = 263,                  /* FPTYPE  */
+    BOOLTYPE = 264,                /* BOOLTYPE  */
+    ASSIGNOP = 265,                /* ASSIGNOP  */
+    CONDOR = 266,                  /* CONDOR  */
+    CONDAND = 267,                 /* CONDAND  */
+    EQALITYOP = 268,               /* EQALITYOP  */
+    RELATIONOP = 269,              /* RELATIONOP  */
+    SHIFTOP = 270,                 /* SHIFTOP  */
+    ADDOP = 271,                   /* ADDOP  */
+    MULTOP = 272,                  /* MULTOP  */
+    ADDOP2 = 273,                  /* ADDOP2  */
+    UNARYOP = 274,                 /* UNARYOP  */
+    KEY_VAR = 275,                 /* KEY_VAR  */
+    KEY_assert = 276,              /* KEY_assert  */
+    KEY_yiethr = 277,              /* KEY_yiethr  */
+    KEY_brecon = 278,              /* KEY_brecon  */
+    KEY_return = 279,              /* KEY_return  */
+    KEY_if = 280,                  /* KEY_if  */
+    KEY_else = 281,                /* KEY_else  */
+    KEY_for = 282,                 /* KEY_for  */
+    KEY_permits = 283,             /* KEY_permits  */
+    KEY_record = 284,              /* KEY_record  */
+    KEY_while = 285,               /* KEY_while  */
+    KEY_sync = 286,                /* KEY_sync  */
+    KEY_final = 287,               /* KEY_final  */
+    KEY_extends = 288,             /* KEY_extends  */
+    KEY_super = 289,               /* KEY_super  */
+    KEY_this = 290,                /* KEY_this  */
+    KEY_class = 291,               /* KEY_class  */
+    KEY_void = 292,                /* KEY_void  */
+    KEY_public = 293,              /* KEY_public  */
+    KEY_new = 294,                 /* KEY_new  */
+    COLON2 = 295,                  /* COLON2  */
+    KEY_throws = 296,              /* KEY_throws  */
+    KEY_static = 297,              /* KEY_static  */
+    KEY_enum = 298,                /* KEY_enum  */
+    DOT3 = 299,                    /* DOT3  */
+    KEY_abstract = 300,            /* KEY_abstract  */
+    KEY_native = 301,              /* KEY_native  */
+    KEY_strictf = 302,             /* KEY_strictf  */
+    KEY_protected = 303,           /* KEY_protected  */
+    KEY_private = 304              /* KEY_private  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -115,7 +113,7 @@ union YYSTYPE
 
     std::string *lit;
 
-#line 119 "parser.tab.h"
+#line 117 "parser.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

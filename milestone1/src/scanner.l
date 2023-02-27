@@ -26,8 +26,7 @@ HEXSIG ({HEXNUM}[.]?)|(0[xX]([0-9a-fA-F]|[0-9a-fA-F][0-9a-fA-F_]*[0-9a-fA-F])?[.
 HEXFLOAT {HEXSIG}[Pp][+-]?{DIGITS}[fFDd]?
 ESCSEQ \\b|\\s|\\t|\\n|\\f|\\r|"\\\""|"\\\'"|"\\\\"|"\0"|\\[0-3]?[0-7]{1,2}
 CHARLIT [']([^\'\\]|{ESCSEQ})[']
-STRLIT ["]([^"\\\n]|\\(.|\n))*["]
-TEXTBLK ["]{3}[ \t\f]*[\r\n]([^"\\]|(["]{2}+[^"\\\n]+)|(["]+[^"\\\n]+)|{ESCSEQ}|[\r\n])*["]{3}
+STRLIT ["]([^"\\\n]|{ESCSEQ}|\\(.|\n))*["]
 SEP1 ";"|","|"."|"@"|"("|"{"|"["|")"|"}"|"]"
 DOT3 "..."
 ASSIGNOP "="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|">>>="|"&="|"\^="|"\|="
@@ -114,17 +113,14 @@ record {return(KEY_record);}
     return(IDENTIFIER);
 }
 
-{ESCSEQ} {
-    return(ESCSEQ);
-}
-
 ["]{3}[ \t\f]*[\r\n] {txt = yytext; BEGIN(txtblk);}
 <txtblk>([^"\\]|{ESCSEQ}|[\r\n])* {txt+=yytext;}
 <txtblk>(["]{2}|["])([^"\\]|\n)+ {txt+=yytext;}
 <txtblk>["]{3} {
     txt+=yytext;
     /*cout << "Text block\n";*/
-    BEGIN(INITIAL);}
+    BEGIN(INITIAL);
+    return(LITERAL);}
 <txtblk><<EOF>> {printf("Line number: %d The text block did not close. Expected \"\"\"\n", yylineno); return 0;}
 
 {CHARLIT} {
