@@ -1,5 +1,6 @@
 %{
 #include<iostream>
+#include"AST.h"
 #include"parser.tab.h"
 using namespace std;
 
@@ -53,16 +54,18 @@ OPERATOR "="|">"|"<"|"!"|"~"|"?"|":"|"->"|"=="|">="|"<="|"!="|"&&"|"|"{2}|"++"|"
 }
 
 
-{INTTYPE} {return(INTTYPE);}
+{INTTYPE} {yylval.st = new std::string(yytext); return(INTTYPE);}
 
-{FPTYPE} {return(FPTYPE);}
+{FPTYPE} {yylval.st = new std::string(yytext); return(FPTYPE);}
 
-{BOOLTYPE} {return(BOOLTYPE);}
+{BOOLTYPE} {yylval.st = new std::string(yytext); return(BOOLTYPE);}
 
 var {return(KEY_VAR);}
 assert {return(KEY_assert);}
-yield|throw {return(KEY_yiethr);}
-break|continue {return(KEY_brecon);}
+yield {return(KEY_yield);}
+throw {return(KEY_throw);}
+break {return(KEY_break);}
+continue {return(KEY_continue);}
 return {return(KEY_return);}
 if {return(KEY_if);}
 else {return(KEY_else);}
@@ -79,34 +82,34 @@ new {return(KEY_new);}
 static {return(KEY_static);}
 public {return(KEY_public);}
 private {return(KEY_private);}
-abstract {return(KEY_abstract);}
-native {return(KEY_native);}
-strictf {return(KEY_strictf);}
 permits {return(KEY_permits);}
 import {return(KEY_import);}
 
 {KEYWORD} {
     return(KEYWORD);
 }
-
  
 {DECINUM}|{HEXNUM}|{OCTNUM}|{BINNUM} {
     //cout << "Integar literal\n";
+    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
 {HEXFLOAT}|{DECFLOAT} {
     //cout << "Floating point\n";
+    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
  
 {BOOLNULLLIT} {
     //cout << "Literal\n";
+    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
  
 {ID} {
+    yylval.st = new std::string(yytext);
     return(IDENTIFIER);
 }
 
@@ -117,31 +120,34 @@ import {return(KEY_import);}
     txt+=yytext;
     /*cout << "Text block\n";*/
     BEGIN(INITIAL);
+    yylval.st = new std::string(yytext);
     return(LITERAL);}
 <txtblk><<EOF>> {printf("Line number: %d The text block did not close. Expected \"\"\"\n", yylineno); return 0;}
 
 {CHARLIT} {
+    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
 {STRLIT} {
+    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
 "=" {return((int)yytext[0]);}
 
-{ASSIGNOP} {return(ASSIGNOP);}
+{ASSIGNOP} {yylval.st = new std::string(yytext); return(ASSIGNOP);}
 
 "|"{2} {return(CONDOR);}
 
 "&&" {return(CONDAND);}
-"=="|"!=" {return(EQALITYOP);}
-"<"|">"|"<="|">=" {return(RELATIONOP);}
-"<<"|">>"|">>>" {return(SHIFTOP);}
-"+"|"-" {return(ADDOP);}
-"++"|"--" {return(ADDOP2);}
-"~"|"!" {return(UNARYOP);}
-"*"|"/"|"%" {return(MULTOP);}
+"=="|"!=" {yylval.st = new std::string(yytext); return(EQALITYOP);}
+"<"|">"|"<="|">=" {yylval.st = new std::string(yytext); return(RELATIONOP);}
+"<<"|">>"|">>>" {yylval.st = new std::string(yytext); return(SHIFTOP);}
+"+"|"-" {yylval.st = new std::string(yytext); return(ADDOP);}
+"++"|"--" {yylval.st = new std::string(yytext); return(ADDOP2);}
+"~"|"!" {yylval.st = new std::string(yytext); return(UNARYOP);}
+"*"|"/"|"%" {yylval.st = new std::string(yytext); return(MULTOP);}
 {SINGLEOP} {return((int)yytext[0]);}
 
 {OPERATOR} {

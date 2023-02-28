@@ -1,8 +1,10 @@
 %{
+#include"AST.h"
 #include <iostream>
 #include <string>
-#include "AST.h"
 using namespace std;
+
+FILE* dotfile;
 
 int yylex();
 int yyerror(const char *str);
@@ -10,13 +12,19 @@ int yyerror(const char *str);
 %}
 
 %locations
-%token KEYWORD IDENTIFIER LITERAL OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yiethr KEY_brecon KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_abstract KEY_native KEY_strictf KEY_private KEY_import
-
-%type <lit> LITERAL 
+%token KEYWORD IDENTIFIER LITERAL OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
 
 %union{
-    std::string *lit;
+    std::string *st;
+    ASTNode *ptr;
 }
+
+%type<st> KEYWORD IDENTIFIER LITERAL OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
+
+%type<ptr> prog ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims
+%type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression PostfixExpression
+%type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
+%type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
 
 %%
 prog:
@@ -55,7 +63,12 @@ PrimitiveType:
 
 IDENdotIDEN:
     IDENdotIDEN '.' IDENTIFIER
-    | IDENTIFIER
+    | IDENTIFIER    {
+        vector<stuff> s;
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *$1 + ")"), "", 1);
+        delete $1;
+        $$ = makeNode("IDENdotIDEN", s);
+    }
 ;
 
 PublicPrivateStatic:
@@ -95,7 +108,7 @@ PrimaryNoNewArray:
     | MethodInvocation
 ;
 
-ClassLiteral: //confirm once
+/* ClassLiteral: //confirm once
     IDENdotIDEN Zero_or_moreSquarebracket '.' KEY_class
     | PrimitiveType Zero_or_moreSquarebracket '.' KEY_class
     | KEY_void '.' KEY_class
@@ -104,7 +117,7 @@ ClassLiteral: //confirm once
 Zero_or_moreSquarebracket:
     Zero_or_moreSquarebracket '[' ']'
     |   
-;
+; */
 
 ClassInstanceCreationExpression:
     KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')' ClassBody
@@ -250,7 +263,8 @@ Block:
 ;
 
 BlockStatements:
-    BlockStatements BlockStatement | 
+    BlockStatements BlockStatement
+    |       {}
 ;
 
 BlockStatement:
@@ -259,11 +273,11 @@ BlockStatement:
 ;
 
 LocalVariableDeclaration:
-    LocalVariableType VariableDeclaratorList   {cout << "local var dec";}
+    LocalVariableType VariableDeclaratorList
 ;
 
 LocalVariableType:
-    Type        {cout <<"type";}
+    Type
     | KEY_VAR
 ;
 
@@ -285,14 +299,30 @@ StatementNoShortIf:
 ;
 
 StatementWithoutTrailingSubstatement:		// left try statement
-    Block
+    Block   {
+        vector<stuff> s;
+        insertAttr(s, $1, "", 1);
+        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+    }
     | ';'
     | StatementExpression ';'
     | AssertStatement
     | BreakContinueStatement
-    | KEY_return ';'
-    | KEY_return Expression ';'
-    | KEY_yiethr Expression ';'
+    | KEY_return ';'    {
+        vector<stuff> s;
+        insertAttr(s, makeLeaf("return"), "", 1);
+        insertAttr(s, makeLeaf(";"), "", 1);
+        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+    }
+    | KEY_return Expression ';'     {
+        vector<stuff> s;
+        insertAttr(s, makeLeaf("return"), "", 1);
+        insertAttr(s, $2, "", 1);
+        insertAttr(s, makeLeaf(";"), "", 1);
+        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+    }
+    | KEY_yield Expression ';'
+    | KEY_throw Expression ';'
     | KEY_sync '(' Expression ')' Block
 ;
 
@@ -316,8 +346,10 @@ AssertStatement:
 ;
 
 BreakContinueStatement:
-    KEY_brecon IDENTIFIER ';'
-    | KEY_brecon ';'
+    KEY_break IDENTIFIER ';'
+    | KEY_break ';'
+    | KEY_continue IDENTIFIER ';'
+    | KEY_continue ';'
 ;
 
 ForStatement:
@@ -350,7 +382,7 @@ StatementExpressionList:
 // 14 end
 
 // §10 (Arrays) START
-ArrayInitializer:
+/* ArrayInitializer:
     '{' zerooroneVariableInitializerList ',' '}'
     | '{' zerooroneVariableInitializerList '}'
 ;
@@ -359,17 +391,14 @@ zerooroneVariableInitializerList:
     | 
 ;
 VariableInitializerList:
-    VariableInitializer cVariableInitializer
-;
-
-cVariableInitializer:
-    cVariableInitializer ',' VariableInitializer |
+    VariableInitializerList ',' VariableInitializer
+    | VariableInitializer
 ;
 
 VariableInitializer:
     Expression
     | ArrayInitializer
-;
+; */
 // §10 (Arrays) END
 
 //Classes
@@ -468,16 +497,8 @@ MethodDeclaration:
     Modifiers MethodHeader MethodBody
 ;
 
-/* Methodmodifiers:
-    Methodmodifiers Methodmodifier |
-; */
-
-/* Methodmodifier:
-    KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
-; */
-
 MethodHeader:
-    Type Methodeclarator      {cout << "MethodHeader";}
+    Type Methodeclarator
     | KEY_void Methodeclarator
 ;
 
@@ -500,13 +521,9 @@ formalparameter:
     | Type DOT3 IDENTIFIER
 ;
 
-VariableModifier:
-    KEY_final |
-;
-
 MethodBody:
-    Block       {cout <<"MEthodBlock";}
-    | ';'       {cout << "MethodBody;";}
+    Block
+    | ';'
 ;
 
 Modifiers:

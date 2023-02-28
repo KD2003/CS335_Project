@@ -73,30 +73,29 @@ extern int yydebug;
     UNARYOP = 274,                 /* UNARYOP  */
     KEY_VAR = 275,                 /* KEY_VAR  */
     KEY_assert = 276,              /* KEY_assert  */
-    KEY_yiethr = 277,              /* KEY_yiethr  */
-    KEY_brecon = 278,              /* KEY_brecon  */
-    KEY_return = 279,              /* KEY_return  */
-    KEY_if = 280,                  /* KEY_if  */
-    KEY_else = 281,                /* KEY_else  */
-    KEY_for = 282,                 /* KEY_for  */
-    KEY_permits = 283,             /* KEY_permits  */
-    KEY_while = 284,               /* KEY_while  */
-    KEY_sync = 285,                /* KEY_sync  */
-    KEY_final = 286,               /* KEY_final  */
-    KEY_extends = 287,             /* KEY_extends  */
-    KEY_super = 288,               /* KEY_super  */
-    KEY_this = 289,                /* KEY_this  */
-    KEY_class = 290,               /* KEY_class  */
-    KEY_void = 291,                /* KEY_void  */
-    KEY_public = 292,              /* KEY_public  */
-    KEY_new = 293,                 /* KEY_new  */
-    KEY_static = 294,              /* KEY_static  */
-    DOT3 = 295,                    /* DOT3  */
-    KEY_abstract = 296,            /* KEY_abstract  */
-    KEY_native = 297,              /* KEY_native  */
-    KEY_strictf = 298,             /* KEY_strictf  */
-    KEY_private = 299,             /* KEY_private  */
-    KEY_import = 300               /* KEY_import  */
+    KEY_yield = 277,               /* KEY_yield  */
+    KEY_throw = 278,               /* KEY_throw  */
+    KEY_break = 279,               /* KEY_break  */
+    KEY_continue = 280,            /* KEY_continue  */
+    KEY_return = 281,              /* KEY_return  */
+    KEY_if = 282,                  /* KEY_if  */
+    KEY_else = 283,                /* KEY_else  */
+    KEY_for = 284,                 /* KEY_for  */
+    KEY_permits = 285,             /* KEY_permits  */
+    KEY_while = 286,               /* KEY_while  */
+    KEY_sync = 287,                /* KEY_sync  */
+    KEY_final = 288,               /* KEY_final  */
+    KEY_extends = 289,             /* KEY_extends  */
+    KEY_super = 290,               /* KEY_super  */
+    KEY_this = 291,                /* KEY_this  */
+    KEY_class = 292,               /* KEY_class  */
+    KEY_void = 293,                /* KEY_void  */
+    KEY_public = 294,              /* KEY_public  */
+    KEY_new = 295,                 /* KEY_new  */
+    KEY_static = 296,              /* KEY_static  */
+    DOT3 = 297,                    /* DOT3  */
+    KEY_private = 298,             /* KEY_private  */
+    KEY_import = 299               /* KEY_import  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -105,9 +104,10 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 16 "parser.y"
+#line 17 "parser.y"
 
-    std::string *lit;
+    std::string *st;
+    ASTNode *ptr;
 
 #line 113 "parser.tab.h"
 
