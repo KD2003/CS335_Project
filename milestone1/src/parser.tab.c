@@ -1698,8 +1698,8 @@ yyreduce:
 #line 32 "parser.y"
                                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("prog", s);
         }
 #line 1706 "parser.tab.c"
@@ -1709,8 +1709,8 @@ yyreduce:
 #line 41 "parser.y"
                         {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ImportList", s);
     }
 #line 1717 "parser.tab.c"
@@ -1728,8 +1728,8 @@ yyreduce:
 #line 53 "parser.y"
                                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassDeclarationList", s);
     }
 #line 1736 "parser.tab.c"
@@ -1747,8 +1747,8 @@ yyreduce:
 #line 65 "parser.y"
                                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("import"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("import"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("Imports", s);
     }
 #line 1755 "parser.tab.c"
@@ -1758,9 +1758,9 @@ yyreduce:
 #line 71 "parser.y"
                                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("import"), "", 1);
-        insertAttr(s, makeLeaf("static"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("import"));
+        insertAttr(s, makeLeaf("static"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("Imports", s);
     }
 #line 1767 "parser.tab.c"
@@ -1770,9 +1770,9 @@ yyreduce:
 #line 78 "parser.y"
                                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("import"), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s,makeLeaf("*"),"",1);
+        insertAttr(s, makeLeaf("import"));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s,makeLeaf("*"));
         
         (yyval.ptr) = makeNode("Imports", s);   
     }
@@ -1783,9 +1783,9 @@ yyreduce:
 #line 86 "parser.y"
                                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("import"), "", 1);
-        insertAttr(s, makeLeaf("static"), "", 1);
-        insertAttr(s,(yyvsp[-3].ptr),"",1);
+        insertAttr(s, makeLeaf("import"));
+        insertAttr(s, makeLeaf("static"));
+        insertAttr(s,(yyvsp[-3].ptr));
         delete (yyvsp[-3].ptr);
         (yyval.ptr) = makeNode("Imports", s);
     }
@@ -1820,7 +1820,7 @@ yyreduce:
 #line 110 "parser.y"
                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("PrimitiveType", s);
     }
@@ -1831,7 +1831,7 @@ yyreduce:
 #line 116 "parser.y"
                    {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("PrimitiveType", s);
     }
@@ -1842,7 +1842,7 @@ yyreduce:
 #line 122 "parser.y"
                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("PrimitiveType", s);
     }
@@ -1853,8 +1853,8 @@ yyreduce:
 #line 131 "parser.y"
                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("IDENdotIDEN", s);
     }
@@ -1865,7 +1865,7 @@ yyreduce:
 #line 138 "parser.y"
                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("IDENdotIDEN", s);
     }
@@ -1876,7 +1876,7 @@ yyreduce:
 #line 147 "parser.y"
                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("public"), "", 1);
+        insertAttr(s, makeLeaf("public"));
         (yyval.ptr) = makeNode("PublicPrivateStatic", s);
     }
 #line 1883 "parser.tab.c"
@@ -1886,7 +1886,7 @@ yyreduce:
 #line 152 "parser.y"
                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("private"), "", 1);
+        insertAttr(s, makeLeaf("private"));
         (yyval.ptr) = makeNode("PublicPrivateStatic", s);
     }
 #line 1893 "parser.tab.c"
@@ -1896,7 +1896,7 @@ yyreduce:
 #line 157 "parser.y"
                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("static"), "", 1);
+        insertAttr(s, makeLeaf("static"));
         (yyval.ptr) = makeNode("PublicPrivateStatic", s);
     }
 #line 1903 "parser.tab.c"
@@ -1960,7 +1960,7 @@ yyreduce:
 #line 197 "parser.y"
                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("Literal"), "", 1);
+        insertAttr(s, makeLeaf("Literal"));
         (yyval.ptr) = makeNode("PrimaryNoNewArray", s);
     }
 #line 1967 "parser.tab.c"
@@ -1970,7 +1970,7 @@ yyreduce:
 #line 203 "parser.y"
                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("this"), "", 1);
+        insertAttr(s, makeLeaf("this"));
         (yyval.ptr) = makeNode("PrimaryNoNewArray", s);
     }
 #line 1977 "parser.tab.c"
@@ -1980,8 +1980,8 @@ yyreduce:
 #line 208 "parser.y"
                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("this"), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("this"));
         
         (yyval.ptr) = makeNode("PrimaryNoNewArray", s);
     }
@@ -2032,10 +2032,10 @@ yyreduce:
 #line 233 "parser.y"
                                                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("new"), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("new"));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassInstanceCreationExpression", s);
     }
 #line 2042 "parser.tab.c"
@@ -2045,9 +2045,9 @@ yyreduce:
 #line 241 "parser.y"
                                                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("new"), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("new"));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ClassInstanceCreationExpression", s);
     }
 #line 2054 "parser.tab.c"
@@ -2073,8 +2073,8 @@ yyreduce:
 #line 260 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         
         (yyval.ptr) = makeNode("FieldAccess", s);
@@ -2086,8 +2086,8 @@ yyreduce:
 #line 268 "parser.y"
                                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("super"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"), "", 1);
+        insertAttr(s, makeLeaf("super"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("FieldAccess", s);
     }
@@ -2098,9 +2098,9 @@ yyreduce:
 #line 275 "parser.y"
                                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, makeLeaf("super"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"), "", 1);
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, makeLeaf("super"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         
         (yyval.ptr) = makeNode("FieldAccess", s);
@@ -2112,8 +2112,8 @@ yyreduce:
 #line 287 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ArrayAccess", s);
     }
 #line 2120 "parser.tab.c"
@@ -2123,8 +2123,8 @@ yyreduce:
 #line 293 "parser.y"
                                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ArrayAccess", s);
     }
 #line 2131 "parser.tab.c"
@@ -2134,8 +2134,8 @@ yyreduce:
 #line 302 "parser.y"
                                                         {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         
         
         (yyval.ptr) = makeNode("MethodInvocation", s);
@@ -2147,10 +2147,10 @@ yyreduce:
 #line 310 "parser.y"
                                                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-5].ptr), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"), "", 1);
+        insertAttr(s, (yyvsp[-5].ptr));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
         
         
         
@@ -2163,10 +2163,10 @@ yyreduce:
 #line 321 "parser.y"
                                                                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("super"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"), "", 1);
+        insertAttr(s, makeLeaf("super"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
         
         
         
@@ -2179,11 +2179,11 @@ yyreduce:
 #line 332 "parser.y"
                                                                                    {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-7].ptr), "", 1);
-        insertAttr(s, makeLeaf("super"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"), "", 1);
+        insertAttr(s, (yyvsp[-7].ptr));
+        insertAttr(s, makeLeaf("super"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("MethodInvocation", s);   
     }
 #line 2190 "parser.tab.c"
@@ -2193,8 +2193,8 @@ yyreduce:
 #line 344 "parser.y"
                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ArguementList", s);
@@ -2214,10 +2214,10 @@ yyreduce:
 #line 358 "parser.y"
                                             {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("new"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("new"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         
@@ -2230,9 +2230,9 @@ yyreduce:
 #line 369 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("new"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("new"));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ArrayCreationExpression", s);
@@ -2244,10 +2244,10 @@ yyreduce:
 #line 378 "parser.y"
                                             {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("new"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("new"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         
@@ -2260,9 +2260,9 @@ yyreduce:
 #line 389 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("new"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("new"));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ArrayCreationExpression", s);
@@ -2274,8 +2274,8 @@ yyreduce:
 #line 402 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         
         
         (yyval.ptr) = makeNode("DimExpr", s);
@@ -2287,7 +2287,7 @@ yyreduce:
 #line 410 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
         
         (yyval.ptr) = makeNode("DimExpr", s);
     }
@@ -2322,9 +2322,9 @@ yyreduce:
 #line 434 "parser.y"
                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2337,9 +2337,9 @@ yyreduce:
 #line 444 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("="), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("="));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("Assignment", s);
@@ -2359,11 +2359,11 @@ yyreduce:
 #line 459 "parser.y"
                                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, makeLeaf("?"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(":"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, makeLeaf("?"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(":"));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         
@@ -2384,9 +2384,9 @@ yyreduce:
 #line 477 "parser.y"
                                                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("||"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("||"));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         
@@ -2407,9 +2407,9 @@ yyreduce:
 #line 493 "parser.y"
                                                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("&&"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("&&"));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         
@@ -2430,9 +2430,9 @@ yyreduce:
 #line 509 "parser.y"
                                                 {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("&"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("&"));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("AndExpression", s);
@@ -2452,9 +2452,9 @@ yyreduce:
 #line 524 "parser.y"
                                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("^"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("^"));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ExclusiveOrExpression", s);
@@ -2474,9 +2474,9 @@ yyreduce:
 #line 539 "parser.y"
                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("|"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("|"));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("InclusiveOrExpression", s);
@@ -2496,9 +2496,9 @@ yyreduce:
 #line 554 "parser.y"
                                                         {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2519,9 +2519,9 @@ yyreduce:
 #line 570 "parser.y"
                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2542,9 +2542,9 @@ yyreduce:
 #line 586 "parser.y"
                                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2565,9 +2565,9 @@ yyreduce:
 #line 602 "parser.y"
                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2588,9 +2588,9 @@ yyreduce:
 #line 618 "parser.y"
                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2603,8 +2603,8 @@ yyreduce:
 #line 631 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         (yyval.ptr) = makeNode("UnaryExpression", s);
@@ -2616,8 +2616,8 @@ yyreduce:
 #line 639 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         (yyval.ptr) = makeNode("UnaryExpression", s);
@@ -2637,7 +2637,7 @@ yyreduce:
 #line 650 "parser.y"
                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[0].ptr));
         
         (yyval.ptr) = makeNode("UnaryExpression", s);
     }
@@ -2656,8 +2656,8 @@ yyreduce:
 #line 662 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        insertAttr(s, (yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         (yyval.ptr) = makeNode("UnaryExpressionNotPlus", s);
@@ -2669,8 +2669,8 @@ yyreduce:
 #line 673 "parser.y"
                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("CastExpression", s);
@@ -2698,8 +2698,8 @@ yyreduce:
 #line 690 "parser.y"
                                     {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         
         (yyval.ptr) = makeNode("PostfixExpression", s);
@@ -2719,8 +2719,8 @@ yyreduce:
 #line 710 "parser.y"
                                    {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("BlockStatements", s);
     }
 #line 2727 "parser.tab.c"
@@ -2754,8 +2754,8 @@ yyreduce:
 #line 731 "parser.y"
                                              {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("LocalVariableDeclaration", s);
     }
 #line 2762 "parser.tab.c"
@@ -2773,7 +2773,7 @@ yyreduce:
 #line 743 "parser.y"
               {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("var"), "", 1);
+        insertAttr(s, makeLeaf("var"));
         (yyval.ptr) = makeNode("LocalVariableType", s);
     }
 #line 2780 "parser.tab.c"
@@ -2791,10 +2791,10 @@ yyreduce:
 #line 754 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s, makeLeaf(":"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf(":"));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2801 "parser.tab.c"
@@ -2804,9 +2804,9 @@ yyreduce:
 #line 762 "parser.y"
                                           {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("if"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("if"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2813 "parser.tab.c"
@@ -2816,11 +2816,11 @@ yyreduce:
 #line 769 "parser.y"
                                                                       {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("if"), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("else"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("if"));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("else"));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2827 "parser.tab.c"
@@ -2830,9 +2830,9 @@ yyreduce:
 #line 778 "parser.y"
                                              {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("while"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("while"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2839 "parser.tab.c"
@@ -2858,10 +2858,10 @@ yyreduce:
 #line 794 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s,makeLeaf(":"),"",1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s,makeLeaf(":"));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementNoShortIf", s);
     }
 #line 2868 "parser.tab.c"
@@ -2871,11 +2871,11 @@ yyreduce:
 #line 802 "parser.y"
                                                                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("if"), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf("else"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("if"));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf("else"));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementNoShortIf", s);
     }
 #line 2882 "parser.tab.c"
@@ -2885,9 +2885,9 @@ yyreduce:
 #line 811 "parser.y"
                                                       {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("while"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("while"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementNoShortIf", s);
     }
 #line 2894 "parser.tab.c"
@@ -2945,7 +2945,7 @@ yyreduce:
 #line 839 "parser.y"
                      {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("return"), "", 1);
+        insertAttr(s, makeLeaf("return"));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2952 "parser.tab.c"
@@ -2955,8 +2955,8 @@ yyreduce:
 #line 844 "parser.y"
                                 {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("return"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("return"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2963 "parser.tab.c"
@@ -2966,8 +2966,8 @@ yyreduce:
 #line 850 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("yield"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("yield"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2974 "parser.tab.c"
@@ -2977,8 +2977,8 @@ yyreduce:
 #line 856 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("throw"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("throw"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2985 "parser.tab.c"
@@ -2988,9 +2988,9 @@ yyreduce:
 #line 862 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("sync"), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("sync"));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2997 "parser.tab.c"
@@ -3016,7 +3016,7 @@ yyreduce:
 #line 878 "parser.y"
                              {
         vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
         delete (yyvsp[-1].st);
         (yyval.ptr) = makeNode("StatementExpression", s);
     }
@@ -3027,8 +3027,8 @@ yyreduce:
 #line 884 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("StatementExpression", s);
     }
@@ -3063,8 +3063,8 @@ yyreduce:
 #line 907 "parser.y"
                               {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("assert"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("assert"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("AssertStatement", s);
     }
 #line 3071 "parser.tab.c"
@@ -3074,10 +3074,10 @@ yyreduce:
 #line 913 "parser.y"
                                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("assert"), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, makeLeaf(":"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, makeLeaf("assert"));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, makeLeaf(":"));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("AssertStatement", s);
     }
 #line 3084 "parser.tab.c"
@@ -3087,8 +3087,8 @@ yyreduce:
 #line 924 "parser.y"
                              {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("break"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("break"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
         delete (yyvsp[-1].st);
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
@@ -3099,7 +3099,7 @@ yyreduce:
 #line 931 "parser.y"
                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("break"), "", 1);
+        insertAttr(s, makeLeaf("break"));
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
 #line 3106 "parser.tab.c"
@@ -3109,8 +3109,8 @@ yyreduce:
 #line 936 "parser.y"
                                   {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("continue"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("continue"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
         delete (yyvsp[-1].st);
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
@@ -3121,7 +3121,7 @@ yyreduce:
 #line 943 "parser.y"
                        {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("continue"), "", 1);
+        insertAttr(s, makeLeaf("continue"));
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
 #line 3128 "parser.tab.c"
@@ -3131,9 +3131,9 @@ yyreduce:
 #line 951 "parser.y"
                                               {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3140 "parser.tab.c"
@@ -3143,10 +3143,10 @@ yyreduce:
 #line 958 "parser.y"
                                                            {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-5].ptr), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-5].ptr));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3153 "parser.tab.c"
@@ -3156,10 +3156,10 @@ yyreduce:
 #line 966 "parser.y"
                                                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-5].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-5].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3166 "parser.tab.c"
@@ -3169,10 +3169,10 @@ yyreduce:
 #line 974 "parser.y"
                                                                                    {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-6].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-6].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3179 "parser.tab.c"
@@ -3182,9 +3182,9 @@ yyreduce:
 #line 986 "parser.y"
                                                        {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3191 "parser.tab.c"
@@ -3194,10 +3194,10 @@ yyreduce:
 #line 993 "parser.y"
                                                                     {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-5].ptr), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-5].ptr));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3204 "parser.tab.c"
@@ -3207,10 +3207,10 @@ yyreduce:
 #line 1001 "parser.y"
                                                                                  {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-5].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-5].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3217 "parser.tab.c"
@@ -3220,11 +3220,11 @@ yyreduce:
 #line 1009 "parser.y"
                                                                                             {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("for"), "", 1);
-        insertAttr(s, (yyvsp[-6].ptr), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("for"));
+        insertAttr(s, (yyvsp[-6].ptr));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3231 "parser.tab.c"
@@ -3234,7 +3234,7 @@ yyreduce:
 #line 1022 "parser.y"
                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForInit", s);
     }
 #line 3241 "parser.tab.c"
@@ -3244,7 +3244,7 @@ yyreduce:
 #line 1027 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForInit", s);
     }
 #line 3251 "parser.tab.c"
@@ -3262,8 +3262,8 @@ yyreduce:
 #line 1038 "parser.y"
                                                      {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementExpressionList", s);
     }
 #line 3270 "parser.tab.c"
@@ -3289,11 +3289,11 @@ yyreduce:
 #line 1077 "parser.y"
                                              {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, makeLeaf("class"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, makeLeaf("class"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
         delete (yyvsp[-1].st);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3300 "parser.tab.c"
@@ -3303,12 +3303,12 @@ yyreduce:
 #line 1086 "parser.y"
                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, makeLeaf("class"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ), "", 1);
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, makeLeaf("class"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st) ;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3315 "parser.tab.c"
@@ -3318,12 +3318,12 @@ yyreduce:
 #line 1096 "parser.y"
                                                             {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, makeLeaf("class"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ), "", 1);
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, makeLeaf("class"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3330 "parser.tab.c"
@@ -3333,13 +3333,13 @@ yyreduce:
 #line 1106 "parser.y"
                                                                          {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-5].ptr), "", 1);
-        insertAttr(s, makeLeaf("class"), "", 1);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ), "", 1);
+        insertAttr(s, (yyvsp[-5].ptr));
+        insertAttr(s, makeLeaf("class"));
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3346 "parser.tab.c"
@@ -3349,8 +3349,8 @@ yyreduce:
 #line 1119 "parser.y"
                           {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("extends"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("extends"));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassExtends", s);
     }
 #line 3357 "parser.tab.c"
@@ -3360,9 +3360,9 @@ yyreduce:
 #line 1127 "parser.y"
                                       {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("permits"), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("permits"));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassPermits", s);
     }
 #line 3369 "parser.tab.c"
@@ -3372,8 +3372,8 @@ yyreduce:
 #line 1137 "parser.y"
                               {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("cTypeName", s);
     }
 #line 3380 "parser.tab.c"
@@ -3399,8 +3399,8 @@ yyreduce:
 #line 1154 "parser.y"
                                                {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassBodyDeclarations", s);
     }
 #line 3407 "parser.tab.c"
@@ -3418,9 +3418,9 @@ yyreduce:
 #line 1165 "parser.y"
                                               {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ClassBodyDeclaration", s);
     }
 #line 3427 "parser.tab.c"
@@ -3454,9 +3454,9 @@ yyreduce:
 #line 1181 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassBodyDeclaration", s);
     }
 #line 3463 "parser.tab.c"
@@ -3474,8 +3474,8 @@ yyreduce:
 #line 1194 "parser.y"
                                                   {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclaratorList", s);
     }
 #line 3482 "parser.tab.c"
@@ -3523,7 +3523,7 @@ yyreduce:
 #line 1222 "parser.y"
                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) +")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) +")" ));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
@@ -3534,9 +3534,9 @@ yyreduce:
 #line 1228 "parser.y"
                                              {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) +")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) +")" ));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
 #line 3543 "parser.tab.c"
@@ -3546,10 +3546,10 @@ yyreduce:
 #line 1235 "parser.y"
                                                                          {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-6].st) +")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-6].st) +")" ));
         delete (yyvsp[-6].st);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
 #line 3556 "parser.tab.c"
@@ -3559,11 +3559,11 @@ yyreduce:
 #line 1243 "parser.y"
                                                                                                      {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-9].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-9].st)+")" ));
         delete (yyvsp[-9].st);
-        insertAttr(s, (yyvsp[-7].ptr), "", 1);
-        insertAttr(s, (yyvsp[-4].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-7].ptr));
+        insertAttr(s, (yyvsp[-4].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
 #line 3570 "parser.tab.c"
@@ -3573,10 +3573,10 @@ yyreduce:
 #line 1255 "parser.y"
                               {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s, makeLeaf("="), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("="));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3583 "parser.tab.c"
@@ -3586,11 +3586,11 @@ yyreduce:
 #line 1263 "parser.y"
                                                        {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-5].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-5].st)+")" ));
         delete (yyvsp[-5].st);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, makeLeaf("="), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, makeLeaf("="));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3597 "parser.tab.c"
@@ -3600,12 +3600,12 @@ yyreduce:
 #line 1272 "parser.y"
                                                                                    {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-8].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-8].st)+")" ));
         delete (yyvsp[-8].st);
-        insertAttr(s, (yyvsp[-6].ptr), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, makeLeaf("="), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-6].ptr));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, makeLeaf("="));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3612 "parser.tab.c"
@@ -3615,13 +3615,13 @@ yyreduce:
 #line 1282 "parser.y"
                                                                                                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-11].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-11].st)+")" ));
         delete (yyvsp[-11].st);
-        insertAttr(s, (yyvsp[-9].ptr), "", 1);
-        insertAttr(s, (yyvsp[-6].ptr), "", 1);
-        insertAttr(s, (yyvsp[-3].ptr), "", 1);
-        insertAttr(s, makeLeaf("="), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-9].ptr));
+        insertAttr(s, (yyvsp[-6].ptr));
+        insertAttr(s, (yyvsp[-3].ptr));
+        insertAttr(s, makeLeaf("="));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3628 "parser.tab.c"
@@ -3639,8 +3639,8 @@ yyreduce:
 #line 1302 "parser.y"
                            {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ArrEle1", s);
     }
 #line 3647 "parser.tab.c"
@@ -3666,8 +3666,8 @@ yyreduce:
 #line 1320 "parser.y"
                       {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ArrEle2", s);
     }
 #line 3674 "parser.tab.c"
@@ -3693,8 +3693,8 @@ yyreduce:
 #line 1338 "parser.y"
                       {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ArrEle3", s);
     }
 #line 3701 "parser.tab.c"
@@ -3712,9 +3712,9 @@ yyreduce:
 #line 1350 "parser.y"
                                       {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("MethodDeclaration", s);
     }
 #line 3721 "parser.tab.c"
@@ -3724,8 +3724,8 @@ yyreduce:
 #line 1360 "parser.y"
                          {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("MethodHeader", s);
     }
 #line 3732 "parser.tab.c"
@@ -3735,8 +3735,8 @@ yyreduce:
 #line 1366 "parser.y"
                                {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("void"), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, makeLeaf("void"));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("MethodHeader", s);
     }
 #line 3743 "parser.tab.c"
@@ -3762,9 +3762,9 @@ yyreduce:
 #line 1384 "parser.y"
                                         {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("IdenPara", s);
     }
 #line 3771 "parser.tab.c"
@@ -3774,7 +3774,7 @@ yyreduce:
 #line 1391 "parser.y"
                          {
         vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
         (yyval.ptr) = makeNode("IdenPara", s);
     }
@@ -3785,8 +3785,8 @@ yyreduce:
 #line 1399 "parser.y"
                                          {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("formalparameters", s);
     }
 #line 3793 "parser.tab.c"
@@ -3804,8 +3804,8 @@ yyreduce:
 #line 1411 "parser.y"
                              {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("formalparameter", s);
     }
 #line 3812 "parser.tab.c"
@@ -3815,10 +3815,10 @@ yyreduce:
 #line 1417 "parser.y"
                            {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr), "", 1);
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)), "", 1);
+        insertAttr(s, (yyvsp[-2].ptr));
+        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
         delete (yyvsp[-1].st);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st)+")" ), "", 1);
+        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st)+")" ));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("formalparameter", s);
     }
@@ -3845,8 +3845,8 @@ yyreduce:
 #line 1438 "parser.y"
                                   {
         vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr), "", 1);
-        insertAttr(s, (yyvsp[0].ptr), "", 1);
+        insertAttr(s, (yyvsp[-1].ptr));
+        insertAttr(s, (yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Modifiers", s);
     }
 #line 3853 "parser.tab.c"
