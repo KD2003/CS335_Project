@@ -91,20 +91,17 @@ import {return(KEY_import);}
  
 {DECINUM}|{HEXNUM}|{OCTNUM}|{BINNUM} {
     //cout << "Integar literal\n";
-    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
 {HEXFLOAT}|{DECFLOAT} {
     //cout << "Floating point\n";
-    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
  
 {BOOLNULLLIT} {
     //cout << "Literal\n";
-    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
  
@@ -120,17 +117,14 @@ import {return(KEY_import);}
     txt+=yytext;
     /*cout << "Text block\n";*/
     BEGIN(INITIAL);
-    yylval.st = new std::string(yytext);
     return(LITERAL);}
 <txtblk><<EOF>> {printf("Line number: %d The text block did not close. Expected \"\"\"\n", yylineno); return 0;}
 
 {CHARLIT} {
-    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
 {STRLIT} {
-    yylval.st = new std::string(yytext);
     return(LITERAL);
 }
 
