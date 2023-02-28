@@ -2,6 +2,7 @@
 #include"AST.h"
 #include <iostream>
 #include <string>
+#include <fstream>
 using namespace std;
 
 FILE* dotfile;
@@ -534,7 +535,9 @@ Modifiers:
 %%
 
 int main(){
+    dotfile = fopen("graphtest.dot","w");
+    beginAST();
     if(yyparse()) return 0;
-    
+    endAST();
     return 0;
 }

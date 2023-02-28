@@ -72,6 +72,7 @@
 #include"AST.h"
 #include <iostream>
 #include <string>
+#include <fstream>
 using namespace std;
 
 FILE* dotfile;
@@ -80,7 +81,7 @@ int yylex();
 int yyerror(const char *str);
 
 
-#line 84 "parser.tab.c"
+#line 85 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -644,27 +645,27 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    31,    31,    35,    36,    40,    41,    45,    46,    47,
-      48,    53,    54,    55,    59,    60,    61,    65,    66,    75,
-      75,    75,    79,    83,    84,    87,    88,    95,    96,   100,
-     102,   103,   104,   105,   106,   107,   108,   123,   124,   128,
-     128,   132,   133,   134,   138,   139,   143,   144,   145,   146,
-     150,   151,   155,   156,   157,   158,   163,   164,   168,   172,
-     173,   177,   178,   182,   183,   187,   188,   192,   193,   197,
-     198,   202,   203,   207,   208,   212,   213,   217,   218,   222,
-     223,   227,   228,   232,   233,   237,   238,   239,   240,   244,
-     245,   249,   253,   254,   255,   262,   266,   267,   271,   272,
-     276,   280,   281,   285,   286,   287,   288,   289,   290,   294,
-     295,   296,   297,   298,   302,   307,   308,   309,   310,   311,
-     317,   324,   325,   326,   330,   331,   332,   333,   338,   339,
-     340,   344,   345,   349,   350,   351,   352,   356,   357,   358,
-     359,   364,   365,   366,   367,   372,   373,   374,   378,   379,
-     406,   409,   410,   411,   412,   415,   418,   422,   422,   426,
-     429,   430,   433,   434,   435,   436,   437,   438,   442,   443,
-     447,   448,   452,   452,   456,   457,   458,   459,   463,   464,
-     465,   466,   470,   474,   475,   479,   483,   484,   488,   492,
-     493,   497,   501,   502,   506,   507,   511,   512,   515,   516,
-     520,   521,   525,   526,   530,   530
+       0,    32,    32,    36,    37,    41,    42,    46,    47,    48,
+      49,    54,    55,    56,    60,    61,    62,    66,    67,    76,
+      76,    76,    80,    84,    85,    88,    89,    96,    97,   101,
+     103,   104,   105,   106,   107,   108,   109,   124,   125,   129,
+     129,   133,   134,   135,   139,   140,   144,   145,   146,   147,
+     151,   152,   156,   157,   158,   159,   164,   165,   169,   173,
+     174,   178,   179,   183,   184,   188,   189,   193,   194,   198,
+     199,   203,   204,   208,   209,   213,   214,   218,   219,   223,
+     224,   228,   229,   233,   234,   238,   239,   240,   241,   245,
+     246,   250,   254,   255,   256,   263,   267,   268,   272,   273,
+     277,   281,   282,   286,   287,   288,   289,   290,   291,   295,
+     296,   297,   298,   299,   303,   308,   309,   310,   311,   312,
+     318,   325,   326,   327,   331,   332,   333,   334,   339,   340,
+     341,   345,   346,   350,   351,   352,   353,   357,   358,   359,
+     360,   365,   366,   367,   368,   373,   374,   375,   379,   380,
+     407,   410,   411,   412,   413,   416,   419,   423,   423,   427,
+     430,   431,   434,   435,   436,   437,   438,   439,   443,   444,
+     448,   449,   453,   453,   457,   458,   459,   460,   464,   465,
+     466,   467,   471,   475,   476,   480,   484,   485,   489,   493,
+     494,   498,   502,   503,   507,   508,   512,   513,   516,   517,
+     521,   522,   526,   527,   531,   531
 };
 #endif
 
@@ -1694,51 +1695,51 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* prog: ImportList ClassDeclarationList  */
-#line 31 "parser.y"
+#line 32 "parser.y"
                                                 {cout << "Program Completed\n";}
-#line 1700 "parser.tab.c"
+#line 1701 "parser.tab.c"
     break;
 
   case 18: /* IDENdotIDEN: IDENTIFIER  */
-#line 66 "parser.y"
+#line 67 "parser.y"
                     {
         vector<stuff> s;
         insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"), "", 1);
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("IDENdotIDEN", s);
     }
-#line 1711 "parser.tab.c"
+#line 1712 "parser.tab.c"
     break;
 
   case 97: /* BlockStatements: %empty  */
-#line 267 "parser.y"
+#line 268 "parser.y"
             {}
-#line 1717 "parser.tab.c"
+#line 1718 "parser.tab.c"
     break;
 
   case 114: /* StatementWithoutTrailingSubstatement: Block  */
-#line 302 "parser.y"
+#line 303 "parser.y"
             {
         vector<stuff> s;
         insertAttr(s, (yyvsp[0].ptr), "", 1);
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
-#line 1727 "parser.tab.c"
+#line 1728 "parser.tab.c"
     break;
 
   case 119: /* StatementWithoutTrailingSubstatement: KEY_return ';'  */
-#line 311 "parser.y"
+#line 312 "parser.y"
                         {
         vector<stuff> s;
         insertAttr(s, makeLeaf("return"), "", 1);
         insertAttr(s, makeLeaf(";"), "", 1);
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
-#line 1738 "parser.tab.c"
+#line 1739 "parser.tab.c"
     break;
 
   case 120: /* StatementWithoutTrailingSubstatement: KEY_return Expression ';'  */
-#line 317 "parser.y"
+#line 318 "parser.y"
                                     {
         vector<stuff> s;
         insertAttr(s, makeLeaf("return"), "", 1);
@@ -1746,11 +1747,11 @@ yyreduce:
         insertAttr(s, makeLeaf(";"), "", 1);
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
-#line 1750 "parser.tab.c"
+#line 1751 "parser.tab.c"
     break;
 
 
-#line 1754 "parser.tab.c"
+#line 1755 "parser.tab.c"
 
       default: break;
     }
@@ -1948,11 +1949,13 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 534 "parser.y"
+#line 535 "parser.y"
 
 
 int main(){
+    dotfile = fopen("graphtest.dot","w");
+    beginAST();
     if(yyparse()) return 0;
-    
+    endAST();
     return 0;
 }
