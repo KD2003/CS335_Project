@@ -2,7 +2,7 @@ import IO;
 
 class ThreeDArray {
 	IO io = new IO();
-	int[5][5][5] a;
+	int a[5][5][5];
 
 	void print_int(int x) {
 		this.io.print_int(x);
@@ -19,7 +19,7 @@ class ThreeDArray {
 		for (int i = 0; i < 5; i++){
 			for (int j = 0; j < 5; ++j){
 				for (int k = 0; k < 5; k += 1){
-					arr.a:[i][j][k] += (i - j) * -k;
+					arr.a[i][j][k] += (i - j) * -k;
 				}
 			}
 		}
@@ -27,7 +27,7 @@ class ThreeDArray {
 		for (int i = 0; i < 5; i++){
 			for (int j = 0; j < 5; ++j){
 				for (int k = 0; k < 5; k += 1){
-					arr.print_int(arr.a:[i][j][k]);
+					arr.print_int(arr.a[i][j][k]);
 				}
 				arr.print_char('\n');
 			}

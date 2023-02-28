@@ -5,7 +5,7 @@ class rec {
 	public int[5][5] array_func(int[5][5] a, int b) {
 		for (int i=0; i<5; i++){
 			for (int j=0; j<5; j++){
-				a:[i][j] = i + b - j;
+				a[i][j] = i + b - j;
 			}
 		}
 		return a;

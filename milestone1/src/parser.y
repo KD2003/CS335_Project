@@ -1,6 +1,7 @@
 %{
 #include <iostream>
 #include <string>
+#include "AST.h"
 using namespace std;
 
 int yylex();
@@ -57,8 +58,8 @@ IDENdotIDEN:
     | IDENTIFIER
 ;
 
-PublicPrivate:
-    KEY_public | KEY_private
+PublicPrivateStatic:
+    KEY_public | KEY_private | KEY_static
 ;
 
 ClassType:
@@ -464,16 +465,16 @@ ArrEle3:
 ;
 
 MethodDeclaration:
-    Modifiers Methodmodifiers MethodHeader MethodBody
+    Modifiers MethodHeader MethodBody
 ;
 
-Methodmodifiers:
+/* Methodmodifiers:
     Methodmodifiers Methodmodifier |
-;
+; */
 
-Methodmodifier:
+/* Methodmodifier:
     KEY_abstract | KEY_static | KEY_final | KEY_sync | KEY_native | KEY_strictf //Keywords mein change karna hain
-;
+; */
 
 MethodHeader:
     Type Methodeclarator      {cout << "MethodHeader";}
@@ -499,9 +500,9 @@ formalparameter:
     | Type DOT3 IDENTIFIER
 ;
 
-/* VariableModifier:
-    VariableModifier KEY_final |
-; */
+VariableModifier:
+    KEY_final |
+;
 
 MethodBody:
     Block       {cout <<"MEthodBlock";}
@@ -509,7 +510,7 @@ MethodBody:
 ;
 
 Modifiers:
-    PublicPrivate | 
+    Modifiers PublicPrivateStatic | 
 ;
 
 // Class and Method END
