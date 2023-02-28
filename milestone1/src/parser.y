@@ -108,22 +108,16 @@ Type:
 
 PrimitiveType:
     INTTYPE     {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
+        $$ = makeLeaf(*$1);
         delete $1;
-        $$ = makeNode("PrimitiveType", s);
     }
     | FPTYPE       {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
+        $$ = makeLeaf(*$1);
         delete $1;
-        $$ = makeNode("PrimitiveType", s);
     }
     | BOOLTYPE      {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
+        $$ = makeLeaf(*$1);
         delete $1;
-        $$ = makeNode("PrimitiveType", s);
     }
 ;
 
@@ -136,28 +130,20 @@ IDENdotIDEN:
         $$ = makeNode("IDENdotIDEN", s);
     }
     | IDENTIFIER    {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1 + ")"));
+        $$ = makeLeaf("IDENTIFIER (" + *$1 + ")");
         delete $1;
-        $$ = makeNode("IDENdotIDEN", s);
     }
 ;
 
 PublicPrivateStatic:
     KEY_public      {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("public"));
-        $$ = makeNode("PublicPrivateStatic", s);
+        $$ = makeLeaf("public");
     }
     | KEY_private       {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("private"));
-        $$ = makeNode("PublicPrivateStatic", s);
+        $$ = makeLeaf("private");
     }
     | KEY_static        {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("static"));
-        $$ = makeNode("PublicPrivateStatic", s);
+        $$ = makeLeaf("static");
     }
 ;
 
@@ -195,21 +181,16 @@ Primary:
 
 PrimaryNoNewArray:
     LITERAL     {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("Literal"));
-        $$ = makeNode("PrimaryNoNewArray", s);
+        $$ = makeLeaf("Literal");
     }
     /* | ClassLiteral */
     | KEY_this      {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("this"));
-        $$ = makeNode("PrimaryNoNewArray", s);
+        $$ = makeLeaf("this");
     }
     | IDENdotIDEN '.' KEY_this      {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("this"));
-        
         $$ = makeNode("PrimaryNoNewArray", s);
     }
     | '(' Expression ')'        {
@@ -278,7 +259,6 @@ FieldAccess:
         s.push_back(makeLeaf("super"));
         s.push_back(makeLeaf("IDENTIFIER (" + *$5 + ")"));
         delete $5;
-        
         $$ = makeNode("FieldAccess", s);
     }
 ;
@@ -434,21 +414,19 @@ Assignment:
     LeftHandSide ASSIGNOP Expression	    {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
+        // s.push_back(makeLeaf(*$2));
         s.push_back($3);
         delete $2;
-        
-        
-        $$ = makeNode("Assignment", s);
+        $$ = makeNode(*$2, s);
     }	// or Assignment
     | LeftHandSide '=' Expression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("="));
+        // s.push_back(makeLeaf("="));
         s.push_back($3);
         
         
-        $$ = makeNode("Assignment", s);
+        $$ = makeNode("=", s);
     }
 ;
 
@@ -463,9 +441,6 @@ ConditionalExpression:
         s.push_back($3);
         s.push_back(makeLeaf(":"));
         s.push_back($5);
-        
-        
-        
         $$ = makeNode("ConditionalExpression", s);
     }
 ;
@@ -477,12 +452,8 @@ ConditionalOrExpression:
     | ConditionalOrExpression CONDOR ConditionalAndExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("||"));
         s.push_back($3);
-        
-        
-        
-        $$ = makeNode("ConditionalOrExpression", s);
+        $$ = makeNode("||", s);
     }
 ;
 
@@ -493,12 +464,8 @@ ConditionalAndExpression:
     | ConditionalAndExpression CONDAND InclusiveOrExpression        {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("&&"));
         s.push_back($3);
-        
-        
-        
-        $$ = makeNode("ConditionalAndExpression", s);
+        $$ = makeNode("&&", s);
     }
 ;
 
@@ -509,11 +476,8 @@ AndExpression:
     | AndExpression '&' EqualityExpression      {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("&"));
         s.push_back($3);
-        
-        
-        $$ = makeNode("AndExpression", s);
+        $$ = makeNode("&", s);
     }
 ;
 
@@ -524,11 +488,8 @@ ExclusiveOrExpression:
     | ExclusiveOrExpression '^' AndExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("^"));
         s.push_back($3);
-        
-        
-        $$ = makeNode("ExclusiveOrExpression", s);
+        $$ = makeNode("^", s);
     }
 ;       
 
@@ -539,11 +500,8 @@ InclusiveOrExpression:
     | InclusiveOrExpression '|' ExclusiveOrExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("|"));
         s.push_back($3);
-        
-        
-        $$ = makeNode("InclusiveOrExpression", s);
+        $$ = makeNode("|", s);
     }
 ;
 
@@ -554,12 +512,9 @@ EqualityExpression:
     | EqualityExpression EQALITYOP RelationalExpression {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
         s.push_back($3);
+        $$ = makeNode(*$2, s);
         delete $2;
-        
-        
-        $$ = makeNode("EqualityExpression", s);
     }
 ;
 
@@ -570,12 +525,9 @@ RelationalExpression:
     | RelationalExpression RELATIONOP ShiftExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
         s.push_back($3);
+        $$ = makeNode(*$2, s);
         delete $2;
-        
-        
-        $$ = makeNode("RelationalExpression", s);
     }
 ;
 
@@ -586,12 +538,9 @@ ShiftExpression:
     | ShiftExpression SHIFTOP AdditiveExpression    {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
         s.push_back($3);
+        $$ = makeNode(*$2, s);
         delete $2;
-        
-        
-        $$ = makeNode("ShiftExpression", s);
     }
 ;
 
@@ -602,12 +551,9 @@ AdditiveExpression:
     | AdditiveExpression ADDOP MultiplicativeExpression     {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
         s.push_back($3);
+        $$ = makeNode(*$2, s);
         delete $2;
-        
-        
-        $$ = makeNode("AdditiveExpression", s);
     }
 ;
 
@@ -618,40 +564,30 @@ MultiplicativeExpression:
     | MultiplicativeExpression MULTOP UnaryExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
         s.push_back($3);
+        $$ = makeNode(*$2, s);
         delete $2;
-        
-        
-        $$ = makeNode("MultiplicativeExpression", s);
     }
 ;
 
 UnaryExpression:
     ADDOP2 UnaryExpression      {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
-        s.push_back($2);
+        s.push_back($2);        
+        $$ = makeNode(*$1, s);
         delete $1;
-        
-        $$ = makeNode("UnaryExpression", s);
     }
     | ADDOP UnaryExpression     {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
-        s.push_back($2);
+        s.push_back($2);        
+        $$ = makeNode(*$1, s);
         delete $1;
-        
-        $$ = makeNode("UnaryExpression", s);
     }
     | UnaryExpressionNotPlusMinus   {
         $$ = $1;
     }
     | CastExpression        {
-        vector<ASTNode*> s;
-        s.push_back($1);
-        
-        $$ = makeNode("UnaryExpression", s);
+        $$=$1;
     }
 ;
 
@@ -661,11 +597,9 @@ UnaryExpressionNotPlusMinus:
     }
     | UNARYOP UnaryExpression   {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
-        s.push_back($2);
+        s.push_back($2);        
+        $$ = makeNode(*$1, s);
         delete $1;
-        
-        $$ = makeNode("UnaryExpressionNotPlus", s);
     }
 ;
 
@@ -674,8 +608,6 @@ CastExpression:
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back($4);
-        
-        
         $$ = makeNode("CastExpression", s);
     }
 ;
@@ -690,10 +622,8 @@ PostfixExpression:
     | PostfixExpression ADDOP2      {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf(*$2));
+        $$ = makeNode(*$2, s);
         delete $2;
-        
-        $$ = makeNode("PostfixExpression", s);
     }
 ;
 // 15 end
@@ -1220,10 +1150,8 @@ zerooroneExpression:
 
 VariableDeclarator1:
     IDENTIFIER {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1 +")" ));
-        delete $1;
-        $$ = makeNode("VariableDeclarator1", s);
+       $$ = makeLeaf("IDENTIFIER (" + *$1 +")");
+       delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1256,18 +1184,16 @@ VariableDeclarator2:
         vector<ASTNode*> s;
         s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
         delete $1;
-        s.push_back(makeLeaf("="));
         s.push_back($3);
-        $$ = makeNode("VariableDeclarator2", s);
+        $$ = makeNode("=",s);
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' List1 {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
         delete $1;
         s.push_back($3);
-        s.push_back(makeLeaf("="));
         s.push_back($6);
-        $$ = makeNode("VariableDeclarator2", s);
+        $$ = makeNode("=", s);
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 {
         vector<ASTNode*> s;
@@ -1275,9 +1201,8 @@ VariableDeclarator2:
         delete $1;
         s.push_back($3);
         s.push_back($6);
-        s.push_back(makeLeaf("="));
         s.push_back($9);
-        $$ = makeNode("VariableDeclarator2", s);
+        $$ = makeNode("=", s);
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3 {
         vector<ASTNode*> s;
@@ -1286,9 +1211,8 @@ VariableDeclarator2:
         s.push_back($3);
         s.push_back($6);
         s.push_back($9);
-        s.push_back(makeLeaf("="));
         s.push_back($12);
-        $$ = makeNode("VariableDeclarator2", s);
+        $$ = makeNode("=", s);
     }
 ;
 
