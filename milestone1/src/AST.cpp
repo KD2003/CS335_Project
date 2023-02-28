@@ -11,13 +11,6 @@ void endAST(){
 	fprintf(dotfile, "}\n");
 }
 
-
-void insertAttr(vector<stuff> &s, ASTNode* nod){
-	stuff d;
-	d.node = nod;
-	s.push_back(d);
-}
-
 ASTNode *makeLeaf(string str){
 	//making leaf node and printing it in dot file
 	ASTNode *node = new ASTNode;
@@ -41,7 +34,7 @@ ASTNode *makeLeaf(string str){
 	return node;
 }
 
-ASTNode *makeNode(string st, vector<stuff> &s){
+ASTNode *makeNode(string st, vector<ASTNode*> &s){
 	//making node and printing it in dot file
 	ASTNode *node = new ASTNode;
 	node->node_name = st;
@@ -49,13 +42,10 @@ ASTNode *makeNode(string st, vector<stuff> &s){
 
 	fprintf(dotfile, "\t%lu [label=\"%s\"];\n", node->node_id, node->node_name.c_str());
 
-	int j=0;
 	for(int i=0; i<s.size(); ++i){
-		if(s[i].node ){
-			fprintf(dotfile, "\t%lu -> %lu;\n", node->node_id, s[i].node->node_id);
+		if(s[i]){
+			fprintf(dotfile, "\t%lu -> %lu;\n", node->node_id, s[i]->node_id);
 		}
 	}
-
 	return node;
-
 }

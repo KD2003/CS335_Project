@@ -8,13 +8,8 @@ typedef struct{
 	string node_name;
 }ASTNode;
 
-typedef struct{
-	ASTNode* node;
-}stuff;
-
 void beginAST();
 void endAST();
 
-void insertAttr(vector<stuff>&, ASTNode*);
 ASTNode *makeLeaf(string);
-ASTNode *makeNode(string , vector<stuff>&);
+ASTNode *makeNode(string , vector<ASTNode*>&);

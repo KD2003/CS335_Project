@@ -1697,9 +1697,9 @@ yyreduce:
   case 2: /* prog: ImportList ClassDeclarationList  */
 #line 32 "parser.y"
                                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("prog", s);
         }
 #line 1706 "parser.tab.c"
@@ -1708,9 +1708,9 @@ yyreduce:
   case 3: /* ImportList: ImportList Imports  */
 #line 41 "parser.y"
                         {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ImportList", s);
     }
 #line 1717 "parser.tab.c"
@@ -1727,9 +1727,9 @@ yyreduce:
   case 5: /* ClassDeclarationList: ClassDeclarationList ClassDeclaration  */
 #line 53 "parser.y"
                                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassDeclarationList", s);
     }
 #line 1736 "parser.tab.c"
@@ -1746,9 +1746,9 @@ yyreduce:
   case 7: /* Imports: KEY_import IDENdotIDEN ';'  */
 #line 65 "parser.y"
                                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("import"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("import"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("Imports", s);
     }
 #line 1755 "parser.tab.c"
@@ -1757,10 +1757,10 @@ yyreduce:
   case 8: /* Imports: KEY_import KEY_static IDENdotIDEN ';'  */
 #line 71 "parser.y"
                                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("import"));
-        insertAttr(s, makeLeaf("static"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("import"));
+        s.push_back(makeLeaf("static"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("Imports", s);
     }
 #line 1767 "parser.tab.c"
@@ -1769,10 +1769,10 @@ yyreduce:
   case 9: /* Imports: KEY_import IDENdotIDEN '.' '*' ';'  */
 #line 78 "parser.y"
                                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("import"));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s,makeLeaf("*"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("import"));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back(makeLeaf("*"));
         
         (yyval.ptr) = makeNode("Imports", s);   
     }
@@ -1782,10 +1782,10 @@ yyreduce:
   case 10: /* Imports: KEY_import KEY_static IDENdotIDEN '.' '*' ';'  */
 #line 86 "parser.y"
                                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("import"));
-        insertAttr(s, makeLeaf("static"));
-        insertAttr(s,(yyvsp[-3].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("import"));
+        s.push_back(makeLeaf("static"));
+        s.push_back((yyvsp[-3].ptr));
         delete (yyvsp[-3].ptr);
         (yyval.ptr) = makeNode("Imports", s);
     }
@@ -1819,8 +1819,8 @@ yyreduce:
   case 14: /* PrimitiveType: INTTYPE  */
 #line 110 "parser.y"
                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("PrimitiveType", s);
     }
@@ -1830,8 +1830,8 @@ yyreduce:
   case 15: /* PrimitiveType: FPTYPE  */
 #line 116 "parser.y"
                    {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("PrimitiveType", s);
     }
@@ -1841,8 +1841,8 @@ yyreduce:
   case 16: /* PrimitiveType: BOOLTYPE  */
 #line 122 "parser.y"
                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("PrimitiveType", s);
     }
@@ -1852,9 +1852,9 @@ yyreduce:
   case 17: /* IDENdotIDEN: IDENdotIDEN '.' IDENTIFIER  */
 #line 131 "parser.y"
                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("IDENdotIDEN", s);
     }
@@ -1864,8 +1864,8 @@ yyreduce:
   case 18: /* IDENdotIDEN: IDENTIFIER  */
 #line 138 "parser.y"
                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("IDENdotIDEN", s);
     }
@@ -1875,8 +1875,8 @@ yyreduce:
   case 19: /* PublicPrivateStatic: KEY_public  */
 #line 147 "parser.y"
                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("public"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("public"));
         (yyval.ptr) = makeNode("PublicPrivateStatic", s);
     }
 #line 1883 "parser.tab.c"
@@ -1885,8 +1885,8 @@ yyreduce:
   case 20: /* PublicPrivateStatic: KEY_private  */
 #line 152 "parser.y"
                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("private"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("private"));
         (yyval.ptr) = makeNode("PublicPrivateStatic", s);
     }
 #line 1893 "parser.tab.c"
@@ -1895,8 +1895,8 @@ yyreduce:
   case 21: /* PublicPrivateStatic: KEY_static  */
 #line 157 "parser.y"
                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("static"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("static"));
         (yyval.ptr) = makeNode("PublicPrivateStatic", s);
     }
 #line 1903 "parser.tab.c"
@@ -1959,8 +1959,8 @@ yyreduce:
   case 29: /* PrimaryNoNewArray: LITERAL  */
 #line 197 "parser.y"
                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("Literal"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("Literal"));
         (yyval.ptr) = makeNode("PrimaryNoNewArray", s);
     }
 #line 1967 "parser.tab.c"
@@ -1969,8 +1969,8 @@ yyreduce:
   case 30: /* PrimaryNoNewArray: KEY_this  */
 #line 203 "parser.y"
                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("this"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("this"));
         (yyval.ptr) = makeNode("PrimaryNoNewArray", s);
     }
 #line 1977 "parser.tab.c"
@@ -1979,9 +1979,9 @@ yyreduce:
   case 31: /* PrimaryNoNewArray: IDENdotIDEN '.' KEY_this  */
 #line 208 "parser.y"
                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("this"));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("this"));
         
         (yyval.ptr) = makeNode("PrimaryNoNewArray", s);
     }
@@ -2031,11 +2031,11 @@ yyreduce:
   case 37: /* ClassInstanceCreationExpression: KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')' ClassBody  */
 #line 233 "parser.y"
                                                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("new"));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("new"));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassInstanceCreationExpression", s);
     }
 #line 2042 "parser.tab.c"
@@ -2044,10 +2044,10 @@ yyreduce:
   case 38: /* ClassInstanceCreationExpression: KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'  */
 #line 241 "parser.y"
                                                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("new"));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("new"));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ClassInstanceCreationExpression", s);
     }
 #line 2054 "parser.tab.c"
@@ -2072,9 +2072,9 @@ yyreduce:
   case 41: /* FieldAccess: Primary '.' IDENTIFIER  */
 #line 260 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         
         (yyval.ptr) = makeNode("FieldAccess", s);
@@ -2085,9 +2085,9 @@ yyreduce:
   case 42: /* FieldAccess: KEY_super '.' IDENTIFIER  */
 #line 268 "parser.y"
                                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("super"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("super"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("FieldAccess", s);
     }
@@ -2097,10 +2097,10 @@ yyreduce:
   case 43: /* FieldAccess: IDENdotIDEN '.' KEY_super '.' IDENTIFIER  */
 #line 275 "parser.y"
                                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, makeLeaf("super"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back(makeLeaf("super"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) + ")"));
         delete (yyvsp[0].st);
         
         (yyval.ptr) = makeNode("FieldAccess", s);
@@ -2111,9 +2111,9 @@ yyreduce:
   case 44: /* ArrayAccess: IDENdotIDEN '[' Expression ']'  */
 #line 287 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ArrayAccess", s);
     }
 #line 2120 "parser.tab.c"
@@ -2122,9 +2122,9 @@ yyreduce:
   case 45: /* ArrayAccess: PrimaryNoNewArray '[' Expression ']'  */
 #line 293 "parser.y"
                                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ArrayAccess", s);
     }
 #line 2131 "parser.tab.c"
@@ -2133,9 +2133,9 @@ yyreduce:
   case 46: /* MethodInvocation: IDENdotIDEN '(' Zeroorone_ArgumentList ')'  */
 #line 302 "parser.y"
                                                         {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[-1].ptr));
         
         
         (yyval.ptr) = makeNode("MethodInvocation", s);
@@ -2146,11 +2146,11 @@ yyreduce:
   case 47: /* MethodInvocation: Primary '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'  */
 #line 310 "parser.y"
                                                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-5].ptr));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-5].ptr));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-1].ptr));
         
         
         
@@ -2162,11 +2162,11 @@ yyreduce:
   case 48: /* MethodInvocation: KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'  */
 #line 321 "parser.y"
                                                                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("super"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("super"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-1].ptr));
         
         
         
@@ -2178,12 +2178,12 @@ yyreduce:
   case 49: /* MethodInvocation: IDENdotIDEN '.' KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'  */
 #line 332 "parser.y"
                                                                                    {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-7].ptr));
-        insertAttr(s, makeLeaf("super"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-7].ptr));
+        s.push_back(makeLeaf("super"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) + ")"));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("MethodInvocation", s);   
     }
 #line 2190 "parser.tab.c"
@@ -2192,9 +2192,9 @@ yyreduce:
   case 50: /* ArgumentList: ArgumentList ',' Expression  */
 #line 344 "parser.y"
                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ArguementList", s);
@@ -2213,11 +2213,11 @@ yyreduce:
   case 52: /* ArrayCreationExpression: KEY_new PrimitiveType DimExpr Dims  */
 #line 358 "parser.y"
                                             {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("new"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("new"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         
         
         
@@ -2229,10 +2229,10 @@ yyreduce:
   case 53: /* ArrayCreationExpression: KEY_new PrimitiveType DimExpr  */
 #line 369 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("new"));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("new"));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ArrayCreationExpression", s);
@@ -2243,11 +2243,11 @@ yyreduce:
   case 54: /* ArrayCreationExpression: KEY_new IDENdotIDEN DimExpr Dims  */
 #line 378 "parser.y"
                                             {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("new"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("new"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         
         
         
@@ -2259,10 +2259,10 @@ yyreduce:
   case 55: /* ArrayCreationExpression: KEY_new IDENdotIDEN DimExpr  */
 #line 389 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("new"));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("new"));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ArrayCreationExpression", s);
@@ -2273,9 +2273,9 @@ yyreduce:
   case 56: /* DimExpr: DimExpr '[' Expression ']'  */
 #line 402 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[-1].ptr));
         
         
         (yyval.ptr) = makeNode("DimExpr", s);
@@ -2286,8 +2286,8 @@ yyreduce:
   case 57: /* DimExpr: '[' Expression ']'  */
 #line 410 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
         
         (yyval.ptr) = makeNode("DimExpr", s);
     }
@@ -2321,10 +2321,10 @@ yyreduce:
   case 61: /* Assignment: LeftHandSide ASSIGNOP Expression  */
 #line 434 "parser.y"
                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2336,10 +2336,10 @@ yyreduce:
   case 62: /* Assignment: LeftHandSide '=' Expression  */
 #line 444 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("="));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("="));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("Assignment", s);
@@ -2358,12 +2358,12 @@ yyreduce:
   case 64: /* ConditionalExpression: ConditionalOrExpression '?' Expression ':' ConditionalExpression  */
 #line 459 "parser.y"
                                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, makeLeaf("?"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(":"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back(makeLeaf("?"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(":"));
+        s.push_back((yyvsp[0].ptr));
         
         
         
@@ -2383,10 +2383,10 @@ yyreduce:
   case 66: /* ConditionalOrExpression: ConditionalOrExpression CONDOR ConditionalAndExpression  */
 #line 477 "parser.y"
                                                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("||"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("||"));
+        s.push_back((yyvsp[0].ptr));
         
         
         
@@ -2406,10 +2406,10 @@ yyreduce:
   case 68: /* ConditionalAndExpression: ConditionalAndExpression CONDAND InclusiveOrExpression  */
 #line 493 "parser.y"
                                                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("&&"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("&&"));
+        s.push_back((yyvsp[0].ptr));
         
         
         
@@ -2429,10 +2429,10 @@ yyreduce:
   case 70: /* AndExpression: AndExpression '&' EqualityExpression  */
 #line 509 "parser.y"
                                                 {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("&"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("&"));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("AndExpression", s);
@@ -2451,10 +2451,10 @@ yyreduce:
   case 72: /* ExclusiveOrExpression: ExclusiveOrExpression '^' AndExpression  */
 #line 524 "parser.y"
                                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("^"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("^"));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("ExclusiveOrExpression", s);
@@ -2473,10 +2473,10 @@ yyreduce:
   case 74: /* InclusiveOrExpression: InclusiveOrExpression '|' ExclusiveOrExpression  */
 #line 539 "parser.y"
                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("|"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("|"));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("InclusiveOrExpression", s);
@@ -2495,10 +2495,10 @@ yyreduce:
   case 76: /* EqualityExpression: EqualityExpression EQALITYOP RelationalExpression  */
 #line 554 "parser.y"
                                                         {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2518,10 +2518,10 @@ yyreduce:
   case 78: /* RelationalExpression: RelationalExpression RELATIONOP ShiftExpression  */
 #line 570 "parser.y"
                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2541,10 +2541,10 @@ yyreduce:
   case 80: /* ShiftExpression: ShiftExpression SHIFTOP AdditiveExpression  */
 #line 586 "parser.y"
                                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2564,10 +2564,10 @@ yyreduce:
   case 82: /* AdditiveExpression: AdditiveExpression ADDOP MultiplicativeExpression  */
 #line 602 "parser.y"
                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2587,10 +2587,10 @@ yyreduce:
   case 84: /* MultiplicativeExpression: MultiplicativeExpression MULTOP UnaryExpression  */
 #line 618 "parser.y"
                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         
@@ -2602,9 +2602,9 @@ yyreduce:
   case 85: /* UnaryExpression: ADDOP2 UnaryExpression  */
 #line 631 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         (yyval.ptr) = makeNode("UnaryExpression", s);
@@ -2615,9 +2615,9 @@ yyreduce:
   case 86: /* UnaryExpression: ADDOP UnaryExpression  */
 #line 639 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         (yyval.ptr) = makeNode("UnaryExpression", s);
@@ -2636,8 +2636,8 @@ yyreduce:
   case 88: /* UnaryExpression: CastExpression  */
 #line 650 "parser.y"
                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[0].ptr));
         
         (yyval.ptr) = makeNode("UnaryExpression", s);
     }
@@ -2655,9 +2655,9 @@ yyreduce:
   case 90: /* UnaryExpressionNotPlusMinus: UNARYOP UnaryExpression  */
 #line 662 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
+        s.push_back((yyvsp[0].ptr));
         delete (yyvsp[-1].st);
         
         (yyval.ptr) = makeNode("UnaryExpressionNotPlus", s);
@@ -2668,9 +2668,9 @@ yyreduce:
   case 91: /* CastExpression: '(' PrimitiveType ')' UnaryExpression  */
 #line 673 "parser.y"
                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         
         
         (yyval.ptr) = makeNode("CastExpression", s);
@@ -2697,9 +2697,9 @@ yyreduce:
   case 94: /* PostfixExpression: PostfixExpression ADDOP2  */
 #line 690 "parser.y"
                                     {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back(makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         
         (yyval.ptr) = makeNode("PostfixExpression", s);
@@ -2718,9 +2718,9 @@ yyreduce:
   case 96: /* BlockStatements: BlockStatements BlockStatement  */
 #line 710 "parser.y"
                                    {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("BlockStatements", s);
     }
 #line 2727 "parser.tab.c"
@@ -2753,9 +2753,9 @@ yyreduce:
   case 100: /* LocalVariableDeclaration: LocalVariableType VariableDeclaratorList  */
 #line 731 "parser.y"
                                              {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("LocalVariableDeclaration", s);
     }
 #line 2762 "parser.tab.c"
@@ -2772,8 +2772,8 @@ yyreduce:
   case 102: /* LocalVariableType: KEY_VAR  */
 #line 743 "parser.y"
               {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("var"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("var"));
         (yyval.ptr) = makeNode("LocalVariableType", s);
     }
 #line 2780 "parser.tab.c"
@@ -2790,11 +2790,11 @@ yyreduce:
   case 104: /* Statement: IDENTIFIER ':' Statement  */
 #line 754 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s, makeLeaf(":"));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back(makeLeaf(":"));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2801 "parser.tab.c"
@@ -2803,10 +2803,10 @@ yyreduce:
   case 105: /* Statement: KEY_if '(' Expression ')' Statement  */
 #line 762 "parser.y"
                                           {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("if"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("if"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2813 "parser.tab.c"
@@ -2815,12 +2815,12 @@ yyreduce:
   case 106: /* Statement: KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement  */
 #line 769 "parser.y"
                                                                       {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("if"));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("else"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("if"));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("else"));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2827 "parser.tab.c"
@@ -2829,10 +2829,10 @@ yyreduce:
   case 107: /* Statement: KEY_while '(' Expression ')' Statement  */
 #line 778 "parser.y"
                                              {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("while"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("while"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Statement", s);
     }
 #line 2839 "parser.tab.c"
@@ -2857,11 +2857,11 @@ yyreduce:
   case 110: /* StatementNoShortIf: IDENTIFIER ':' StatementNoShortIf  */
 #line 794 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s,makeLeaf(":"));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back(makeLeaf(":"));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementNoShortIf", s);
     }
 #line 2868 "parser.tab.c"
@@ -2870,12 +2870,12 @@ yyreduce:
   case 111: /* StatementNoShortIf: KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf  */
 #line 802 "parser.y"
                                                                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("if"));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf("else"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("if"));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf("else"));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementNoShortIf", s);
     }
 #line 2882 "parser.tab.c"
@@ -2884,10 +2884,10 @@ yyreduce:
   case 112: /* StatementNoShortIf: KEY_while '(' Expression ')' StatementNoShortIf  */
 #line 811 "parser.y"
                                                       {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("while"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("while"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementNoShortIf", s);
     }
 #line 2894 "parser.tab.c"
@@ -2944,8 +2944,8 @@ yyreduce:
   case 119: /* StatementWithoutTrailingSubstatement: KEY_return ';'  */
 #line 839 "parser.y"
                      {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("return"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("return"));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2952 "parser.tab.c"
@@ -2954,9 +2954,9 @@ yyreduce:
   case 120: /* StatementWithoutTrailingSubstatement: KEY_return Expression ';'  */
 #line 844 "parser.y"
                                 {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("return"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("return"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2963 "parser.tab.c"
@@ -2965,9 +2965,9 @@ yyreduce:
   case 121: /* StatementWithoutTrailingSubstatement: KEY_yield Expression ';'  */
 #line 850 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("yield"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("yield"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2974 "parser.tab.c"
@@ -2976,9 +2976,9 @@ yyreduce:
   case 122: /* StatementWithoutTrailingSubstatement: KEY_throw Expression ';'  */
 #line 856 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("throw"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("throw"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2985 "parser.tab.c"
@@ -2987,10 +2987,10 @@ yyreduce:
   case 123: /* StatementWithoutTrailingSubstatement: KEY_sync '(' Expression ')' Block  */
 #line 862 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("sync"));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("sync"));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementWithoutTrailingSubstatement", s);
     }
 #line 2997 "parser.tab.c"
@@ -3015,8 +3015,8 @@ yyreduce:
   case 126: /* StatementExpression: ADDOP2 UnaryExpression  */
 #line 878 "parser.y"
                              {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
         delete (yyvsp[-1].st);
         (yyval.ptr) = makeNode("StatementExpression", s);
     }
@@ -3026,9 +3026,9 @@ yyreduce:
   case 127: /* StatementExpression: PostfixExpression ADDOP2  */
 #line 884 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[0].st)));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back(makeLeaf(*(yyvsp[0].st)));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("StatementExpression", s);
     }
@@ -3062,9 +3062,9 @@ yyreduce:
   case 131: /* AssertStatement: KEY_assert Expression ';'  */
 #line 907 "parser.y"
                               {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("assert"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("assert"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("AssertStatement", s);
     }
 #line 3071 "parser.tab.c"
@@ -3073,11 +3073,11 @@ yyreduce:
   case 132: /* AssertStatement: KEY_assert Expression ':' Expression ';'  */
 #line 913 "parser.y"
                                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("assert"));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, makeLeaf(":"));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("assert"));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back(makeLeaf(":"));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("AssertStatement", s);
     }
 #line 3084 "parser.tab.c"
@@ -3086,9 +3086,9 @@ yyreduce:
   case 133: /* BreakContinueStatement: KEY_break IDENTIFIER ';'  */
 #line 924 "parser.y"
                              {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("break"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("break"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
         delete (yyvsp[-1].st);
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
@@ -3098,8 +3098,8 @@ yyreduce:
   case 134: /* BreakContinueStatement: KEY_break ';'  */
 #line 931 "parser.y"
                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("break"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("break"));
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
 #line 3106 "parser.tab.c"
@@ -3108,9 +3108,9 @@ yyreduce:
   case 135: /* BreakContinueStatement: KEY_continue IDENTIFIER ';'  */
 #line 936 "parser.y"
                                   {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("continue"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("continue"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
         delete (yyvsp[-1].st);
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
@@ -3120,8 +3120,8 @@ yyreduce:
   case 136: /* BreakContinueStatement: KEY_continue ';'  */
 #line 943 "parser.y"
                        {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("continue"));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("continue"));
         (yyval.ptr) = makeNode("BreakContinueStatement", s);
     }
 #line 3128 "parser.tab.c"
@@ -3130,10 +3130,10 @@ yyreduce:
   case 137: /* ForStatement: KEY_for '(' ForInit ';' ';' ')' Statement  */
 #line 951 "parser.y"
                                               {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3140 "parser.tab.c"
@@ -3142,11 +3142,11 @@ yyreduce:
   case 138: /* ForStatement: KEY_for '(' ForInit ';' Expression ';' ')' Statement  */
 #line 958 "parser.y"
                                                            {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-5].ptr));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-5].ptr));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3153 "parser.tab.c"
@@ -3155,11 +3155,11 @@ yyreduce:
   case 139: /* ForStatement: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement  */
 #line 966 "parser.y"
                                                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-5].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-5].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3166 "parser.tab.c"
@@ -3168,11 +3168,11 @@ yyreduce:
   case 140: /* ForStatement: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement  */
 #line 974 "parser.y"
                                                                                    {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-6].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-6].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatement", s);
     }
 #line 3179 "parser.tab.c"
@@ -3181,10 +3181,10 @@ yyreduce:
   case 141: /* ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf  */
 #line 986 "parser.y"
                                                        {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3191 "parser.tab.c"
@@ -3193,11 +3193,11 @@ yyreduce:
   case 142: /* ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf  */
 #line 993 "parser.y"
                                                                     {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-5].ptr));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-5].ptr));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3204 "parser.tab.c"
@@ -3206,11 +3206,11 @@ yyreduce:
   case 143: /* ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf  */
 #line 1001 "parser.y"
                                                                                  {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-5].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-5].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3217 "parser.tab.c"
@@ -3219,12 +3219,12 @@ yyreduce:
   case 144: /* ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf  */
 #line 1009 "parser.y"
                                                                                             {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("for"));
-        insertAttr(s, (yyvsp[-6].ptr));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("for"));
+        s.push_back((yyvsp[-6].ptr));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForStatementNoShortIf", s);
     }
 #line 3231 "parser.tab.c"
@@ -3233,8 +3233,8 @@ yyreduce:
   case 145: /* ForInit: StatementExpressionList  */
 #line 1022 "parser.y"
                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForInit", s);
     }
 #line 3241 "parser.tab.c"
@@ -3243,8 +3243,8 @@ yyreduce:
   case 146: /* ForInit: LocalVariableDeclaration  */
 #line 1027 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ForInit", s);
     }
 #line 3251 "parser.tab.c"
@@ -3261,9 +3261,9 @@ yyreduce:
   case 148: /* StatementExpressionList: StatementExpressionList ',' StatementExpression  */
 #line 1038 "parser.y"
                                                      {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("StatementExpressionList", s);
     }
 #line 3270 "parser.tab.c"
@@ -3288,12 +3288,12 @@ yyreduce:
   case 151: /* NormalClassDeclaration: Modifiers KEY_class IDENTIFIER ClassBody  */
 #line 1077 "parser.y"
                                              {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, makeLeaf("class"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back(makeLeaf("class"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-1].st)+")" ));
         delete (yyvsp[-1].st);
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3300 "parser.tab.c"
@@ -3302,13 +3302,13 @@ yyreduce:
   case 152: /* NormalClassDeclaration: Modifiers KEY_class IDENTIFIER ClassExtends ClassBody  */
 #line 1086 "parser.y"
                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, makeLeaf("class"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back(makeLeaf("class"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st) ;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3315 "parser.tab.c"
@@ -3317,13 +3317,13 @@ yyreduce:
   case 153: /* NormalClassDeclaration: Modifiers KEY_class IDENTIFIER ClassPermits ClassBody  */
 #line 1096 "parser.y"
                                                             {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, makeLeaf("class"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back(makeLeaf("class"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3330 "parser.tab.c"
@@ -3332,14 +3332,14 @@ yyreduce:
   case 154: /* NormalClassDeclaration: Modifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody  */
 #line 1106 "parser.y"
                                                                          {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-5].ptr));
-        insertAttr(s, makeLeaf("class"));
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-5].ptr));
+        s.push_back(makeLeaf("class"));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("NormalClassDeclaration", s);
     }
 #line 3346 "parser.tab.c"
@@ -3348,9 +3348,9 @@ yyreduce:
   case 155: /* ClassExtends: KEY_extends ClassType  */
 #line 1119 "parser.y"
                           {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("extends"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("extends"));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassExtends", s);
     }
 #line 3357 "parser.tab.c"
@@ -3359,10 +3359,10 @@ yyreduce:
   case 156: /* ClassPermits: KEY_permits IDENdotIDEN cTypeName  */
 #line 1127 "parser.y"
                                       {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("permits"));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("permits"));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassPermits", s);
     }
 #line 3369 "parser.tab.c"
@@ -3371,9 +3371,9 @@ yyreduce:
   case 157: /* cTypeName: cTypeName ',' IDENdotIDEN  */
 #line 1137 "parser.y"
                               {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("cTypeName", s);
     }
 #line 3380 "parser.tab.c"
@@ -3398,9 +3398,9 @@ yyreduce:
   case 160: /* ClassBodyDeclarations: ClassBodyDeclarations ClassBodyDeclaration  */
 #line 1154 "parser.y"
                                                {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassBodyDeclarations", s);
     }
 #line 3407 "parser.tab.c"
@@ -3417,10 +3417,10 @@ yyreduce:
   case 162: /* ClassBodyDeclaration: Modifiers Type VariableDeclaratorList ';'  */
 #line 1165 "parser.y"
                                               {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("ClassBodyDeclaration", s);
     }
 #line 3427 "parser.tab.c"
@@ -3453,10 +3453,10 @@ yyreduce:
   case 166: /* ClassBodyDeclaration: Modifiers IdenPara Block  */
 #line 1181 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ClassBodyDeclaration", s);
     }
 #line 3463 "parser.tab.c"
@@ -3473,9 +3473,9 @@ yyreduce:
   case 168: /* VariableDeclaratorList: VariableDeclaratorList ',' VariableDeclarator  */
 #line 1194 "parser.y"
                                                   {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclaratorList", s);
     }
 #line 3482 "parser.tab.c"
@@ -3522,8 +3522,8 @@ yyreduce:
   case 174: /* VariableDeclarator1: IDENTIFIER  */
 #line 1222 "parser.y"
                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) +")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st) +")" ));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
@@ -3533,10 +3533,10 @@ yyreduce:
   case 175: /* VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']'  */
 #line 1228 "parser.y"
                                              {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) +")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st) +")" ));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
 #line 3543 "parser.tab.c"
@@ -3545,11 +3545,11 @@ yyreduce:
   case 176: /* VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']'  */
 #line 1235 "parser.y"
                                                                          {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-6].st) +")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-6].st) +")" ));
         delete (yyvsp[-6].st);
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
 #line 3556 "parser.tab.c"
@@ -3558,12 +3558,12 @@ yyreduce:
   case 177: /* VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']'  */
 #line 1243 "parser.y"
                                                                                                      {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-9].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-9].st)+")" ));
         delete (yyvsp[-9].st);
-        insertAttr(s, (yyvsp[-7].ptr));
-        insertAttr(s, (yyvsp[-4].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-7].ptr));
+        s.push_back((yyvsp[-4].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator1", s);
     }
 #line 3570 "parser.tab.c"
@@ -3572,11 +3572,11 @@ yyreduce:
   case 178: /* VariableDeclarator2: IDENTIFIER '=' Expression  */
 #line 1255 "parser.y"
                               {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
-        insertAttr(s, makeLeaf("="));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back(makeLeaf("="));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3583 "parser.tab.c"
@@ -3585,12 +3585,12 @@ yyreduce:
   case 179: /* VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' List1  */
 #line 1263 "parser.y"
                                                        {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-5].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-5].st)+")" ));
         delete (yyvsp[-5].st);
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, makeLeaf("="));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back(makeLeaf("="));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3597 "parser.tab.c"
@@ -3599,13 +3599,13 @@ yyreduce:
   case 180: /* VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2  */
 #line 1272 "parser.y"
                                                                                    {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-8].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-8].st)+")" ));
         delete (yyvsp[-8].st);
-        insertAttr(s, (yyvsp[-6].ptr));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, makeLeaf("="));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[-6].ptr));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back(makeLeaf("="));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3612 "parser.tab.c"
@@ -3614,14 +3614,14 @@ yyreduce:
   case 181: /* VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3  */
 #line 1282 "parser.y"
                                                                                                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-11].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-11].st)+")" ));
         delete (yyvsp[-11].st);
-        insertAttr(s, (yyvsp[-9].ptr));
-        insertAttr(s, (yyvsp[-6].ptr));
-        insertAttr(s, (yyvsp[-3].ptr));
-        insertAttr(s, makeLeaf("="));
-        insertAttr(s, (yyvsp[0].ptr));
+        s.push_back((yyvsp[-9].ptr));
+        s.push_back((yyvsp[-6].ptr));
+        s.push_back((yyvsp[-3].ptr));
+        s.push_back(makeLeaf("="));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("VariableDeclarator2", s);
     }
 #line 3628 "parser.tab.c"
@@ -3638,9 +3638,9 @@ yyreduce:
   case 183: /* ArrEle1: ArrEle1 ',' Expression  */
 #line 1302 "parser.y"
                            {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ArrEle1", s);
     }
 #line 3647 "parser.tab.c"
@@ -3665,9 +3665,9 @@ yyreduce:
   case 186: /* ArrEle2: ArrEle2 ',' List1  */
 #line 1320 "parser.y"
                       {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ArrEle2", s);
     }
 #line 3674 "parser.tab.c"
@@ -3692,9 +3692,9 @@ yyreduce:
   case 189: /* ArrEle3: ArrEle3 ',' List2  */
 #line 1338 "parser.y"
                       {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("ArrEle3", s);
     }
 #line 3701 "parser.tab.c"
@@ -3711,10 +3711,10 @@ yyreduce:
   case 191: /* MethodDeclaration: Modifiers MethodHeader MethodBody  */
 #line 1350 "parser.y"
                                       {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("MethodDeclaration", s);
     }
 #line 3721 "parser.tab.c"
@@ -3723,9 +3723,9 @@ yyreduce:
   case 192: /* MethodHeader: Type Methodeclarator  */
 #line 1360 "parser.y"
                          {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("MethodHeader", s);
     }
 #line 3732 "parser.tab.c"
@@ -3734,9 +3734,9 @@ yyreduce:
   case 193: /* MethodHeader: KEY_void Methodeclarator  */
 #line 1366 "parser.y"
                                {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("void"));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("void"));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("MethodHeader", s);
     }
 #line 3743 "parser.tab.c"
@@ -3761,10 +3761,10 @@ yyreduce:
   case 196: /* IdenPara: IDENTIFIER '(' formalparameters ')'  */
 #line 1384 "parser.y"
                                         {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-3].st)+")" ));
         delete (yyvsp[-3].st);
-        insertAttr(s, (yyvsp[-1].ptr));
+        s.push_back((yyvsp[-1].ptr));
         (yyval.ptr) = makeNode("IdenPara", s);
     }
 #line 3771 "parser.tab.c"
@@ -3773,8 +3773,8 @@ yyreduce:
   case 197: /* IdenPara: IDENTIFIER '(' ')'  */
 #line 1391 "parser.y"
                          {
-        vector<stuff> s;
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[-2].st)+")" ));
         delete (yyvsp[-2].st);
         (yyval.ptr) = makeNode("IdenPara", s);
     }
@@ -3784,9 +3784,9 @@ yyreduce:
   case 198: /* formalparameters: formalparameters ',' formalparameter  */
 #line 1399 "parser.y"
                                          {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("formalparameters", s);
     }
 #line 3793 "parser.tab.c"
@@ -3803,9 +3803,9 @@ yyreduce:
   case 200: /* formalparameter: Type VariableDeclarator1  */
 #line 1411 "parser.y"
                              {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("formalparameter", s);
     }
 #line 3812 "parser.tab.c"
@@ -3814,11 +3814,11 @@ yyreduce:
   case 201: /* formalparameter: Type DOT3 IDENTIFIER  */
 #line 1417 "parser.y"
                            {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-2].ptr));
-        insertAttr(s, makeLeaf(*(yyvsp[-1].st)));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-2].ptr));
+        s.push_back(makeLeaf(*(yyvsp[-1].st)));
         delete (yyvsp[-1].st);
-        insertAttr(s, makeLeaf("IDENTIFIER (" + *(yyvsp[0].st)+")" ));
+        s.push_back(makeLeaf("IDENTIFIER (" + *(yyvsp[0].st)+")" ));
         delete (yyvsp[0].st);
         (yyval.ptr) = makeNode("formalparameter", s);
     }
@@ -3844,9 +3844,9 @@ yyreduce:
   case 204: /* Modifiers: Modifiers PublicPrivateStatic  */
 #line 1438 "parser.y"
                                   {
-        vector<stuff> s;
-        insertAttr(s, (yyvsp[-1].ptr));
-        insertAttr(s, (yyvsp[0].ptr));
+        vector<ASTNode*> s;
+        s.push_back((yyvsp[-1].ptr));
+        s.push_back((yyvsp[0].ptr));
         (yyval.ptr) = makeNode("Modifiers", s);
     }
 #line 3853 "parser.tab.c"
