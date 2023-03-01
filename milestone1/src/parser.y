@@ -92,7 +92,6 @@ Imports:
         s.push_back(makeLeaf("import"));
         s.push_back(makeLeaf("static"));
         s.push_back($3);
-        delete $3;
         $$ = makeNode("Imports", s);
     }
 ;
@@ -344,7 +343,6 @@ ArrayCreationExpression:        // array initiaizer to do
         s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        s.push_back($4);
         $$ = makeNode("ArrayCreationExpression", s);
     }
     | KEY_new PrimitiveType DimExpr     {
@@ -359,7 +357,6 @@ ArrayCreationExpression:        // array initiaizer to do
         s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        s.push_back($4);
         $$ = makeNode("ArrayCreationExpression", s);
     }
     | KEY_new IDENdotIDEN DimExpr       {
@@ -376,14 +373,11 @@ DimExpr:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        
-        
         $$ = makeNode("DimExpr", s);
     }
     | '[' Expression ']'        {
         vector<ASTNode*> s;
         s.push_back($2);
-        
         $$ = makeNode("DimExpr", s);
     }
 ;
@@ -407,18 +401,14 @@ Assignment:
     LeftHandSide ASSIGNOP Expression	    {
         vector<ASTNode*> s;
         s.push_back($1);
-        // s.push_back(makeLeaf(*$2));
         s.push_back($3);
-        delete $2;
         $$ = makeNode(*$2, s);
-    }	// or Assignment
+        delete $2;
+    }
     | LeftHandSide '=' Expression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        // s.push_back(makeLeaf("="));
         s.push_back($3);
-        
-        
         $$ = makeNode("=", s);
     }
 ;
@@ -677,10 +667,10 @@ Statement:
     | IDENTIFIER ':' Statement {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
-        delete $1;
         s.push_back(makeLeaf(":"));
         s.push_back($3);
         $$ = makeNode("Statement", s);
+        delete $1;
     }
     | KEY_if '(' Expression ')' Statement {
         vector<ASTNode*> s;
