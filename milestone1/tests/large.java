@@ -2,9 +2,9 @@
 
 public class Life {
 	int length = 10;
-    public void show(boolean[10][10] grid) {
-        // String s = "";
-		// System.out.println(s);
+    public void show(boolean grid[10][10]) {
+        String s = "";
+		System.out.println(s);
 		int a = 10;
     }
     

@@ -1,13 +1,13 @@
 import IO;
 
 class String {
-    char[100] string;
+    char string[100];
     int length;
     IO io;
 
-    String(char[100] string, int length) {
+    String(char string[100], int length) {
         for (int i = 0; i < length; i++) {
-            this.string:[i] = string:[i];
+            this.string[i] = string[i];
         }
         this.length = length;
         this.io = new IO();
@@ -15,7 +15,7 @@ class String {
 
     void print() {
         for (int i = 0; i < length; i++) {
-            io.print_char(string:[i]);
+            io.print_char(string[i]);
         }
         io.print_char('\n');
     }
@@ -26,7 +26,7 @@ class String {
             length = io.scan_int();
         }
         for (int i = 0; i < length; i++) {
-            string:[i] = io.scan_char();
+            string[i] = io.scan_char();
         }
     }
 
@@ -35,7 +35,7 @@ class String {
             return false;
         }
         for (int i = 0; i < length; i++) {
-            if (cmp.string:[i] != string:[i]) {
+            if (cmp.string[i] != string[i]) {
                 return false;
             }
         }
@@ -45,7 +45,7 @@ class String {
 
 class Test {
     void main() {
-        char[100] arr;
+        char arr[100];
 
         String str1 = new String(arr, 0);
         str1.scan();

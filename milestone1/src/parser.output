@@ -259,68 +259,71 @@ Grammar
   178                    | IDENTIFIER '[' zerooroneExpression ']' '=' List1
   179                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+  181                    | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1
+  182                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-  181 List1: '{' ArrEle1 '}'
+  184 List1: '{' ArrEle1 '}'
 
-  182 ArrEle1: ArrEle1 ',' Expression
-  183        | Expression
+  185 ArrEle1: ArrEle1 ',' Expression
+  186        | Expression
 
-  184 List2: '{' ArrEle2 '}'
+  187 List2: '{' ArrEle2 '}'
 
-  185 ArrEle2: ArrEle2 ',' List1
-  186        | List1
+  188 ArrEle2: ArrEle2 ',' List1
+  189        | List1
 
-  187 List3: '{' ArrEle3 '}'
+  190 List3: '{' ArrEle3 '}'
 
-  188 ArrEle3: ArrEle3 ',' List2
-  189        | List2
+  191 ArrEle3: ArrEle3 ',' List2
+  192        | List2
 
-  190 MethodDeclaration: Modifiers MethodHeader MethodBody
+  193 MethodDeclaration: Modifiers MethodHeader MethodBody
 
-  191 MethodHeader: Type Methodeclarator
-  192             | KEY_void Methodeclarator
+  194 MethodHeader: Type Methodeclarator
+  195             | KEY_void Methodeclarator
 
-  193 Methodeclarator: IdenPara Dims
-  194                | IdenPara
+  196 Methodeclarator: IdenPara Dims
+  197                | IdenPara
 
-  195 IdenPara: IDENTIFIER '(' formalparameters ')'
-  196         | IDENTIFIER '(' ')'
+  198 IdenPara: IDENTIFIER '(' formalparameters ')'
+  199         | IDENTIFIER '(' ')'
 
-  197 formalparameters: formalparameters ',' formalparameter
-  198                 | formalparameter
+  200 formalparameters: formalparameters ',' formalparameter
+  201                 | formalparameter
 
-  199 formalparameter: Type VariableDeclarator1
-  200                | Type DOT3 IDENTIFIER
+  202 formalparameter: Type VariableDeclarator1
+  203                | Type DOT3 IDENTIFIER
 
-  201 MethodBody: Block
-  202           | ';'
+  204 MethodBody: Block
+  205           | ';'
 
-  203 Modifiers: Modifiers PublicPrivateStatic
-  204          | ε
+  206 Modifiers: Modifiers PublicPrivateStatic
+  207          | ε
 
 
 Terminals, with rules where they appear
 
     $end (0) 0
     '&' (38) 69
-    '(' (40) 31 36 37 45 46 47 48 90 104 105 106 110 111 122 136 137 138 139 140 141 142 143 195 196
-    ')' (41) 31 36 37 45 46 47 48 90 104 105 106 110 111 122 136 137 138 139 140 141 142 143 195 196
+    '(' (40) 31 36 37 45 46 47 48 90 104 105 106 110 111 122 136 137 138 139 140 141 142 143 198 199
+    ')' (41) 31 36 37 45 46 47 48 90 104 105 106 110 111 122 136 137 138 139 140 141 142 143 198 199
     '*' (42) 8 9
-    ',' (44) 49 147 156 167 182 185 188 197
+    ',' (44) 49 147 156 167 185 188 191 200
     '.' (46) 8 9 16 30 40 41 42 46 47 48
     ':' (58) 63 103 109 131
-    ';' (59) 6 7 8 9 97 114 115 118 119 120 121 130 131 132 133 134 135 136 137 138 139 140 141 142 143 161 163 202
-    '=' (61) 61 177 178 179 180
+    ';' (59) 6 7 8 9 97 114 115 118 119 120 121 130 131 132 133 134 135 136 137 138 139 140 141 142 143 161 163 205
+    '=' (61) 61 177 178 179 180 181 182 183
     '?' (63) 63
-    '[' (91) 24 25 43 44 55 56 174 175 176 178 179 180
-    ']' (93) 24 25 43 44 55 56 174 175 176 178 179 180
+    '[' (91) 24 25 43 44 55 56 174 175 176 178 179 180 181 182 183
+    ']' (93) 24 25 43 44 55 56 174 175 176 178 179 180 181 182 183
     '^' (94) 71
-    '{' (123) 94 158 181 184 187
+    '{' (123) 94 158 184 187 190
     '|' (124) 73
-    '}' (125) 94 158 181 184 187
+    '}' (125) 94 158 184 187 190
     error (256)
     KEYWORD <st> (258)
-    IDENTIFIER <st> (259) 16 17 40 41 42 46 47 48 103 109 132 134 150 151 152 153 173 174 175 176 177 178 179 180 195 196 200
+    IDENTIFIER <st> (259) 16 17 40 41 42 46 47 48 103 109 132 134 150 151 152 153 173 174 175 176 177 178 179 180 181 182 183 198 199 203
     LITERAL <st> (260) 28
     OPERATOR <st> (261)
     INTTYPE <st> (262) 13
@@ -354,11 +357,11 @@ Terminals, with rules where they appear
     KEY_super <st> (290) 41 42 47 48
     KEY_this <st> (291) 29 30
     KEY_class <st> (292) 150 151 152 153
-    KEY_void <st> (293) 192
+    KEY_void <st> (293) 195
     KEY_public <st> (294) 18
-    KEY_new <st> (295) 36 37 51 52 53 54
+    KEY_new <st> (295) 36 37 51 52 53 54 181 182 183
     KEY_static <st> (296) 7 9 20
-    DOT3 <st> (297) 200
+    DOT3 <st> (297) 203
     KEY_private <st> (298) 19
     KEY_import <st> (299) 6 7 8 9
 
@@ -381,16 +384,16 @@ Nonterminals, with rules where they appear
         on right: 2
     Type <ptr> (66)
         on left: 10 11 12
-        on right: 100 161 191 199 200
+        on right: 100 161 194 202 203
     PrimitiveType <ptr> (67)
         on left: 13 14 15
-        on right: 10 22 51 52 90
+        on right: 10 22 51 52 90 181 182 183
     IDENdotIDEN <ptr> (68)
         on left: 16 17
         on right: 6 7 8 9 16 21 30 36 37 42 43 45 48 53 54 92 127 155 156
     PublicPrivateStatic <ptr> (69)
         on left: 18 19 20
-        on right: 203
+        on right: 206
     ClassType <ptr> (70)
         on left: 21
         on right: 12 23 154
@@ -399,7 +402,7 @@ Nonterminals, with rules where they appear
         on right: 11
     Dims <ptr> (72)
         on left: 24 25
-        on right: 22 23 25 51 53 193
+        on right: 22 23 25 51 53 196
     Primary <ptr> (73)
         on left: 26 27
         on right: 40 46 91
@@ -432,7 +435,7 @@ Nonterminals, with rules where they appear
         on right: 51 52 53 54 55
     Expression <ptr> (83)
         on left: 57
-        on right: 31 43 44 49 50 55 56 60 61 63 104 105 106 110 111 119 120 121 122 130 131 137 139 141 143 171 177 182 183
+        on right: 31 43 44 49 50 55 56 60 61 63 104 105 106 110 111 119 120 121 122 130 131 137 139 141 143 171 177 185 186
     AssignmentExpression <ptr> (84)
         on left: 58 59
         on right: 57
@@ -486,7 +489,7 @@ Nonterminals, with rules where they appear
         on right: 88 93 126
     Block <ptr> (101)
         on left: 94
-        on right: 113 122 164 165 201
+        on right: 113 122 164 165 204
     BlockStatements <ptr> (102)
         on left: 95 96
         on right: 94 95
@@ -564,55 +567,55 @@ Nonterminals, with rules where they appear
         on right: 167 168
     zerooroneExpression <ptr> (127)
         on left: 171 172
-        on right: 174 175 176 178 179 180
+        on right: 174 175 176 178 179 180 181 182 183
     VariableDeclarator1 <ptr> (128)
         on left: 173 174 175 176
-        on right: 169 199
+        on right: 169 202
     VariableDeclarator2 <ptr> (129)
-        on left: 177 178 179 180
+        on left: 177 178 179 180 181 182 183
         on right: 170
     List1 <ptr> (130)
-        on left: 181
-        on right: 178 185 186
-    ArrEle1 <ptr> (131)
-        on left: 182 183
-        on right: 181 182
-    List2 <ptr> (132)
         on left: 184
-        on right: 179 188 189
-    ArrEle2 <ptr> (133)
+        on right: 178 181 188 189
+    ArrEle1 <ptr> (131)
         on left: 185 186
         on right: 184 185
-    List3 <ptr> (134)
+    List2 <ptr> (132)
         on left: 187
-        on right: 180
-    ArrEle3 <ptr> (135)
+        on right: 179 182 191 192
+    ArrEle2 <ptr> (133)
         on left: 188 189
         on right: 187 188
-    MethodDeclaration <ptr> (136)
+    List3 <ptr> (134)
         on left: 190
+        on right: 180 183
+    ArrEle3 <ptr> (135)
+        on left: 191 192
+        on right: 190 191
+    MethodDeclaration <ptr> (136)
+        on left: 193
         on right: 166
     MethodHeader <ptr> (137)
-        on left: 191 192
-        on right: 190
+        on left: 194 195
+        on right: 193
     Methodeclarator <ptr> (138)
-        on left: 193 194
-        on right: 191 192
+        on left: 196 197
+        on right: 194 195
     IdenPara <ptr> (139)
-        on left: 195 196
-        on right: 165 193 194
+        on left: 198 199
+        on right: 165 196 197
     formalparameters <ptr> (140)
-        on left: 197 198
-        on right: 195 197
+        on left: 200 201
+        on right: 198 200
     formalparameter <ptr> (141)
-        on left: 199 200
-        on right: 197 198
+        on left: 202 203
+        on right: 200 201
     MethodBody <ptr> (142)
-        on left: 201 202
-        on right: 190
+        on left: 204 205
+        on right: 193
     Modifiers <ptr> (143)
-        on left: 203 204
-        on right: 150 151 152 153 161 165 190 203
+        on left: 206 207
+        on right: 150 151 152 153 161 165 193 206
 
 
 State 0
@@ -639,7 +642,7 @@ State 2
 
     KEY_import  shift, and go to state 4
 
-    $default  reduce using rule 204 (Modifiers)
+    $default  reduce using rule 207 (Modifiers)
 
     ClassDeclarationList    go to state 5
     Imports                 go to state 6
@@ -674,7 +677,7 @@ State 5
     4 ClassDeclarationList: ClassDeclarationList • ClassDeclaration
 
     $end      reduce using rule 1 (prog)
-    $default  reduce using rule 204 (Modifiers)
+    $default  reduce using rule 207 (Modifiers)
 
     ClassDeclaration        go to state 13
     NormalClassDeclaration  go to state 8
@@ -708,7 +711,7 @@ State 9
   151                       | Modifiers • KEY_class IDENTIFIER ClassExtends ClassBody
   152                       | Modifiers • KEY_class IDENTIFIER ClassPermits ClassBody
   153                       | Modifiers • KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody
-  203 Modifiers: Modifiers • PublicPrivateStatic
+  206 Modifiers: Modifiers • PublicPrivateStatic
 
     KEY_class    shift, and go to state 14
     KEY_public   shift, and go to state 15
@@ -785,9 +788,9 @@ State 17
 
 State 18
 
-  203 Modifiers: Modifiers PublicPrivateStatic •
+  206 Modifiers: Modifiers PublicPrivateStatic •
 
-    $default  reduce using rule 203 (Modifiers)
+    $default  reduce using rule 206 (Modifiers)
 
 
 State 19
@@ -970,7 +973,7 @@ State 38
     '{'  shift, and go to state 46
     '}'  shift, and go to state 47
 
-    $default  reduce using rule 204 (Modifiers)
+    $default  reduce using rule 207 (Modifiers)
 
     Block                   go to state 48
     ClassDeclaration        go to state 49
@@ -1086,8 +1089,8 @@ State 52
   153                       | Modifiers • KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody
   161 ClassBodyDeclaration: Modifiers • Type VariableDeclaratorList ';'
   165                     | Modifiers • IdenPara Block
-  190 MethodDeclaration: Modifiers • MethodHeader MethodBody
-  203 Modifiers: Modifiers • PublicPrivateStatic
+  193 MethodDeclaration: Modifiers • MethodHeader MethodBody
+  206 Modifiers: Modifiers • PublicPrivateStatic
 
     IDENTIFIER   shift, and go to state 56
     INTTYPE      shift, and go to state 57
@@ -1185,8 +1188,8 @@ State 55
 State 56
 
    17 IDENdotIDEN: IDENTIFIER •
-  195 IdenPara: IDENTIFIER • '(' formalparameters ')'
-  196         | IDENTIFIER • '(' ')'
+  198 IdenPara: IDENTIFIER • '(' formalparameters ')'
+  199         | IDENTIFIER • '(' ')'
 
     '('  shift, and go to state 110
 
@@ -1216,7 +1219,7 @@ State 59
 
 State 60
 
-  192 MethodHeader: KEY_void • Methodeclarator
+  195 MethodHeader: KEY_void • Methodeclarator
 
     IDENTIFIER  shift, and go to state 111
 
@@ -1227,7 +1230,7 @@ State 60
 State 61
 
   161 ClassBodyDeclaration: Modifiers Type • VariableDeclaratorList ';'
-  191 MethodHeader: Type • Methodeclarator
+  194 MethodHeader: Type • Methodeclarator
 
     IDENTIFIER  shift, and go to state 114
 
@@ -1272,7 +1275,7 @@ State 64
 
 State 65
 
-  190 MethodDeclaration: Modifiers MethodHeader • MethodBody
+  193 MethodDeclaration: Modifiers MethodHeader • MethodBody
 
     ';'  shift, and go to state 123
     '{'  shift, and go to state 46
@@ -1863,8 +1866,8 @@ State 109
 
 State 110
 
-  195 IdenPara: IDENTIFIER '(' • formalparameters ')'
-  196         | IDENTIFIER '(' • ')'
+  198 IdenPara: IDENTIFIER '(' • formalparameters ')'
+  199         | IDENTIFIER '(' • ')'
 
     IDENTIFIER  shift, and go to state 10
     INTTYPE     shift, and go to state 57
@@ -1883,27 +1886,27 @@ State 110
 
 State 111
 
-  195 IdenPara: IDENTIFIER • '(' formalparameters ')'
-  196         | IDENTIFIER • '(' ')'
+  198 IdenPara: IDENTIFIER • '(' formalparameters ')'
+  199         | IDENTIFIER • '(' ')'
 
     '('  shift, and go to state 110
 
 
 State 112
 
-  192 MethodHeader: KEY_void Methodeclarator •
+  195 MethodHeader: KEY_void Methodeclarator •
 
-    $default  reduce using rule 192 (MethodHeader)
+    $default  reduce using rule 195 (MethodHeader)
 
 
 State 113
 
-  193 Methodeclarator: IdenPara • Dims
-  194                | IdenPara •
+  196 Methodeclarator: IdenPara • Dims
+  197                | IdenPara •
 
     '['  shift, and go to state 120
 
-    $default  reduce using rule 194 (Methodeclarator)
+    $default  reduce using rule 197 (Methodeclarator)
 
     Dims  go to state 188
 
@@ -1918,8 +1921,11 @@ State 114
   178                    | IDENTIFIER • '[' zerooroneExpression ']' '=' List1
   179                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
-  195 IdenPara: IDENTIFIER • '(' formalparameters ')'
-  196         | IDENTIFIER • '(' ')'
+  181                    | IDENTIFIER • '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1
+  182                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
+  198 IdenPara: IDENTIFIER • '(' formalparameters ')'
+  199         | IDENTIFIER • '(' ')'
 
     '['  shift, and go to state 189
     '('  shift, and go to state 110
@@ -1960,9 +1966,9 @@ State 118
 
 State 119
 
-  191 MethodHeader: Type Methodeclarator •
+  194 MethodHeader: Type Methodeclarator •
 
-    $default  reduce using rule 191 (MethodHeader)
+    $default  reduce using rule 194 (MethodHeader)
 
 
 State 120
@@ -1994,23 +2000,23 @@ State 122
 
 State 123
 
-  202 MethodBody: ';' •
+  205 MethodBody: ';' •
 
-    $default  reduce using rule 202 (MethodBody)
+    $default  reduce using rule 205 (MethodBody)
 
 
 State 124
 
-  201 MethodBody: Block •
+  204 MethodBody: Block •
 
-    $default  reduce using rule 201 (MethodBody)
+    $default  reduce using rule 204 (MethodBody)
 
 
 State 125
 
-  190 MethodDeclaration: Modifiers MethodHeader MethodBody •
+  193 MethodDeclaration: Modifiers MethodHeader MethodBody •
 
-    $default  reduce using rule 190 (MethodDeclaration)
+    $default  reduce using rule 193 (MethodDeclaration)
 
 
 State 126
@@ -2872,6 +2878,9 @@ State 179
   178                    | IDENTIFIER • '[' zerooroneExpression ']' '=' List1
   179                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+  181                    | IDENTIFIER • '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1
+  182                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
     '['  shift, and go to state 189
     '='  shift, and go to state 190
@@ -2984,15 +2993,15 @@ State 183
 
 State 184
 
-  196 IdenPara: IDENTIFIER '(' ')' •
+  199 IdenPara: IDENTIFIER '(' ')' •
 
-    $default  reduce using rule 196 (IdenPara)
+    $default  reduce using rule 199 (IdenPara)
 
 
 State 185
 
-  199 formalparameter: Type • VariableDeclarator1
-  200                | Type • DOT3 IDENTIFIER
+  202 formalparameter: Type • VariableDeclarator1
+  203                | Type • DOT3 IDENTIFIER
 
     IDENTIFIER  shift, and go to state 242
     DOT3        shift, and go to state 243
@@ -3002,8 +3011,8 @@ State 185
 
 State 186
 
-  195 IdenPara: IDENTIFIER '(' formalparameters • ')'
-  197 formalparameters: formalparameters • ',' formalparameter
+  198 IdenPara: IDENTIFIER '(' formalparameters • ')'
+  200 formalparameters: formalparameters • ',' formalparameter
 
     ')'  shift, and go to state 245
     ','  shift, and go to state 246
@@ -3011,19 +3020,19 @@ State 186
 
 State 187
 
-  198 formalparameters: formalparameter •
+  201 formalparameters: formalparameter •
 
-    $default  reduce using rule 198 (formalparameters)
+    $default  reduce using rule 201 (formalparameters)
 
 
 State 188
 
    25 Dims: Dims • '[' ']'
-  193 Methodeclarator: IdenPara Dims •
+  196 Methodeclarator: IdenPara Dims •
 
     '['  shift, and go to state 194
 
-    $default  reduce using rule 193 (Methodeclarator)
+    $default  reduce using rule 196 (Methodeclarator)
 
 
 State 189
@@ -3034,6 +3043,9 @@ State 189
   178 VariableDeclarator2: IDENTIFIER '[' • zerooroneExpression ']' '=' List1
   179                    | IDENTIFIER '[' • zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER '[' • zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+  181                    | IDENTIFIER '[' • zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1
+  182                    | IDENTIFIER '[' • zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' • zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
     IDENTIFIER  shift, and go to state 10
     LITERAL     shift, and go to state 69
@@ -3928,28 +3940,28 @@ State 242
 
 State 243
 
-  200 formalparameter: Type DOT3 • IDENTIFIER
+  203 formalparameter: Type DOT3 • IDENTIFIER
 
     IDENTIFIER  shift, and go to state 283
 
 
 State 244
 
-  199 formalparameter: Type VariableDeclarator1 •
+  202 formalparameter: Type VariableDeclarator1 •
 
-    $default  reduce using rule 199 (formalparameter)
+    $default  reduce using rule 202 (formalparameter)
 
 
 State 245
 
-  195 IdenPara: IDENTIFIER '(' formalparameters ')' •
+  198 IdenPara: IDENTIFIER '(' formalparameters ')' •
 
-    $default  reduce using rule 195 (IdenPara)
+    $default  reduce using rule 198 (IdenPara)
 
 
 State 246
 
-  197 formalparameters: formalparameters ',' • formalparameter
+  200 formalparameters: formalparameters ',' • formalparameter
 
     IDENTIFIER  shift, and go to state 10
     INTTYPE     shift, and go to state 57
@@ -3979,6 +3991,9 @@ State 248
   178 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression • ']' '=' List1
   179                    | IDENTIFIER '[' zerooroneExpression • ']' '[' zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER '[' zerooroneExpression • ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+  181                    | IDENTIFIER '[' zerooroneExpression • ']' '=' KEY_new PrimitiveType '[' ']' List1
+  182                    | IDENTIFIER '[' zerooroneExpression • ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' zerooroneExpression • ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
     ']'  shift, and go to state 285
 
@@ -4612,16 +4627,16 @@ State 282
 
 State 283
 
-  200 formalparameter: Type DOT3 IDENTIFIER •
+  203 formalparameter: Type DOT3 IDENTIFIER •
 
-    $default  reduce using rule 200 (formalparameter)
+    $default  reduce using rule 203 (formalparameter)
 
 
 State 284
 
-  197 formalparameters: formalparameters ',' formalparameter •
+  200 formalparameters: formalparameters ',' formalparameter •
 
-    $default  reduce using rule 197 (formalparameters)
+    $default  reduce using rule 200 (formalparameters)
 
 
 State 285
@@ -4632,6 +4647,9 @@ State 285
   178 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' • '=' List1
   179                    | IDENTIFIER '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+  181                    | IDENTIFIER '[' zerooroneExpression ']' • '=' KEY_new PrimitiveType '[' ']' List1
+  182                    | IDENTIFIER '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
     '['  shift, and go to state 310
     '='  shift, and go to state 311
@@ -4894,6 +4912,8 @@ State 310
   176                    | IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '[' zerooroneExpression ']'
   179 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '=' List2
   180                    | IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3
+  182                    | IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
     IDENTIFIER  shift, and go to state 10
     LITERAL     shift, and go to state 69
@@ -4940,10 +4960,12 @@ State 310
 State 311
 
   178 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' • List1
+  181                    | IDENTIFIER '[' zerooroneExpression ']' '=' • KEY_new PrimitiveType '[' ']' List1
 
-    '{'  shift, and go to state 328
+    KEY_new  shift, and go to state 328
+    '{'      shift, and go to state 329
 
-    List1  go to state 329
+    List1  go to state 330
 
 
 State 312
@@ -4990,7 +5012,7 @@ State 313
     PostfixExpression                     go to state 98
     Block                                 go to state 99
     Statement                             go to state 195
-    StatementNoShortIf                    go to state 330
+    StatementNoShortIf                    go to state 331
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5024,7 +5046,7 @@ State 314
     ArrayAccess                      go to state 94
     MethodInvocation                 go to state 135
     ArrayCreationExpression          go to state 96
-    Expression                       go to state 331
+    Expression                       go to state 332
     AssignmentExpression             go to state 142
     Assignment                       go to state 143
     ConditionalExpression            go to state 144
@@ -5088,7 +5110,7 @@ State 315
     LocalVariableType                go to state 102
     StatementExpression              go to state 221
     LeftHandSide                     go to state 106
-    ForInit                          go to state 332
+    ForInit                          go to state 333
     StatementExpressionList          go to state 223
 
 
@@ -5115,7 +5137,7 @@ State 316
     ArrayAccess                      go to state 94
     MethodInvocation                 go to state 135
     ArrayCreationExpression          go to state 96
-    Expression                       go to state 333
+    Expression                       go to state 334
     AssignmentExpression             go to state 142
     Assignment                       go to state 143
     ConditionalExpression            go to state 144
@@ -5171,7 +5193,7 @@ State 317
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 334
+    Statement                             go to state 335
     StatementWithoutTrailingSubstatement  go to state 104
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5215,7 +5237,7 @@ State 318
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 335
+    Statement                             go to state 336
     StatementWithoutTrailingSubstatement  go to state 104
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5229,7 +5251,7 @@ State 319
   138 ForStatement: KEY_for '(' ForInit ';' ';' StatementExpressionList • ')' Statement
   147 StatementExpressionList: StatementExpressionList • ',' StatementExpression
 
-    ')'  shift, and go to state 336
+    ')'  shift, and go to state 337
     ','  shift, and go to state 267
 
 
@@ -5245,7 +5267,7 @@ State 320
     KEY_this    shift, and go to state 83
     KEY_new     shift, and go to state 84
     '('         shift, and go to state 86
-    ')'         shift, and go to state 337
+    ')'         shift, and go to state 338
 
     IDENdotIDEN                      go to state 140
     Primary                          go to state 90
@@ -5259,7 +5281,7 @@ State 320
     PostfixExpression                go to state 98
     StatementExpression              go to state 221
     LeftHandSide                     go to state 106
-    StatementExpressionList          go to state 338
+    StatementExpressionList          go to state 339
 
 
 State 321
@@ -5303,7 +5325,7 @@ State 324
     Primary                          go to state 90
     PrimaryNoNewArray                go to state 91
     ClassInstanceCreationExpression  go to state 92
-    Zeroorone_ArgumentList           go to state 339
+    Zeroorone_ArgumentList           go to state 340
     FieldAccess                      go to state 93
     ArrayAccess                      go to state 94
     MethodInvocation                 go to state 135
@@ -5343,7 +5365,7 @@ State 326
   175                    | IDENTIFIER '[' zerooroneExpression ']' • '[' zerooroneExpression ']'
   176                    | IDENTIFIER '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '[' zerooroneExpression ']'
 
-    '['  shift, and go to state 340
+    '['  shift, and go to state 341
 
     $default  reduce using rule 174 (VariableDeclarator1)
 
@@ -5354,13 +5376,26 @@ State 327
   176                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '[' zerooroneExpression ']'
   179 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '=' List2
   180                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '[' zerooroneExpression ']' '=' List3
+  182                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-    ']'  shift, and go to state 341
+    ']'  shift, and go to state 342
 
 
 State 328
 
-  181 List1: '{' • ArrEle1 '}'
+  181 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new • PrimitiveType '[' ']' List1
+
+    INTTYPE   shift, and go to state 57
+    FPTYPE    shift, and go to state 58
+    BOOLTYPE  shift, and go to state 59
+
+    PrimitiveType  go to state 343
+
+
+State 329
+
+  184 List1: '{' • ArrEle1 '}'
 
     IDENTIFIER  shift, and go to state 10
     LITERAL     shift, and go to state 69
@@ -5380,7 +5415,7 @@ State 328
     ArrayAccess                      go to state 94
     MethodInvocation                 go to state 135
     ArrayCreationExpression          go to state 96
-    Expression                       go to state 342
+    Expression                       go to state 344
     AssignmentExpression             go to state 142
     Assignment                       go to state 143
     ConditionalExpression            go to state 144
@@ -5399,33 +5434,33 @@ State 328
     CastExpression                   go to state 138
     PostfixExpression                go to state 139
     LeftHandSide                     go to state 106
-    ArrEle1                          go to state 343
+    ArrEle1                          go to state 345
 
 
-State 329
+State 330
 
   178 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' List1 •
 
     $default  reduce using rule 178 (VariableDeclarator2)
 
 
-State 330
+State 331
 
   109 StatementNoShortIf: IDENTIFIER ':' StatementNoShortIf •
 
     $default  reduce using rule 109 (StatementNoShortIf)
 
 
-State 331
+State 332
 
   104 Statement: KEY_if '(' Expression • ')' Statement
   105          | KEY_if '(' Expression • ')' StatementNoShortIf KEY_else Statement
   110 StatementNoShortIf: KEY_if '(' Expression • ')' StatementNoShortIf KEY_else StatementNoShortIf
 
-    ')'  shift, and go to state 344
+    ')'  shift, and go to state 346
 
 
-State 332
+State 333
 
   136 ForStatement: KEY_for '(' ForInit • ';' ';' ')' Statement
   137             | KEY_for '(' ForInit • ';' Expression ';' ')' Statement
@@ -5436,32 +5471,32 @@ State 332
   142                      | KEY_for '(' ForInit • ';' ';' StatementExpressionList ')' StatementNoShortIf
   143                      | KEY_for '(' ForInit • ';' Expression ';' StatementExpressionList ')' StatementNoShortIf
 
-    ';'  shift, and go to state 345
+    ';'  shift, and go to state 347
 
 
-State 333
+State 334
 
   106 Statement: KEY_while '(' Expression • ')' Statement
   111 StatementNoShortIf: KEY_while '(' Expression • ')' StatementNoShortIf
 
-    ')'  shift, and go to state 346
+    ')'  shift, and go to state 348
 
 
-State 334
+State 335
 
   105 Statement: KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement •
 
     $default  reduce using rule 105 (Statement)
 
 
-State 335
+State 336
 
   136 ForStatement: KEY_for '(' ForInit ';' ';' ')' Statement •
 
     $default  reduce using rule 136 (ForStatement)
 
 
-State 336
+State 337
 
   138 ForStatement: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' • Statement
 
@@ -5496,7 +5531,7 @@ State 336
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 347
+    Statement                             go to state 349
     StatementWithoutTrailingSubstatement  go to state 104
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5505,7 +5540,7 @@ State 336
     ForStatement                          go to state 109
 
 
-State 337
+State 338
 
   137 ForStatement: KEY_for '(' ForInit ';' Expression ';' ')' • Statement
 
@@ -5540,7 +5575,7 @@ State 337
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 348
+    Statement                             go to state 350
     StatementWithoutTrailingSubstatement  go to state 104
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5549,23 +5584,23 @@ State 337
     ForStatement                          go to state 109
 
 
-State 338
+State 339
 
   139 ForStatement: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList • ')' Statement
   147 StatementExpressionList: StatementExpressionList • ',' StatementExpression
 
-    ')'  shift, and go to state 349
+    ')'  shift, and go to state 351
     ','  shift, and go to state 267
 
 
-State 339
+State 340
 
    48 MethodInvocation: IDENdotIDEN '.' KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList • ')'
 
-    ')'  shift, and go to state 350
+    ')'  shift, and go to state 352
 
 
-State 340
+State 341
 
   175 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']'
   176                    | IDENTIFIER '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '[' zerooroneExpression ']'
@@ -5609,39 +5644,48 @@ State 340
     CastExpression                   go to state 138
     PostfixExpression                go to state 139
     LeftHandSide                     go to state 106
-    zerooroneExpression              go to state 351
+    zerooroneExpression              go to state 353
 
 
-State 341
+State 342
 
   175 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' •
   176                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '[' zerooroneExpression ']'
   179 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '=' List2
   180                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '=' List3
+  182                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '=' KEY_new PrimitiveType '[' ']' '[' ']' List2
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-    '['  shift, and go to state 352
-    '='  shift, and go to state 353
+    '['  shift, and go to state 354
+    '='  shift, and go to state 355
 
     $default  reduce using rule 175 (VariableDeclarator1)
 
 
-State 342
-
-  183 ArrEle1: Expression •
-
-    $default  reduce using rule 183 (ArrEle1)
-
-
 State 343
 
-  181 List1: '{' ArrEle1 • '}'
-  182 ArrEle1: ArrEle1 • ',' Expression
+  181 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType • '[' ']' List1
 
-    ','  shift, and go to state 354
-    '}'  shift, and go to state 355
+    '['  shift, and go to state 356
 
 
 State 344
+
+  186 ArrEle1: Expression •
+
+    $default  reduce using rule 186 (ArrEle1)
+
+
+State 345
+
+  184 List1: '{' ArrEle1 • '}'
+  185 ArrEle1: ArrEle1 • ',' Expression
+
+    ','  shift, and go to state 357
+    '}'  shift, and go to state 358
+
+
+State 346
 
   104 Statement: KEY_if '(' Expression ')' • Statement
   105          | KEY_if '(' Expression ')' • StatementNoShortIf KEY_else Statement
@@ -5679,7 +5723,7 @@ State 344
     PostfixExpression                     go to state 98
     Block                                 go to state 99
     Statement                             go to state 293
-    StatementNoShortIf                    go to state 356
+    StatementNoShortIf                    go to state 359
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5689,7 +5733,7 @@ State 344
     ForStatementNoShortIf                 go to state 296
 
 
-State 345
+State 347
 
   136 ForStatement: KEY_for '(' ForInit ';' • ';' ')' Statement
   137             | KEY_for '(' ForInit ';' • Expression ';' ')' Statement
@@ -5708,7 +5752,7 @@ State 345
     KEY_super   shift, and go to state 82
     KEY_this    shift, and go to state 83
     KEY_new     shift, and go to state 84
-    ';'         shift, and go to state 357
+    ';'         shift, and go to state 360
     '('         shift, and go to state 131
 
     IDENdotIDEN                      go to state 140
@@ -5719,7 +5763,7 @@ State 345
     ArrayAccess                      go to state 94
     MethodInvocation                 go to state 135
     ArrayCreationExpression          go to state 96
-    Expression                       go to state 358
+    Expression                       go to state 361
     AssignmentExpression             go to state 142
     Assignment                       go to state 143
     ConditionalExpression            go to state 144
@@ -5740,7 +5784,7 @@ State 345
     LeftHandSide                     go to state 106
 
 
-State 346
+State 348
 
   106 Statement: KEY_while '(' Expression ')' • Statement
   111 StatementNoShortIf: KEY_while '(' Expression ')' • StatementNoShortIf
@@ -5777,7 +5821,7 @@ State 346
     PostfixExpression                     go to state 98
     Block                                 go to state 99
     Statement                             go to state 300
-    StatementNoShortIf                    go to state 359
+    StatementNoShortIf                    go to state 362
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5787,21 +5831,21 @@ State 346
     ForStatementNoShortIf                 go to state 296
 
 
-State 347
+State 349
 
   138 ForStatement: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement •
 
     $default  reduce using rule 138 (ForStatement)
 
 
-State 348
+State 350
 
   137 ForStatement: KEY_for '(' ForInit ';' Expression ';' ')' Statement •
 
     $default  reduce using rule 137 (ForStatement)
 
 
-State 349
+State 351
 
   139 ForStatement: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' • Statement
 
@@ -5836,7 +5880,7 @@ State 349
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 360
+    Statement                             go to state 363
     StatementWithoutTrailingSubstatement  go to state 104
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -5845,25 +5889,26 @@ State 349
     ForStatement                          go to state 109
 
 
-State 350
+State 352
 
    48 MethodInvocation: IDENdotIDEN '.' KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')' •
 
     $default  reduce using rule 48 (MethodInvocation)
 
 
-State 351
+State 353
 
   175 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']'
   176                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '[' zerooroneExpression ']'
 
-    ']'  shift, and go to state 361
+    ']'  shift, and go to state 364
 
 
-State 352
+State 354
 
   176 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' • zerooroneExpression ']'
   180 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '=' List3
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' • zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
     IDENTIFIER  shift, and go to state 10
     LITERAL     shift, and go to state 69
@@ -5904,21 +5949,30 @@ State 352
     CastExpression                   go to state 138
     PostfixExpression                go to state 139
     LeftHandSide                     go to state 106
-    zerooroneExpression              go to state 362
+    zerooroneExpression              go to state 365
 
 
-State 353
+State 355
 
   179 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' • List2
+  182                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' • KEY_new PrimitiveType '[' ']' '[' ']' List2
 
-    '{'  shift, and go to state 363
+    KEY_new  shift, and go to state 366
+    '{'      shift, and go to state 367
 
-    List2  go to state 364
+    List2  go to state 368
 
 
-State 354
+State 356
 
-  182 ArrEle1: ArrEle1 ',' • Expression
+  181 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' • ']' List1
+
+    ']'  shift, and go to state 369
+
+
+State 357
+
+  185 ArrEle1: ArrEle1 ',' • Expression
 
     IDENTIFIER  shift, and go to state 10
     LITERAL     shift, and go to state 69
@@ -5938,7 +5992,7 @@ State 354
     ArrayAccess                      go to state 94
     MethodInvocation                 go to state 135
     ArrayCreationExpression          go to state 96
-    Expression                       go to state 365
+    Expression                       go to state 370
     AssignmentExpression             go to state 142
     Assignment                       go to state 143
     ConditionalExpression            go to state 144
@@ -5959,22 +6013,22 @@ State 354
     LeftHandSide                     go to state 106
 
 
-State 355
+State 358
 
-  181 List1: '{' ArrEle1 '}' •
+  184 List1: '{' ArrEle1 '}' •
 
-    $default  reduce using rule 181 (List1)
+    $default  reduce using rule 184 (List1)
 
 
-State 356
+State 359
 
   105 Statement: KEY_if '(' Expression ')' StatementNoShortIf • KEY_else Statement
   110 StatementNoShortIf: KEY_if '(' Expression ')' StatementNoShortIf • KEY_else StatementNoShortIf
 
-    KEY_else  shift, and go to state 366
+    KEY_else  shift, and go to state 371
 
 
-State 357
+State 360
 
   136 ForStatement: KEY_for '(' ForInit ';' ';' • ')' Statement
   138             | KEY_for '(' ForInit ';' ';' • StatementExpressionList ')' Statement
@@ -5988,7 +6042,7 @@ State 357
     KEY_this    shift, and go to state 83
     KEY_new     shift, and go to state 84
     '('         shift, and go to state 86
-    ')'         shift, and go to state 367
+    ')'         shift, and go to state 372
 
     IDENdotIDEN                      go to state 140
     Primary                          go to state 90
@@ -6002,76 +6056,97 @@ State 357
     PostfixExpression                go to state 98
     StatementExpression              go to state 221
     LeftHandSide                     go to state 106
-    StatementExpressionList          go to state 368
+    StatementExpressionList          go to state 373
 
 
-State 358
+State 361
 
   137 ForStatement: KEY_for '(' ForInit ';' Expression • ';' ')' Statement
   139             | KEY_for '(' ForInit ';' Expression • ';' StatementExpressionList ')' Statement
   141 ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression • ';' ')' StatementNoShortIf
   143                      | KEY_for '(' ForInit ';' Expression • ';' StatementExpressionList ')' StatementNoShortIf
 
-    ';'  shift, and go to state 369
+    ';'  shift, and go to state 374
 
 
-State 359
+State 362
 
   111 StatementNoShortIf: KEY_while '(' Expression ')' StatementNoShortIf •
 
     $default  reduce using rule 111 (StatementNoShortIf)
 
 
-State 360
+State 363
 
   139 ForStatement: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement •
 
     $default  reduce using rule 139 (ForStatement)
 
 
-State 361
+State 364
 
   175 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' •
   176                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '[' zerooroneExpression ']'
 
-    '['  shift, and go to state 370
+    '['  shift, and go to state 375
 
     $default  reduce using rule 175 (VariableDeclarator1)
 
 
-State 362
+State 365
 
   176 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression • ']'
   180 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '=' List3
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression • ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-    ']'  shift, and go to state 371
-
-
-State 363
-
-  184 List2: '{' • ArrEle2 '}'
-
-    '{'  shift, and go to state 328
-
-    List1    go to state 372
-    ArrEle2  go to state 373
+    ']'  shift, and go to state 376
 
 
-State 364
+State 366
+
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new • PrimitiveType '[' ']' '[' ']' List2
+
+    INTTYPE   shift, and go to state 57
+    FPTYPE    shift, and go to state 58
+    BOOLTYPE  shift, and go to state 59
+
+    PrimitiveType  go to state 377
+
+
+State 367
+
+  187 List2: '{' • ArrEle2 '}'
+
+    '{'  shift, and go to state 329
+
+    List1    go to state 378
+    ArrEle2  go to state 379
+
+
+State 368
 
   179 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 •
 
     $default  reduce using rule 179 (VariableDeclarator2)
 
 
-State 365
+State 369
 
-  182 ArrEle1: ArrEle1 ',' Expression •
+  181 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' • List1
 
-    $default  reduce using rule 182 (ArrEle1)
+    '{'  shift, and go to state 329
+
+    List1  go to state 380
 
 
-State 366
+State 370
+
+  185 ArrEle1: ArrEle1 ',' Expression •
+
+    $default  reduce using rule 185 (ArrEle1)
+
+
+State 371
 
   105 Statement: KEY_if '(' Expression ')' StatementNoShortIf KEY_else • Statement
   110 StatementNoShortIf: KEY_if '(' Expression ')' StatementNoShortIf KEY_else • StatementNoShortIf
@@ -6107,8 +6182,8 @@ State 366
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 334
-    StatementNoShortIf                    go to state 374
+    Statement                             go to state 335
+    StatementNoShortIf                    go to state 381
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -6118,7 +6193,7 @@ State 366
     ForStatementNoShortIf                 go to state 296
 
 
-State 367
+State 372
 
   136 ForStatement: KEY_for '(' ForInit ';' ';' ')' • Statement
   140 ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' ')' • StatementNoShortIf
@@ -6154,8 +6229,8 @@ State 367
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 335
-    StatementNoShortIf                    go to state 375
+    Statement                             go to state 336
+    StatementNoShortIf                    go to state 382
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -6165,17 +6240,17 @@ State 367
     ForStatementNoShortIf                 go to state 296
 
 
-State 368
+State 373
 
   138 ForStatement: KEY_for '(' ForInit ';' ';' StatementExpressionList • ')' Statement
   142 ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' StatementExpressionList • ')' StatementNoShortIf
   147 StatementExpressionList: StatementExpressionList • ',' StatementExpression
 
-    ')'  shift, and go to state 376
+    ')'  shift, and go to state 383
     ','  shift, and go to state 267
 
 
-State 369
+State 374
 
   137 ForStatement: KEY_for '(' ForInit ';' Expression ';' • ')' Statement
   139             | KEY_for '(' ForInit ';' Expression ';' • StatementExpressionList ')' Statement
@@ -6189,7 +6264,7 @@ State 369
     KEY_this    shift, and go to state 83
     KEY_new     shift, and go to state 84
     '('         shift, and go to state 86
-    ')'         shift, and go to state 377
+    ')'         shift, and go to state 384
 
     IDENdotIDEN                      go to state 140
     Primary                          go to state 90
@@ -6203,10 +6278,10 @@ State 369
     PostfixExpression                go to state 98
     StatementExpression              go to state 221
     LeftHandSide                     go to state 106
-    StatementExpressionList          go to state 378
+    StatementExpressionList          go to state 385
 
 
-State 370
+State 375
 
   176 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' • zerooroneExpression ']'
 
@@ -6249,50 +6324,65 @@ State 370
     CastExpression                   go to state 138
     PostfixExpression                go to state 139
     LeftHandSide                     go to state 106
-    zerooroneExpression              go to state 379
+    zerooroneExpression              go to state 386
 
 
-State 371
+State 376
 
   176 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' •
   180 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '=' List3
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' • '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-    '='  shift, and go to state 380
+    '='  shift, and go to state 387
 
     $default  reduce using rule 176 (VariableDeclarator1)
 
 
-State 372
+State 377
 
-  186 ArrEle2: List1 •
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType • '[' ']' '[' ']' List2
 
-    $default  reduce using rule 186 (ArrEle2)
-
-
-State 373
-
-  184 List2: '{' ArrEle2 • '}'
-  185 ArrEle2: ArrEle2 • ',' List1
-
-    ','  shift, and go to state 381
-    '}'  shift, and go to state 382
+    '['  shift, and go to state 388
 
 
-State 374
+State 378
+
+  189 ArrEle2: List1 •
+
+    $default  reduce using rule 189 (ArrEle2)
+
+
+State 379
+
+  187 List2: '{' ArrEle2 • '}'
+  188 ArrEle2: ArrEle2 • ',' List1
+
+    ','  shift, and go to state 389
+    '}'  shift, and go to state 390
+
+
+State 380
+
+  181 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1 •
+
+    $default  reduce using rule 181 (VariableDeclarator2)
+
+
+State 381
 
   110 StatementNoShortIf: KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf •
 
     $default  reduce using rule 110 (StatementNoShortIf)
 
 
-State 375
+State 382
 
   140 ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf •
 
     $default  reduce using rule 140 (ForStatementNoShortIf)
 
 
-State 376
+State 383
 
   138 ForStatement: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' • Statement
   142 ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' • StatementNoShortIf
@@ -6328,8 +6418,8 @@ State 376
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 347
-    StatementNoShortIf                    go to state 383
+    Statement                             go to state 349
+    StatementNoShortIf                    go to state 391
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -6339,7 +6429,7 @@ State 376
     ForStatementNoShortIf                 go to state 296
 
 
-State 377
+State 384
 
   137 ForStatement: KEY_for '(' ForInit ';' Expression ';' ')' • Statement
   141 ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' ')' • StatementNoShortIf
@@ -6375,8 +6465,8 @@ State 377
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 348
-    StatementNoShortIf                    go to state 384
+    Statement                             go to state 350
+    StatementNoShortIf                    go to state 392
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -6386,63 +6476,72 @@ State 377
     ForStatementNoShortIf                 go to state 296
 
 
-State 378
+State 385
 
   139 ForStatement: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList • ')' Statement
   143 ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList • ')' StatementNoShortIf
   147 StatementExpressionList: StatementExpressionList • ',' StatementExpression
 
-    ')'  shift, and go to state 385
+    ')'  shift, and go to state 393
     ','  shift, and go to state 267
 
 
-State 379
+State 386
 
   176 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression • ']'
 
-    ']'  shift, and go to state 386
+    ']'  shift, and go to state 394
 
 
-State 380
+State 387
 
   180 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' • List3
+  183                    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' • KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-    '{'  shift, and go to state 387
+    KEY_new  shift, and go to state 395
+    '{'      shift, and go to state 396
 
-    List3  go to state 388
-
-
-State 381
-
-  185 ArrEle2: ArrEle2 ',' • List1
-
-    '{'  shift, and go to state 328
-
-    List1  go to state 389
+    List3  go to state 397
 
 
-State 382
+State 388
 
-  184 List2: '{' ArrEle2 '}' •
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' • ']' '[' ']' List2
 
-    $default  reduce using rule 184 (List2)
+    ']'  shift, and go to state 398
 
 
-State 383
+State 389
+
+  188 ArrEle2: ArrEle2 ',' • List1
+
+    '{'  shift, and go to state 329
+
+    List1  go to state 399
+
+
+State 390
+
+  187 List2: '{' ArrEle2 '}' •
+
+    $default  reduce using rule 187 (List2)
+
+
+State 391
 
   142 ForStatementNoShortIf: KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf •
 
     $default  reduce using rule 142 (ForStatementNoShortIf)
 
 
-State 384
+State 392
 
   141 ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf •
 
     $default  reduce using rule 141 (ForStatementNoShortIf)
 
 
-State 385
+State 393
 
   139 ForStatement: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' • Statement
   143 ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' • StatementNoShortIf
@@ -6478,8 +6577,8 @@ State 385
     Assignment                            go to state 97
     PostfixExpression                     go to state 98
     Block                                 go to state 99
-    Statement                             go to state 360
-    StatementNoShortIf                    go to state 390
+    Statement                             go to state 363
+    StatementNoShortIf                    go to state 400
     StatementWithoutTrailingSubstatement  go to state 295
     StatementExpression                   go to state 105
     LeftHandSide                          go to state 106
@@ -6489,78 +6588,177 @@ State 385
     ForStatementNoShortIf                 go to state 296
 
 
-State 386
+State 394
 
   176 VariableDeclarator1: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' •
 
     $default  reduce using rule 176 (VariableDeclarator1)
 
 
-State 387
+State 395
 
-  187 List3: '{' • ArrEle3 '}'
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new • PrimitiveType '[' ']' '[' ']' '[' ']' List3
 
-    '{'  shift, and go to state 363
+    INTTYPE   shift, and go to state 57
+    FPTYPE    shift, and go to state 58
+    BOOLTYPE  shift, and go to state 59
 
-    List2    go to state 391
-    ArrEle3  go to state 392
+    PrimitiveType  go to state 401
 
 
-State 388
+State 396
+
+  190 List3: '{' • ArrEle3 '}'
+
+    '{'  shift, and go to state 367
+
+    List2    go to state 402
+    ArrEle3  go to state 403
+
+
+State 397
 
   180 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3 •
 
     $default  reduce using rule 180 (VariableDeclarator2)
 
 
-State 389
+State 398
 
-  185 ArrEle2: ArrEle2 ',' List1 •
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' • '[' ']' List2
 
-    $default  reduce using rule 185 (ArrEle2)
+    '['  shift, and go to state 404
 
 
-State 390
+State 399
+
+  188 ArrEle2: ArrEle2 ',' List1 •
+
+    $default  reduce using rule 188 (ArrEle2)
+
+
+State 400
 
   143 ForStatementNoShortIf: KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf •
 
     $default  reduce using rule 143 (ForStatementNoShortIf)
 
 
-State 391
+State 401
 
-  189 ArrEle3: List2 •
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType • '[' ']' '[' ']' '[' ']' List3
 
-    $default  reduce using rule 189 (ArrEle3)
-
-
-State 392
-
-  187 List3: '{' ArrEle3 • '}'
-  188 ArrEle3: ArrEle3 • ',' List2
-
-    ','  shift, and go to state 393
-    '}'  shift, and go to state 394
+    '['  shift, and go to state 405
 
 
-State 393
+State 402
 
-  188 ArrEle3: ArrEle3 ',' • List2
+  192 ArrEle3: List2 •
 
-    '{'  shift, and go to state 363
-
-    List2  go to state 395
+    $default  reduce using rule 192 (ArrEle3)
 
 
-State 394
+State 403
 
-  187 List3: '{' ArrEle3 '}' •
+  190 List3: '{' ArrEle3 • '}'
+  191 ArrEle3: ArrEle3 • ',' List2
 
-    $default  reduce using rule 187 (List3)
+    ','  shift, and go to state 406
+    '}'  shift, and go to state 407
 
 
-State 395
+State 404
 
-  188 ArrEle3: ArrEle3 ',' List2 •
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' • ']' List2
 
-    $default  reduce using rule 188 (ArrEle3)
+    ']'  shift, and go to state 408
+
+
+State 405
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' • ']' '[' ']' '[' ']' List3
+
+    ']'  shift, and go to state 409
+
+
+State 406
+
+  191 ArrEle3: ArrEle3 ',' • List2
+
+    '{'  shift, and go to state 367
+
+    List2  go to state 410
+
+
+State 407
+
+  190 List3: '{' ArrEle3 '}' •
+
+    $default  reduce using rule 190 (List3)
+
+
+State 408
+
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' • List2
+
+    '{'  shift, and go to state 367
+
+    List2  go to state 411
+
+
+State 409
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' • '[' ']' '[' ']' List3
+
+    '['  shift, and go to state 412
+
+
+State 410
+
+  191 ArrEle3: ArrEle3 ',' List2 •
+
+    $default  reduce using rule 191 (ArrEle3)
+
+
+State 411
+
+  182 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2 •
+
+    $default  reduce using rule 182 (VariableDeclarator2)
+
+
+State 412
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' • ']' '[' ']' List3
+
+    ']'  shift, and go to state 413
+
+
+State 413
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' • '[' ']' List3
+
+    '['  shift, and go to state 414
+
+
+State 414
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' • ']' List3
+
+    ']'  shift, and go to state 415
+
+
+State 415
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' • List3
+
+    '{'  shift, and go to state 396
+
+    List3  go to state 416
+
+
+State 416
+
+  183 VariableDeclarator2: IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3 •
+
+    $default  reduce using rule 183 (VariableDeclarator2)

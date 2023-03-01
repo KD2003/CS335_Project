@@ -1,6 +1,6 @@
 %{
 #include"AST.h"
-#include <iostream>
+#include <stdio.h>
 #include <string>
 #include <fstream>
 using namespace std;
@@ -8,6 +8,8 @@ using namespace std;
 FILE* dotfile;
 extern FILE* yyin;
 extern int yyrestart(FILE*);
+
+bool gotinputfile, gotoutputfile, verbosemode;
 
 int yylex();
 int yyerror(const char *str);
@@ -343,9 +345,6 @@ ArrayCreationExpression:        // array initiaizer to do
         s.push_back($2);
         s.push_back($3);
         s.push_back($4);
-        
-        
-        
         $$ = makeNode("ArrayCreationExpression", s);
     }
     | KEY_new PrimitiveType DimExpr     {
@@ -353,8 +352,6 @@ ArrayCreationExpression:        // array initiaizer to do
         s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        
-        
         $$ = makeNode("ArrayCreationExpression", s);
     }
     | KEY_new IDENdotIDEN DimExpr Dims      {
@@ -363,9 +360,6 @@ ArrayCreationExpression:        // array initiaizer to do
         s.push_back($2);
         s.push_back($3);
         s.push_back($4);
-        
-        
-        
         $$ = makeNode("ArrayCreationExpression", s);
     }
     | KEY_new IDENdotIDEN DimExpr       {
@@ -373,11 +367,8 @@ ArrayCreationExpression:        // array initiaizer to do
         s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        
-        
         $$ = makeNode("ArrayCreationExpression", s);
     }
-    /* | KEY_new PrimitiveType Dims ArrayInitializer */
 ;
 
 DimExpr:
@@ -907,6 +898,7 @@ ForStatement:
         vector<ASTNode*> s;
         s.push_back(makeLeaf("for"));
         s.push_back($3);
+        s.push_back($5);
         s.push_back($7);
         s.push_back($9);
         $$ = makeNode("ForStatement", s);
@@ -947,7 +939,6 @@ ForStatementNoShortIf:
         s.push_back($9);
         $$ = makeNode("ForStatementNoShortIf", s);
     }
-    /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' StatementNoShortIf */
 ;
 
 ForInit:
@@ -979,25 +970,6 @@ StatementExpressionList:
 ;
 
 // 14 end
-
-// §10 (Arrays) START
-/* ArrayInitializer:
-    '{' zerooroneVariableInitializerList ',' '}'
-    | '{' zerooroneVariableInitializerList '}'
-;
-zerooroneVariableInitializerList:
-    VariableInitializerList
-    | 
-;
-VariableInitializerList:
-    VariableInitializerList ',' VariableInitializer
-    | VariableInitializer
-;
-VariableInitializer:
-    Expression
-    | ArrayInitializer
-; */
-// §10 (Arrays) END
 
 //Classes
 ClassDeclaration:
@@ -1216,6 +1188,39 @@ VariableDeclarator2:
         s.push_back($12);
         $$ = makeNode("=", s);
     }
+    | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1 {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        delete $1;
+        s.push_back($3);
+        s.push_back(makeLeaf("new"));
+        s.push_back($7);
+        s.push_back($10);
+        $$ = makeNode("=", s);
+    }
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2 {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        delete $1;
+        s.push_back($3);
+        s.push_back($6);
+        s.push_back(makeLeaf("new"));
+        s.push_back($10);
+        s.push_back($15);
+        $$ = makeNode("=", s);
+    }
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3 {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        delete $1;
+        s.push_back($3);
+        s.push_back($6);
+        s.push_back($9);
+        s.push_back(makeLeaf("new"));
+        s.push_back($13);
+        s.push_back($20);
+        $$ = makeNode("=", s);
+    }
 ;
 
 List1:
@@ -1374,36 +1379,34 @@ Modifiers:
 %%
 
 void print_help(){
-    cout << " options :::\n";
-    cout << " --help           Display available options.\n";
-    cout << " --input <file>   take <file> as input file.\n";
-    cout << " --output <file>  will print the dot script in <file>.\n";
-    cout << " --verbose        display the procedure in bit details.\n"; 
+    printf(" options :::\n");
+    printf(" --help           Display available options.\n");
+    printf(" --input <file>   take <file> as input file.\n");
+    printf(" --output <file>  will print the dot script in <file>.\n");
+    printf(" --verbose        display the procedure in bit details.\n"); 
     return;                                                     
 }
 
 int main(int argc, char* argv[]){
-    bool gotinputfile=false;
-    bool gotoutputfile=false;
-    char* dotfilename;
-    dotfilename = (char*)malloc(sizeof(char)*100);
-    strcpy(dotfilename,"temp.dot");
-    bool verbosemode=false;
+    gotinputfile=false;
+    gotoutputfile=false;
+    verbosemode=false;
 
     for(int i=1;i<argc;i++){
         if(!strcmp(argv[i],"--input")){
             if(i==argc-1){
-                cout << "Error :: input file name not given.\n";
+                printf("Error :: input file name not given.\n");
                 return 0;
             }
             else if(gotinputfile){
-                cout << "Error :: multiple input file name detected.\n";
+                printf("Error :: multiple input file name detected.\n");
                 return 0;
             }
             else{
                 yyin = fopen(argv[i+1],"r");
+                /* printf("%s\n", argv[i+1]); */
                 if(yyin==NULL){
-                    cout << argv[i+1] << " can not be opened as an input file.\n";
+                    printf("%s can not be opened as an input file.\n", argv[i+1]);
                     return 0;
                 } 
                 i++;
@@ -1413,15 +1416,15 @@ int main(int argc, char* argv[]){
         }
         else if(!strcmp(argv[i],"--output")){
             if(i==argc-1){
-                cout << "Error :: output file name not given.\n";
+                printf("Error :: output file name not given.\n");
                 return 0;
             }
             else if(gotoutputfile){
-                cout << "Error :: multiple output file name detected.\n";
+                printf("Error :: multiple output file name detected.\n");
                 return 0;
             }
             else{
-                dotfilename=argv[i+1];
+                dotfile = fopen(argv[i+1], "w");
                 i++;
                 gotoutputfile=true;
                 continue;
@@ -1435,38 +1438,36 @@ int main(int argc, char* argv[]){
             verbosemode=true;
         }
         else{
-            cout << "Argument: " << argv[i] << "  not recognised.\n";return 0;
+            printf("Argument: %s  not recognised.\n", argv[i]);return 0;
             
         }
     }
     if(!gotinputfile){
-        cout << "Inputfile name not mentioned.\n";
+        printf("Inputfile name not mentioned.\n");
         return 0;
     }
 
     if(verbosemode){
-        cout<< "Input file is opened" ;
-        cout << "....\n";
-        cout << "Starting the parser...\n";
+        printf("Input file is opened");
+        printf("....\n");
+        printf("Starting the parser...\n");
     }
 
-    dotfile = fopen(dotfilename, "w");
+    if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 
     if(dotfile==NULL){
-        cout << "Dot file can not be opened.\n";
+        printf("Dot file can not be opened.\n");
         return 0;
     }
     yyrestart(yyin);
+
     beginAST();
     if(yyparse()) return 0;
     endAST();
-
+    
     if(verbosemode){
-        cout << "Parser work completed..\n";
-        cout << "Dot script is printed in ";
-        for(char* tmp=dotfilename;*tmp!='\0';tmp++){
-            cout << *tmp;
-        }
-        cout << "....\n";
+        printf("Parser work completed..\n");
+        printf("Dot script has generated successfully");
+        printf("....\n");
     }
 }
