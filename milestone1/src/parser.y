@@ -26,18 +26,21 @@ int yyerror(const char *str);
 
 %type<st> KEYWORD IDENTIFIER LITERAL OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
 
-%type<ptr> prog ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims
+%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims
 %type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression PostfixExpression
 %type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
 
+%left ADDOP MULTOP SHIFTOP EQALITYOP ADDOP2 '*'
+%right ASSIGNOP '='
+
 %%
-prog:
+Start:
     ImportList ClassDeclarationList		{
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($2);
-        $$ = makeNode("prog", s);
+        $$ = makeNode("Start", s);
         }
 ;
 
@@ -68,31 +71,26 @@ ClassDeclarationList:
 Imports:
     KEY_import IDENdotIDEN ';'      {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("import"));
         s.push_back($2);
-        $$ = makeNode("Imports", s);
+        $$ = makeNode("import", s);
     }
     | KEY_import KEY_static IDENdotIDEN ';'     {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("import"));
         s.push_back(makeLeaf("static"));
         s.push_back($3);
-        $$ = makeNode("Imports", s);
+        $$ = makeNode("import", s);
     }
     | KEY_import IDENdotIDEN '.' '*' ';'        {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("import"));
         s.push_back($2);
         s.push_back(makeLeaf("*"));
-        
-        $$ = makeNode("Imports", s);   
+        $$ = makeNode("import", s);   
     }
     | KEY_import KEY_static IDENdotIDEN '.' '*' ';'     {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("import"));
         s.push_back(makeLeaf("static"));
         s.push_back($3);
-        $$ = makeNode("Imports", s);
+        $$ = makeNode("import", s);
     }
 ;
 
@@ -128,12 +126,12 @@ IDENdotIDEN:
     IDENdotIDEN '.' IDENTIFIER      {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3 + ")"));
+        s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
-        $$ = makeNode("IDENdotIDEN", s);
+        $$ = makeNode(".", s);
     }
     | IDENTIFIER    {
-        $$ = makeLeaf("IDENTIFIER (" + *$1 + ")");
+        $$ = makeLeaf("ID (" + *$1 + ")");
         delete $1;
     }
 ;
@@ -216,18 +214,16 @@ PrimaryNoNewArray:
 ClassInstanceCreationExpression:
     KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')' ClassBody        {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($4);
         s.push_back($6);
-        $$ = makeNode("ClassInstanceCreationExpression", s);
+        $$ = makeNode("new", s);
     }
     | KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'        {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($4);
-        $$ = makeNode("ClassInstanceCreationExpression", s);
+        $$ = makeNode("new", s);
     }
 ;
 
@@ -244,23 +240,22 @@ FieldAccess:
     Primary '.' IDENTIFIER      {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3 + ")"));
+        s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
         
         $$ = makeNode("FieldAccess", s);
     }
     | KEY_super '.' IDENTIFIER      {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("super"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3 + ")"));
+        s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
-        $$ = makeNode("FieldAccess", s);
+        $$ = makeNode("super", s);
     }
     | IDENdotIDEN '.' KEY_super '.' IDENTIFIER      {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("super"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$5 + ")"));
+        s.push_back(makeLeaf("ID (" + *$5 + ")"));
         delete $5;
         $$ = makeNode("FieldAccess", s);
     }
@@ -293,7 +288,7 @@ MethodInvocation:
     | Primary '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'     {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3 + ")"));
+        s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
         s.push_back($5);
         
@@ -304,7 +299,7 @@ MethodInvocation:
     | KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'       {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("super"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3 + ")"));
+        s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
         s.push_back($5);
         
@@ -316,7 +311,7 @@ MethodInvocation:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("super"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$5 + ")"));
+        s.push_back(makeLeaf("ID (" + *$5 + ")"));
         delete $5;
         s.push_back($7);
         $$ = makeNode("MethodInvocation", s);   
@@ -328,9 +323,7 @@ ArgumentList:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        
-        
-        $$ = makeNode("ArguementList", s);
+        $$ = makeNode(",", s);
     }
     | Expression        {
         $$ = $1;
@@ -340,31 +333,27 @@ ArgumentList:
 ArrayCreationExpression:        // array initiaizer to do
     KEY_new PrimitiveType DimExpr Dims      {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        $$ = makeNode("ArrayCreationExpression", s);
+        $$ = makeNode("new", s);
     }
     | KEY_new PrimitiveType DimExpr     {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        $$ = makeNode("ArrayCreationExpression", s);
+        $$ = makeNode("new", s);
     }
     | KEY_new IDENdotIDEN DimExpr Dims      {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        $$ = makeNode("ArrayCreationExpression", s);
+        $$ = makeNode("new", s);
     }
     | KEY_new IDENdotIDEN DimExpr       {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("new"));
         s.push_back($2);
         s.push_back($3);
-        $$ = makeNode("ArrayCreationExpression", s);
+        $$ = makeNode("new", s);
     }
 ;
 
@@ -551,12 +540,18 @@ MultiplicativeExpression:
         $$ = makeNode(*$2, s);
         delete $2;
     }
+    | MultiplicativeExpression '*' UnaryExpression       {
+        vector<ASTNode*> s;
+        s.push_back($1);
+        s.push_back($3);
+        $$ = makeNode("*", s);
+    }
 ;
 
 UnaryExpression:
     ADDOP2 UnaryExpression      {
         vector<ASTNode*> s;
-        s.push_back($2);        
+        s.push_back($2);
         $$ = makeNode(*$1, s);
         delete $1;
     }
@@ -605,7 +600,8 @@ PostfixExpression:
     | PostfixExpression ADDOP2      {
         vector<ASTNode*> s;
         s.push_back($1);
-        $$ = makeNode(*$2, s);
+        s.push_back(makeLeaf(*$2));
+        $$ = makeNode("Postfix Expression", s);
         delete $2;
     }
 ;
@@ -654,9 +650,7 @@ LocalVariableType:
         $$=$1;
     }
     | KEY_VAR {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("var"));
-        $$ = makeNode("LocalVariableType", s);
+        $$ = makeLeaf("var");
     }
 ;
 
@@ -666,7 +660,7 @@ Statement:
     }
     | IDENTIFIER ':' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         s.push_back(makeLeaf(":"));
         s.push_back($3);
         $$ = makeNode("Statement", s);
@@ -674,26 +668,23 @@ Statement:
     }
     | KEY_if '(' Expression ')' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("if"));
         s.push_back($3);
         s.push_back($5);
-        $$ = makeNode("Statement", s);
+        $$ = makeNode("if", s);
     }
     | KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("if"));
+        vector<ASTNode*> s,s1;
+        s1.push_back($7);
         s.push_back($3);
         s.push_back($5);
-        s.push_back(makeLeaf("else"));
-        s.push_back($7);
-        $$ = makeNode("Statement", s);
+        s.push_back(makeNode("else", s1));
+        $$ = makeNode("if", s);
     }
     | KEY_while '(' Expression ')' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("while"));
         s.push_back($3);
         s.push_back($5);
-        $$ = makeNode("Statement", s);
+        $$ = makeNode("while", s);
     }
     | ForStatement {
         $$=$1;
@@ -706,27 +697,25 @@ StatementNoShortIf:
     }
     | IDENTIFIER ':' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back(makeLeaf(":"));
         s.push_back($3);
         $$ = makeNode("StatementNoShortIf", s);
     }
     | KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("if"));
+        vector<ASTNode*> s,s1;
+        s1.push_back($7);
         s.push_back($3);
         s.push_back($5);
-        s.push_back(makeLeaf("else"));
-        s.push_back($7);
-        $$ = makeNode("StatementNoShortIf", s);
+        s.push_back(makeNode("else", s1));
+        $$ = makeNode("if", s);
     }
     | KEY_while '(' Expression ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("while"));
         s.push_back($3);
         s.push_back($5);
-        $$ = makeNode("StatementNoShortIf", s);
+        $$ = makeNode("while", s);
     }
     | ForStatementNoShortIf {
         $$=$1;
@@ -750,34 +739,28 @@ StatementWithoutTrailingSubstatement:		// left try statement
         $$=$1;
     }
     | KEY_return ';' {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("return"));
-        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+        $$ = makeLeaf("return");
     }
     | KEY_return Expression ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("return"));
         s.push_back($2);
-        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+        $$ = makeNode("return", s);
     }
     | KEY_yield Expression ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("yield"));
         s.push_back($2);
-        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+        $$ = makeNode("yield", s);
     }
     | KEY_throw Expression ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("throw"));
         s.push_back($2);
-        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+        $$ = makeNode("throw", s);
     }
     | KEY_sync '(' Expression ')' Block {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("sync"));
         s.push_back($3);
         s.push_back($5);
-        $$ = makeNode("StatementWithoutTrailingSubstatement", s);
+        $$ = makeNode("sync", s);
     }
 ;
 
@@ -790,16 +773,16 @@ StatementExpression:
     }
     | ADDOP2 UnaryExpression {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf(*$1));
+        s.push_back($2);
+        $$ = makeNode(*$1, s);
         delete $1;
-        $$ = makeNode("StatementExpression", s);
     }
     | PostfixExpression ADDOP2 {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf(*$2));
         delete $2;
-        $$ = makeNode("StatementExpression", s);
+        $$ = makeNode("Statement Expression", s);
     }
     /* | ClassInstanceCreationExpression */
 ;
@@ -819,79 +802,67 @@ LeftHandSide:
 AssertStatement:
     KEY_assert Expression ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("assert"));
         s.push_back($2);
-        $$ = makeNode("AssertStatement", s);
+        $$ = makeNode("assert", s);
     }
     | KEY_assert Expression ':' Expression ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("assert"));
         s.push_back($2);
         s.push_back(makeLeaf(":"));
         s.push_back($4);
-        $$ = makeNode("AssertStatement", s);
+        $$ = makeNode("assert", s);
     }
 ;
 
 BreakContinueStatement:
     KEY_break IDENTIFIER ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("break"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$2+")" ));
+        s.push_back(makeLeaf("ID (" + *$2+")" ));
         delete $2;
-        $$ = makeNode("BreakContinueStatement", s);
+        $$ = makeNode("break", s);
     }
     | KEY_break ';' {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("break"));
-        $$ = makeNode("BreakContinueStatement", s);
+        $$ = makeLeaf("break");
     }
     | KEY_continue IDENTIFIER ';' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("continue"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$2+")" ));
+        s.push_back(makeLeaf("ID (" + *$2+")" ));
         delete $2;
-        $$ = makeNode("BreakContinueStatement", s);
+        $$ = makeNode("continue", s);
     }
     | KEY_continue ';' {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("continue"));
-        $$ = makeNode("BreakContinueStatement", s);
+        $$ = makeLeaf("continue");
     }
 ;
 
 ForStatement:
     KEY_for '(' ForInit ';' ';' ')' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($7);
-        $$ = makeNode("ForStatement", s);
+        $$ = makeNode("for", s);
     }
     | KEY_for '(' ForInit ';' Expression ';' ')' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($5);
         s.push_back($8);
-        $$ = makeNode("ForStatement", s);
+        $$ = makeNode("for", s);
     }
     | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($6);
         s.push_back($8);
-        $$ = makeNode("ForStatement", s);
+        $$ = makeNode("for", s);
     }
     | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($5);
         s.push_back($7);
         s.push_back($9);
-        $$ = makeNode("ForStatement", s);
+        $$ = makeNode("for", s);
     }
     /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement */
 ;
@@ -899,48 +870,40 @@ ForStatement:
 ForStatementNoShortIf:
     KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($7);
-        $$ = makeNode("ForStatementNoShortIf", s);
+        $$ = makeNode("for", s);
     }
     | KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($5);
         s.push_back($8);
-        $$ = makeNode("ForStatementNoShortIf", s);
+        $$ = makeNode("for", s);
     }
     | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($6);
         s.push_back($8);
-        $$ = makeNode("ForStatementNoShortIf", s);
+        $$ = makeNode("for", s);
     }
     | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("for"));
         s.push_back($3);
         s.push_back($5);
         s.push_back($7);
         s.push_back($9);
-        $$ = makeNode("ForStatementNoShortIf", s);
+        $$ = makeNode("for", s);
     }
 ;
 
 ForInit:
     StatementExpressionList {
-        vector<ASTNode*> s;
-        s.push_back($1);
-        $$ = makeNode("ForInit", s);
+        $$ = $1;
     }
     | LocalVariableDeclaration {
-        vector<ASTNode*> s;
-        s.push_back($1);
-        $$ = makeNode("ForInit", s);
+        $$ = $1;
     }
     |   {
         $$=NULL;
@@ -952,7 +915,7 @@ StatementExpressionList:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("StatementExpressionList", s);
+        $$ = makeNode(",", s);
     }
     | StatementExpression {
         $$=$1;
@@ -971,59 +934,53 @@ NormalClassDeclaration:
     Modifiers KEY_class IDENTIFIER ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("class"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3+")" ));
+        s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3;
         s.push_back($4);
-        $$ = makeNode("NormalClassDeclaration", s);
+        $$ = makeNode("class", s);
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("class"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3+")" ));
+        s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3 ;
         s.push_back($4);
         s.push_back($5);
-        $$ = makeNode("NormalClassDeclaration", s);
+        $$ = makeNode("class", s);
     }
     | Modifiers KEY_class IDENTIFIER ClassPermits ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("class"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3+")" ));
+        s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3;
         s.push_back($4);
         s.push_back($5);
-        $$ = makeNode("NormalClassDeclaration", s);
+        $$ = makeNode("class", s);
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back(makeLeaf("class"));
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3+")" ));
+        s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3;
         s.push_back($4);
         s.push_back($5);
         s.push_back($6);
-        $$ = makeNode("NormalClassDeclaration", s);
+        $$ = makeNode("class", s);
     }
 ;
 ClassExtends:
     KEY_extends ClassType {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("extends"));
         s.push_back($2);
-        $$ = makeNode("ClassExtends", s);
+        $$ = makeNode("extends", s);
     }
 ;
 ClassPermits:
     KEY_permits IDENdotIDEN cTypeName {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("permits"));
         s.push_back($2);
         s.push_back($3);
-        $$ = makeNode("ClassPermits", s);
+        $$ = makeNode("permits", s);
     }
 ;
 
@@ -1032,7 +989,7 @@ cTypeName:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("cTypeName", s);
+        $$ = makeNode(",", s);
     }
     |   {
         $$=NULL;
@@ -1089,7 +1046,7 @@ VariableDeclaratorList:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("VariableDeclaratorList", s);
+        $$ = makeNode(",", s);
     }
     | VariableDeclarator {
         $$=$1;
@@ -1114,19 +1071,19 @@ zerooroneExpression:
 
 VariableDeclarator1:
     IDENTIFIER {
-       $$ = makeLeaf("IDENTIFIER (" + *$1 +")");
+       $$ = makeLeaf("ID (" + *$1 +")");
        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1 +")" ));
+        s.push_back(makeLeaf("ID (" + *$1 +")" ));
         delete $1;
         s.push_back($3);
         $$ = makeNode("VariableDeclarator1", s);
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1 +")" ));
+        s.push_back(makeLeaf("ID (" + *$1 +")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
@@ -1134,7 +1091,7 @@ VariableDeclarator1:
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
@@ -1146,14 +1103,14 @@ VariableDeclarator1:
 VariableDeclarator2:
     IDENTIFIER '=' Expression {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         $$ = makeNode("=",s);
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' List1 {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
@@ -1161,7 +1118,7 @@ VariableDeclarator2:
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
@@ -1170,7 +1127,7 @@ VariableDeclarator2:
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3 {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
@@ -1178,37 +1135,79 @@ VariableDeclarator2:
         s.push_back($12);
         $$ = makeNode("=", s);
     }
-    | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' List1 {
+    | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' List1 {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back(makeLeaf("new"));
         s.push_back($7);
-        s.push_back($10);
+        s.push_back($9);
+        s.push_back($11);
         $$ = makeNode("=", s);
     }
-    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' List2 {
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' List2 {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back(makeLeaf("new"));
         s.push_back($10);
+        s.push_back($12);
         s.push_back($15);
+        s.push_back($17);
         $$ = makeNode("=", s);
     }
-    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' ']' '[' ']' '[' ']' List3 {
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' List3 {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back($9);
         s.push_back(makeLeaf("new"));
         s.push_back($13);
-        s.push_back($20);
+        s.push_back($15);
+        s.push_back($18);
+        s.push_back($21);
+        s.push_back($23);
+        $$ = makeNode("=", s);
+    }
+    | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
+        delete $1;
+        s.push_back($3);
+        s.push_back(makeLeaf("new"));
+        s.push_back($7);
+        s.push_back($9);
+        $$ = makeNode("=", s);
+    }
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
+        delete $1;
+        s.push_back($3);
+        s.push_back($6);
+        s.push_back(makeLeaf("new"));
+        s.push_back($10);
+        s.push_back($12);
+        s.push_back($15);
+        $$ = makeNode("=", s);
+    }
+    | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
+        delete $1;
+        s.push_back($3);
+        s.push_back($6);
+        s.push_back($9);
+        s.push_back(makeLeaf("new"));
+        s.push_back($13);
+        s.push_back($15);
+        s.push_back($18);
+        s.push_back($21);
         $$ = makeNode("=", s);
     }
 ;
@@ -1224,7 +1223,7 @@ ArrEle1:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("ArrEle1", s);
+        $$ = makeNode(",", s);
     }
     | Expression {
        $$=$1;
@@ -1242,7 +1241,7 @@ ArrEle2:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("ArrEle2", s);
+        $$ = makeNode(",", s);
     }
     | List1 {
         $$=$1;
@@ -1260,7 +1259,7 @@ ArrEle3:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("ArrEle3", s);
+        $$ = makeNode(",", s);
     }
     | List2 {
         $$=$1;
@@ -1286,9 +1285,8 @@ MethodHeader:
     }
     | KEY_void Methodeclarator {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("void"));
         s.push_back($2);
-        $$ = makeNode("MethodHeader", s);
+        $$ = makeNode("void", s);
     }
 ;
 
@@ -1304,14 +1302,14 @@ Methodeclarator:
 IdenPara:
     IDENTIFIER '(' formalparameters ')' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         s.push_back($3);
         $$ = makeNode("IdenPara", s);
     }
     | IDENTIFIER '(' ')' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$1+")" ));
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         $$ = makeNode("IdenPara", s);
     }
@@ -1321,7 +1319,7 @@ formalparameters:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        $$ = makeNode("formalparameters", s);
+        $$ = makeNode(",", s);
     }
     | formalparameter {
         $$=$1;
@@ -1340,7 +1338,7 @@ formalparameter:
         s.push_back($1);
         s.push_back(makeLeaf(*$2));
         delete $2;
-        s.push_back(makeLeaf("IDENTIFIER (" + *$3+")" ));
+        s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3;
         $$ = makeNode("formalparameter", s);
     }

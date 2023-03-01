@@ -1,46 +1,17 @@
-import IO;
-
-class nested_ifelse {
-	
-	public void main() {
-		IO io =  new IO();
-		int a = 1;
-		int b = 2;
-		int c = 3;
-		int d = 4;
-		int e = 5;
-		int f = 6;
-		if (a > b) {
-			a = b + 1;
-			if (c > a){
-				c = a - 1;
-			}
-			else if (c < a) {
-				c = a + 1;
-				if (c==d && e!=f) {
-					if (a) {
-						a = e;
-					} else {
-						a = f;
-					}
-				}
-				if (c!=d || e>f) {
-					if (a) {
-						a = e;
-					} else {
-						a = f;
-					}
-				}
-			}
-			else{
-				c = a * 2;
-			}
-		}
-		else if (a<b){
-			a = b * 2;
-		}
-		else{
-			return;
-		}
-	}
-}
+//Java Program to demonstrate the use of Nested If Statement.    
+public class JavaNestedIfExample2 {      
+public static void main(String[] args) {      
+	//Creating two variables for age and weight    
+	int age=25;    
+	int weight=48;      
+	//applying condition on age and weight    
+	if(age>=18){      
+		if(weight>50){    
+			System.out.println("You are eligible to donate blood");    
+		} else{  
+			System.out.println("You are not eligible to donate blood");    
+		}  
+	} else{  
+		System.out.println("Age must be greater than 18");  
+	}  
+}  }  

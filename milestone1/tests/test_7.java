@@ -1,31 +1,58 @@
-import IO;
-public class MyBinarySearch {
+import java.util.Scanner;
 
-    public int binarySearch(int inputArr[8], int len, int key) {        // c-type
-        int start = 0,mid;
-        int end = len - 1;
-        while (start <= end) {
-            mid = (start + end) / 2;
-            if (key == inputArr[mid]) {
-                return mid;
-            }
-            if (key < inputArr[mid]) {
-                end = mid - 1;
-            } else {
-                start = mid + 1;
-            }
-        }
-        return -1;
+// Binary Search in Java
+
+class Main {
+  int binarySearch(int array[], int element, int low, int high) {
+
+    // Repeat until the pointers low and high meet each other
+    while (low <= high) {
+
+      // get index of mid element
+      int mid = low + (high - low) / 2;
+
+      // if element to be searched is the mid element
+      if (array[mid] == element)
+        return mid;
+
+      // if element is less than mid element
+      // search only the left side of mid
+      if (array[mid] < element)
+        low = mid + 1;
+
+      // if element is greater than mid element
+      // search only the right side of mid
+      else
+        high = mid - 1;
     }
-    public void main() {
-		IO io = new IO();
-        MyBinarySearch mbs = new MyBinarySearch();
-        int arr[8] = {2, 4, 6, 8, 10, 12, 14, 16};          // c-type declaraton
 
-        io.print_int(mbs.binarySearch(arr, 8, 14)); io.print_char('\n');
+    return -1;
+  }
 
-        int arr1[8] = {6, 34, 78, 123, 432, 900, 990, 1000};        // c-type declaration
+  public static void main(String args[]) {
 
-        io.print_int(mbs.binarySearch(arr1, 8, 431)); io.print_char('\n');
-    }
+    // create an object of Main class
+    Main obj = new Main();
+
+    // create a sorted array
+    int array[] = { 3, 4, 5, 6, 7, 8, 9 };
+    int n = array.length;
+
+    // get input from user for element to be searched
+    Scanner input = new Scanner(System.in);
+
+    System.out.println("Enter element to be searched:");
+
+    // element to be searched
+    int element = input.nextInt();
+    input.close();
+
+    // call the binary search method
+    // pass arguments: array, element, index of first and last element
+    int result = obj.binarySearch(array, element, 0, n - 1);
+    if (result == -1)
+      System.out.println("Not found");
+    else
+      System.out.println("Element found at index " + result);
+  }
 }

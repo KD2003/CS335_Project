@@ -31,7 +31,7 @@ STRLIT ["]([^"\\\n]|{ESCSEQ}|\\(.|\n))*["]
 SEP1 ";"|","|"."|"@"|"("|"{"|"["|")"|"}"|"]"
 DOT3 "..."
 ASSIGNOP "="|"*="|"/="|"%="|"+="|"-="|"<<="|">>="|">>>="|"&="|"\^="|"\|="
-SINGLEOP "&"|"^"|"|"|":"|'?'
+SINGLEOP "&"|"^"|"|"|":"|'?'|"*"
 OPERATOR "="|">"|"<"|"!"|"~"|"?"|":"|"->"|"=="|">="|"<="|"!="|"&&"|"|"{2}|"++"|"--"|"+"|"-"|"*"|"/"|"&"|"|"|"^"|"%"|"<<"|">>"|">>>"|"+="|"-="|"*="|"/="|"&="|"\|="|"\^="|"%="|"<<="|">>="|">>>="
 
 %option yylineno
@@ -141,7 +141,7 @@ import {return(KEY_import);}
 "+"|"-" {yylval.st = new std::string(yytext); return(ADDOP);}
 "++"|"--" {yylval.st = new std::string(yytext); return(ADDOP2);}
 "~"|"!" {yylval.st = new std::string(yytext); return(UNARYOP);}
-"*"|"/"|"%" {yylval.st = new std::string(yytext); return(MULTOP);}
+"/"|"%" {yylval.st = new std::string(yytext); return(MULTOP);}
 {SINGLEOP} {return((int)yytext[0]);}
 
 {OPERATOR} {
