@@ -6,6 +6,8 @@
 using namespace std;
 
 FILE* dotfile;
+extern FILE* yyin;
+extern int yyrestart(FILE*);
 
 int yylex();
 int yyerror(const char *str);
@@ -1371,10 +1373,100 @@ Modifiers:
 // Class and Method END
 %%
 
-int main(){
-    dotfile = fopen("graphtest.dot","w");
+void print_help(){
+    cout << " options :::\n";
+    cout << " --help           Display available options.\n";
+    cout << " --input <file>   take <file> as input file.\n";
+    cout << " --output <file>  will print the dot script in <file>.\n";
+    cout << " --verbose        display the procedure in bit details.\n"; 
+    return;                                                     
+}
+
+int main(int argc, char* argv[]){
+    bool gotinputfile=false;
+    bool gotoutputfile=false;
+    char* dotfilename;
+    dotfilename = (char*)malloc(sizeof(char)*100);
+    strcpy(dotfilename,"temp.dot");
+    bool verbosemode=false;
+
+    for(int i=1;i<argc;i++){
+        if(!strcmp(argv[i],"--input")){
+            if(i==argc-1){
+                cout << "Error :: input file name not given.\n";
+                return 0;
+            }
+            else if(gotinputfile){
+                cout << "Error :: multiple input file name detected.\n";
+                return 0;
+            }
+            else{
+                yyin = fopen(argv[i+1],"r");
+                if(yyin==NULL){
+                    cout << argv[i+1] << " can not be opened as an input file.\n";
+                    return 0;
+                } 
+                i++;
+                gotinputfile=true;
+                continue;
+            }
+        }
+        else if(!strcmp(argv[i],"--output")){
+            if(i==argc-1){
+                cout << "Error :: output file name not given.\n";
+                return 0;
+            }
+            else if(gotoutputfile){
+                cout << "Error :: multiple output file name detected.\n";
+                return 0;
+            }
+            else{
+                dotfilename=argv[i+1];
+                i++;
+                gotoutputfile=true;
+                continue;
+            }
+        }
+        else if(!strcmp(argv[i],"--help")){
+            print_help();
+            return 0;
+        }
+        else if(!strcmp(argv[i],"--verbose")){
+            verbosemode=true;
+        }
+        else{
+            cout << "Argument: " << argv[i] << "  not recognised.\n";return 0;
+            
+        }
+    }
+    if(!gotinputfile){
+        cout << "Inputfile name not mentioned.\n";
+        return 0;
+    }
+
+    if(verbosemode){
+        cout<< "Input file is opened" ;
+        cout << "....\n";
+        cout << "Starting the parser...\n";
+    }
+
+    dotfile = fopen(dotfilename, "w");
+
+    if(dotfile==NULL){
+        cout << "Dot file can not be opened.\n";
+        return 0;
+    }
+    yyrestart(yyin);
     beginAST();
     if(yyparse()) return 0;
     endAST();
-    return 0;
+
+    if(verbosemode){
+        cout << "Parser work completed..\n";
+        cout << "Dot script is printed in ";
+        for(char* tmp=dotfilename;*tmp!='\0';tmp++){
+            cout << *tmp;
+        }
+        cout << "....\n";
+    }
 }

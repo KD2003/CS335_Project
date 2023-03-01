@@ -1,5 +1,5 @@
 
-#line 3 "lex.yy.c"
+#line 2 "lex.yy.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -856,9 +856,9 @@ using namespace std;
 
 string txt;
 
-#line 860 "lex.yy.c"
+#line 859 "lex.yy.c"
 
-#line 862 "lex.yy.c"
+#line 861 "lex.yy.c"
 
 #define INITIAL 0
 #define COMMENT 1
@@ -1080,7 +1080,7 @@ YY_DECL
 #line 40 "scanner.l"
 
 
-#line 1084 "lex.yy.c"
+#line 1083 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -1504,7 +1504,7 @@ YY_RULE_SETUP
 #line 169 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1508 "lex.yy.c"
+#line 1507 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
