@@ -280,41 +280,18 @@
 //   	fclose(file);
 // }
 
-// // return the size of the given datatype
-// int getSize(string id){
-// //   if(typeLookup(id)) return getStructsize(id);
-//   if(1) return 4;
-//   if(id == "char") return sizeof(char);
-//   if(id == "short") return sizeof(short);
-//   if(id == "short int") return sizeof(short int);
-//   if(id == "int") return sizeof(int);
-//   if(id == "bool") return sizeof(bool);
-//   if(id == "long int") return sizeof(long int);
-//   if(id == "long long") return sizeof(long long);
-//   if(id == "long long int") return sizeof(long long int);
-//   if(id == "float") return sizeof(float);
-//   if(id == "double") return sizeof(double);
-//   if(id == "long double") return sizeof(long double);
-//   if(id == "signed short int") return sizeof(signed short int);
-//   if(id == "signed int") return sizeof(signed int);
-//   if(id == "signed long int") return sizeof(signed long int);
-//   if(id == "signed long long") return sizeof(signed long long);
-//   if(id == "signed long long int") return sizeof(signed long long int);
-//   if(id == "unsigned short int") return sizeof(unsigned short int);
-//   if(id == "unsigned int") return sizeof(unsigned int);
-//   if(id == "unsigned long int") return sizeof(unsigned long int);
-//   if(id == "unsigned long long") return sizeof(unsigned long long);
-//   if(id == "unsigned long long int") return sizeof(unsigned long long int);
-//   return 4;
-// }
 
 // NEW
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
+map<string, pair< string,vector<string> > > func_arg;
 sym_table* cur_table;
 
-extern int isArray;
-extern vector<int> array_dims;
+int avl = 0;
+
+// extern int isArray;
+extern int dump_sym_table;
+// extern vector<int> array_dims;
 
 void symbolTableInit(){
 	parent_table.insert(make_pair(&global_st, nullptr));
@@ -347,21 +324,21 @@ sym_entry* curLookup(string id){
 
 void insertSymbol(sym_table& table, string id, string token, string lexeme, string type, int lineno, sym_table* ptr){
 	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr)));
-	if(type[type.length()-1] == '*' && !array_dims.empty()){
-		vector<int> temp;
-		int cur = 1;
-		for(int i = array_dims.size()-1; i>=1; i--){
-			cur*=array_dims[i];
-			temp.push_back(cur);
-		}
-		reverse(temp.begin(), temp.end());
-		table[id]->array_dims = temp;
-		if(isArray){
-			table[id]->isArray = 1;
-			isArray = 0;
-		}
-		array_dims.clear();
-	}
+	// if(type[type.length()-1] == '*' && !array_dims.empty()){
+	// 	vector<int> temp;
+	// 	int cur = 1;
+	// 	for(int i = array_dims.size()-1; i>=1; i--){
+	// 		cur*=array_dims[i];
+	// 		temp.push_back(cur);
+	// 	}
+	// 	reverse(temp.begin(), temp.end());
+	// 	table[id]->array_dims = temp;
+	// 	if(isArray){
+	// 		table[id]->isArray = 1;
+	// 		isArray = 0;
+	// 	}
+	// 	array_dims.clear();
+	// }
 }
 
 void makeSymbolTable(string name, string f_type, int lineno){
@@ -381,4 +358,55 @@ void makeSymbolTable(string name, string f_type, int lineno){
 		(*parent_table[cur_table]).erase("dummyF_name");
 		(*parent_table[cur_table]).insert(make_pair(name, createEntry("FUNC", f_type, "FUNC", lineno, cur_table)));
 	}
+}
+
+void createParamList(int lineno){
+	makeSymbolTable("dummyF_name", "",lineno);
+	avl = 1;
+}
+
+void paramInsert(sym_table& table, string id, string token, string lexeme,string type, int lineno, sym_table* ptr){
+	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr)));
+}
+
+vector<string> getFuncArgs(string id){
+	vector<string> temp;
+	temp.push_back("#NO_FUNC");
+	if(func_arg.find(id) != func_arg.end()) return func_arg[id].second;
+	else return temp;
+}
+
+string getFuncType(string id){
+	if(func_arg.find(id) != func_arg.end()) return func_arg[id].first;
+	return "";
+}
+
+void insertFuncArg(string &func, vector<string> &arg, string &tp){
+	func_arg.insert(make_pair(func, make_pair(string("FUNC_" +tp),arg)));
+}
+
+void printSymbolTable(sym_table* table, string file_name){
+	if(!dump_sym_table) return;
+	FILE* file = fopen(file_name.c_str(), "w");
+  	fprintf( file,"Name, Token, Lexeme, Type, Lineno\n");
+  	for(auto it: (*table)){
+    	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
+  	}
+  	fclose(file);
+}
+
+string funcProtoLookup(string id){
+	if(func_arg.find(id)!= func_arg.end())return func_arg[id].first;
+	else return "";
+}
+
+void removeFuncProto(){
+	avl = 0;
+	endSymbolTable("dummyF_name");
+	parent_table.erase((*cur_table)["dummyF_name"]->entry);
+	(*cur_table).erase("dummyF_name");
+}
+
+void endSymbolTable(string id){
+	cur_table = parent_table[cur_table];
 }
