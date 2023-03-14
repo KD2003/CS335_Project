@@ -1,5 +1,5 @@
 #include "symbol_table.h"
-#include <bits/stdc++.h>
+#include <string>
 using namespace std;
 
 string primaryExpression(string id);

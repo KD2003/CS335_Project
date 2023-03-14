@@ -11,6 +11,8 @@ extern int yyrestart(FILE*);
 
 bool gotinputfile, gotoutputfile, verbosemode;
 
+string type;
+
 int yylex();
 int yyerror(const char *str);
 
@@ -110,14 +112,20 @@ Type:
 PrimitiveType:
     INTTYPE     {
         $$ = makeLeaf(*$1);
+        $$->type = *$1;
+        if(type=="") type = *$1;
         delete $1;
     }
     | FPTYPE       {
         $$ = makeLeaf(*$1);
+        $$->type = *$1;
+        if(type=="") type = *$1;
         delete $1;
     }
     | BOOLTYPE      {
         $$ = makeLeaf(*$1);
+        $$->type = *$1;
+        if(type=="") type = *$1;
         delete $1;
     }
 ;
@@ -1019,6 +1027,7 @@ ClassBodyDeclaration:
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("ClassBodyDeclaration", s);
+        type = "";
     }
     | ClassDeclaration {
         $$=$1;
@@ -1071,8 +1080,14 @@ zerooroneExpression:
 
 VariableDeclarator1:
     IDENTIFIER {
-       $$ = makeLeaf("ID (" + *$1 +")");
-       delete $1;
+        $$ = makeLeaf("ID (" + *$1 +")");
+
+        $$->expType = 1;
+        if(type!="") $$->type = type;
+        else{
+            printf("Type is not defined\n");
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
