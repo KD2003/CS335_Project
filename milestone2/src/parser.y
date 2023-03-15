@@ -75,24 +75,28 @@ Imports:
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("import", s);
+        type="";
     }
     | KEY_import KEY_static IDENdotIDEN ';'     {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("static"));
         s.push_back($3);
         $$ = makeNode("import", s);
+        type="";
     }
     | KEY_import IDENdotIDEN '.' '*' ';'        {
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back(makeLeaf("*"));
         $$ = makeNode("import", s);   
+        type="";
     }
     | KEY_import KEY_static IDENdotIDEN '.' '*' ';'     {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("static"));
         s.push_back($3);
         $$ = makeNode("import", s);
+        type="";
     }
 ;
 
@@ -226,12 +230,16 @@ ClassInstanceCreationExpression:
         s.push_back($4);
         s.push_back($6);
         $$ = makeNode("new", s);
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
     | KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'        {
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back($4);
         $$ = makeNode("new", s);
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
 ;
 
@@ -250,14 +258,21 @@ FieldAccess:
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
-        
         $$ = makeNode("FieldAccess", s);
+
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | KEY_super '.' IDENTIFIER      {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
         $$ = makeNode("super", s);
+
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | IDENdotIDEN '.' KEY_super '.' IDENTIFIER      {
         vector<ASTNode*> s;
@@ -266,6 +281,8 @@ FieldAccess:
         s.push_back(makeLeaf("ID (" + *$5 + ")"));
         delete $5;
         $$ = makeNode("FieldAccess", s);
+
+        //
     }
 ;
 
@@ -275,12 +292,19 @@ ArrayAccess:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("ArrayAccess", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
+
     }
     | PrimaryNoNewArray '[' Expression ']'      {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("ArrayAccess", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
 ;
 
@@ -289,9 +313,10 @@ MethodInvocation:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
-        
-        
         $$ = makeNode("MethodInvocation", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
     | Primary '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'     {
         vector<ASTNode*> s;
@@ -299,10 +324,10 @@ MethodInvocation:
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
         s.push_back($5);
-        
-        
-        
         $$ = makeNode("MethodInvocation", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'       {
         vector<ASTNode*> s;
@@ -310,10 +335,10 @@ MethodInvocation:
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         delete $3;
         s.push_back($5);
-        
-        
-        
         $$ = makeNode("MethodInvocation", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | IDENdotIDEN '.' KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'      {
         vector<ASTNode*> s;
@@ -323,6 +348,8 @@ MethodInvocation:
         delete $5;
         s.push_back($7);
         $$ = makeNode("MethodInvocation", s);   
+
+        //
     }
 ;
 
@@ -338,30 +365,43 @@ ArgumentList:
     }
 ;
 
-ArrayCreationExpression:        // array initiaizer to do
+ArrayCreationExpression: 
     KEY_new PrimitiveType DimExpr Dims      {
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("new", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
+
     }
     | KEY_new PrimitiveType DimExpr     {
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("new", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
     | KEY_new IDENdotIDEN DimExpr Dims      {
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("new", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
     | KEY_new IDENdotIDEN DimExpr       {
         vector<ASTNode*> s;
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("new", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
 ;
 
@@ -401,12 +441,53 @@ Assignment:
         s.push_back($3);
         $$ = makeNode(*$2, s);
         delete $2;
+
+        string t=assignExp($1->type,$3->type,ASSIGNOP);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
     | LeftHandSide '=' Expression       {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("=", s);
+
+
+        string t=assignExp($1->type,$3->type,"=");
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -422,6 +503,8 @@ ConditionalExpression:
         s.push_back(makeLeaf(":"));
         s.push_back($5);
         $$ = makeNode("ConditionalExpression", s);
+
+        //
     }
 ;
 
@@ -434,6 +517,26 @@ ConditionalOrExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("||", s);
+
+        string t=assignExp($1->type,$3->type,CONDOR);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -446,6 +549,26 @@ ConditionalAndExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("&&", s);
+
+        string t=assignExp($1->type,$3->type,CONDAND);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -458,6 +581,26 @@ AndExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("&", s);
+
+        string t=assignExp($1->type,$3->type,"&");
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -470,6 +613,27 @@ ExclusiveOrExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("^", s);
+
+
+    string t=assignExp($1->type,$3->type,"^");
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;       
 
@@ -482,6 +646,26 @@ InclusiveOrExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("|", s);
+
+        string t=assignExp($1->type,$3->type,"|");
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -495,6 +679,26 @@ EqualityExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
         delete $2;
+
+        string t=assignExp($1->type,$3->type,EQALITYOP);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -508,6 +712,26 @@ RelationalExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
         delete $2;
+
+        string t=assignExp($1->type,$3->type,RELATIONOP);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -521,6 +745,26 @@ ShiftExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
         delete $2;
+
+        string t=assignExp($1->type,$3->type,SHIFTOP);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -534,6 +778,26 @@ AdditiveExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
         delete $2;
+
+        string t=assignExp($1->type,$3->type,ADDOP);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -547,12 +811,52 @@ MultiplicativeExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
         delete $2;
+
+        string t=assignExp($1->type,$3->type,MULTOP);
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
     | MultiplicativeExpression '*' UnaryExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("*", s);
+
+        string t=assignExp($1->type,$3->type,"*");
+        if(!$1->error && !$3->error && $1->expType!=4){
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=$1->type;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
+        }
+        else if($1->expType==4){
+                fprintf(1,"Right side cannot be a constant");
+        }
+        $$->is_error=1;
     }
 ;
 
@@ -562,12 +866,40 @@ UnaryExpression:
         s.push_back($2);
         $$ = makeNode(*$1, s);
         delete $1;
+
+        string t=PostfixExpression($2->type,6);
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=t;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
     }
     | ADDOP UnaryExpression     {
         vector<ASTNode*> s;
         s.push_back($2);        
         $$ = makeNode(*$1, s);
         delete $1;
+
+        string t=PostfixExpression($2->type,6);
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=t;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
     }
     | UnaryExpressionNotPlusMinus   {
         $$ = $1;
@@ -586,6 +918,20 @@ UnaryExpressionNotPlusMinus:
         s.push_back($2);        
         $$ = makeNode(*$1, s);
         delete $1;
+
+        if(!$1->is_error && !$2->is_error){
+        string t = unaryExp($1->node_name,$2->type);
+			if(!temp.empty()){
+				$$->type = t;
+			}
+			else{
+				yyerror("Type inconsistent with operator");
+				$$->is_error = 1;
+			}
+		}
+		else{
+			$$->is_error = 1;
+		}
     }
 ;
 
@@ -595,6 +941,10 @@ CastExpression:
         s.push_back($2);
         s.push_back($4);
         $$ = makeNode("CastExpression", s);
+
+        if(type="")type=$2->type;
+        $$->type=type;
+        //
     }
 ;
 
@@ -611,6 +961,8 @@ PostfixExpression:
         s.push_back(makeLeaf(*$2));
         $$ = makeNode("Postfix Expression", s);
         delete $2;
+
+        //
     }
 ;
 // 15 end
@@ -638,6 +990,7 @@ BlockStatements:
 BlockStatement:
     LocalVariableDeclaration ';' {
         $$=$1;
+        type="";
     }
     | Statement {
         $$=$1;
@@ -650,6 +1003,10 @@ LocalVariableDeclaration:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("LocalVariableDeclaration", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
+        $2->type=type;
     }
 ;
 
@@ -659,6 +1016,11 @@ LocalVariableType:
     }
     | KEY_VAR {
         $$ = makeLeaf("var");
+
+
+        if(type=="")type=*$1;
+        $$->type=type;
+        delete $1;
     }
 ;
 
@@ -673,6 +1035,10 @@ Statement:
         s.push_back($3);
         $$ = makeNode("Statement", s);
         delete $1;
+
+        if(type=="")type=$1->type;
+        $$->type=type;
+        $3->type=type;
     }
     | KEY_if '(' Expression ')' Statement {
         vector<ASTNode*> s;
@@ -710,6 +1076,10 @@ StatementNoShortIf:
         s.push_back(makeLeaf(":"));
         s.push_back($3);
         $$ = makeNode("StatementNoShortIf", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
+        $3->type=type;
     }
     | KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf {
         vector<ASTNode*> s,s1;
@@ -736,9 +1106,11 @@ StatementWithoutTrailingSubstatement:		// left try statement
     }
     | ';' {
         $$=NULL;
+        type="";
     }
     | StatementExpression ';' {
         $$=$1;
+        type="";
     }
     | AssertStatement {
         $$=$1;
@@ -748,27 +1120,34 @@ StatementWithoutTrailingSubstatement:		// left try statement
     }
     | KEY_return ';' {
         $$ = makeLeaf("return");
+        type="";
     }
     | KEY_return Expression ';' {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("return", s);
+        type="";
+
+        //
     }
     | KEY_yield Expression ';' {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("yield", s);
+        type="";
     }
     | KEY_throw Expression ';' {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("throw", s);
+        type="";
     }
     | KEY_sync '(' Expression ')' Block {
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("sync", s);
+        type="";
     }
 ;
 
@@ -784,6 +1163,20 @@ StatementExpression:
         s.push_back($2);
         $$ = makeNode(*$1, s);
         delete $1;
+
+        string t=PostfixExpression($2->type,6);
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=t;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
     }
     | PostfixExpression ADDOP2 {
         vector<ASTNode*> s;
@@ -791,6 +1184,20 @@ StatementExpression:
         s.push_back(makeLeaf(*$2));
         delete $2;
         $$ = makeNode("Statement Expression", s);
+
+        string t=PostfixExpression($1->type,6);
+            if(!t.empty()){
+                if(t=="ok"){
+                    $$->type=t;
+                }
+                // if($1->expType == 3 && $3->isInit){
+				// 	updInit($1->temp_name);
+				// }
+            }
+            else{
+                fprintf(1,"Incompatible Types when comparing");
+                $$->is_error=1;
+            }
     }
     /* | ClassInstanceCreationExpression */
 ;
@@ -798,6 +1205,8 @@ StatementExpression:
 LeftHandSide:
     IDENdotIDEN {
         $$=$1;
+        if(type=="")type="IdendotIden String Name";
+        $$->type=type;
     }
     | FieldAccess {
         $$=$1;
@@ -812,6 +1221,12 @@ AssertStatement:
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("assert", s);
+
+        if($2->type!=boolean){
+            $$->is_error=1;
+        }
+        type="";
+
     }
     | KEY_assert Expression ':' Expression ';' {
         vector<ASTNode*> s;
@@ -819,6 +1234,10 @@ AssertStatement:
         s.push_back(makeLeaf(":"));
         s.push_back($4);
         $$ = makeNode("assert", s);
+
+
+        if($2->type!=boolean && $4->type!="void")
+        type="";
     }
 ;
 
@@ -828,18 +1247,22 @@ BreakContinueStatement:
         s.push_back(makeLeaf("ID (" + *$2+")" ));
         delete $2;
         $$ = makeNode("break", s);
+        type="";
     }
     | KEY_break ';' {
         $$ = makeLeaf("break");
+        type="";
     }
     | KEY_continue IDENTIFIER ';' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$2+")" ));
         delete $2;
         $$ = makeNode("continue", s);
+        type="";
     }
     | KEY_continue ';' {
         $$ = makeLeaf("continue");
+        type="";
     }
 ;
 
@@ -909,12 +1332,15 @@ ForStatementNoShortIf:
 ForInit:
     StatementExpressionList {
         $$ = $1;
+        type="";
     }
     | LocalVariableDeclaration {
         $$ = $1;
+        type="";
     }
     |   {
         $$=NULL;
+        type="";
     }
 ;
 
@@ -946,6 +1372,9 @@ NormalClassDeclaration:
         delete $3;
         s.push_back($4);
         $$ = makeNode("class", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassBody {
         vector<ASTNode*> s;
@@ -955,6 +1384,9 @@ NormalClassDeclaration:
         s.push_back($4);
         s.push_back($5);
         $$ = makeNode("class", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | Modifiers KEY_class IDENTIFIER ClassPermits ClassBody {
         vector<ASTNode*> s;
@@ -964,6 +1396,9 @@ NormalClassDeclaration:
         s.push_back($4);
         s.push_back($5);
         $$ = makeNode("class", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody {
         vector<ASTNode*> s;
@@ -974,6 +1409,9 @@ NormalClassDeclaration:
         s.push_back($5);
         s.push_back($6);
         $$ = makeNode("class", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
 ;
 ClassExtends:
@@ -989,6 +1427,9 @@ ClassPermits:
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("permits", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
 ;
 
@@ -1028,12 +1469,16 @@ ClassBodyDeclaration:
         s.push_back($3);
         $$ = makeNode("ClassBodyDeclaration", s);
         type = "";
+
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
     | ClassDeclaration {
         $$=$1;
     }
     | ';' {
         $$=NULL;
+        type="";
     }
     | Block {
         $$=$1;
@@ -1044,6 +1489,9 @@ ClassBodyDeclaration:
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("ClassBodyDeclaration", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
     }
     | MethodDeclaration {
         $$=$1;
@@ -1081,7 +1529,6 @@ zerooroneExpression:
 VariableDeclarator1:
     IDENTIFIER {
         $$ = makeLeaf("ID (" + *$1 +")");
-
         $$->expType = 1;
         if(type!="") $$->type = type;
         else{
@@ -1095,6 +1542,8 @@ VariableDeclarator1:
         delete $1;
         s.push_back($3);
         $$ = makeNode("VariableDeclarator1", s);
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1103,6 +1552,8 @@ VariableDeclarator1:
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("VariableDeclarator1", s);
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1112,6 +1563,8 @@ VariableDeclarator1:
         s.push_back($6);
         s.push_back($9);
         $$ = makeNode("VariableDeclarator1", s);
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
 ;
 
@@ -1302,6 +1755,8 @@ MethodHeader:
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("void", s);
+
+
     }
 ;
 
@@ -1321,12 +1776,18 @@ IdenPara:
         delete $1;
         s.push_back($3);
         $$ = makeNode("IdenPara", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
     | IDENTIFIER '(' ')' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         $$ = makeNode("IdenPara", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
     }
 ;
 formalparameters:
@@ -1347,6 +1808,9 @@ formalparameter:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("formalparameter", s);
+
+        if(type=="")type=$1->type;
+        $$->type=type;
     }
     | Type DOT3 IDENTIFIER {
         vector<ASTNode*> s;
@@ -1356,6 +1820,10 @@ formalparameter:
         s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3;
         $$ = makeNode("formalparameter", s);
+
+        if(type=="")type=$3->type;
+        $$->type=type;
+        $3->type=type;
     }
 ;
 
@@ -1365,6 +1833,7 @@ MethodBody:
     }
     | ';' {
         $$=NULL;
+        type="";
     }
 ;
 
