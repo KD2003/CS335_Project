@@ -14,7 +14,7 @@ typedef struct{
 	double realVal;
 	string strVal;
 	int is_error = 0;
-
+	
 	string temp_name;
 	// qid place;
 }ASTNode;
