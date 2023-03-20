@@ -305,6 +305,9 @@ ArrayAccess:
 
         if(type=="")type=$1->type;
         $$->type=type;
+        if($3->type!="INT"){
+            fprintf(1,"Index of the array should be integer.");
+        }
     }
 ;
 
@@ -315,8 +318,45 @@ MethodInvocation:
         s.push_back($3);
         $$ = makeNode("MethodInvocation", s);
 
-        if(type=="")type=$1->type;
-        $$->type=type;
+
+        // string t=PostfixExpression($1->type,2);
+        // if(t.empty()){
+        //     t=getFuncType($1->temp_name);
+        // }
+
+        // if(type=="")type=$1->type;
+        // $$->type=type;
+        string t = postfixExpression($1->type,2);
+		currArgs.push_back(vector<string>() ); 
+
+		if(t.empty()){
+			t = getFuncType($1->temp_name);
+		}
+
+		if(!($1->is_error) && $1->expType!=4){
+			if(!t.empty()){	
+				$$->type = t;
+                if($1-expType==3){
+                    vector<string> funcArg = getFuncArgs($1->temp_name);
+                    if(funcArg.empty()){
+                        yyerror(("Too few Arguments to Function " + $1->temp_name).c_str());
+                    }
+                    else{
+                        //3ac
+                    }
+                }
+            }
+            else{
+				yyerror(("Function " + $1->temp_name + " not declared in this scope").c_str());
+                $$->is_error=1;
+            }
+        }
+        else{
+            if($1->expType==4)yyerror("Constant Expression");
+            $$->is_error=1;
+        }
+
+
     }
     | Primary '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'     {
         vector<ASTNode*> s;
@@ -337,8 +377,72 @@ MethodInvocation:
         s.push_back($5);
         $$ = makeNode("MethodInvocation", s);
 
-        if(type=="")type=$3->type;
-        $$->type=type;
+
+		string t = postfixExpression($1->type,3);
+		if(t.empty()){
+			t = getFuncType($1->temp_name);
+		}
+
+		if(!($3->is_error || $5->is_error) && $3->expType!=4){
+			if(!t.empty()){	
+				$$->type = t;
+				if($3->expType ==3){
+					vector<string> funcArgs = getFuncArgs($1->temp_name);
+					vector<string> tempArgs =currArgs.back();
+					for(int i=0;i<funcArgs.size();i++){
+						if(funcArgs[i]=="...")break;
+						if(tempArgs.size()==i){
+							yyerror(("Too few Arguments to Function " + $1->temp_name).c_str());
+							break;
+						}
+						string msg = checkType(funcArgs[i],tempArgs[i]);
+
+						// if(msg =="warning"){
+						// 	warning(("Incompatible conversion of " +  tempArgs[i] + " to parameter of type " + funcArgs[i]).c_str());
+						// }
+						else if(msg.empty()){
+							yyerror(("Incompatible Argument to the function " + $1->temp_name).c_str());
+							$$->is_error = 1;
+							break;
+						}
+						if(i==funcArgs.size()-1 && i<tempArgs.size()-1){
+							yyerror(("Too many Arguments to Function " + $3->temp_name).c_str());
+							$$->is_error = 1;
+							break;
+						}
+
+					}	
+
+					//--3AC
+					// if(!$$->is_error){
+					// 	qid q = newtemp($$->type);
+					// 	$$->place = q;
+					// 	$$->nextlist.clear();
+
+					// 	emit(qid("CALL", NULL), qid($1->temp_name,NULL), qid(to_string(currArgs.back().size()), NULL), q, -1);
+					// 	currArgs.pop_back();
+
+					// 	if(func_usage_map.find($1->temp_name) != func_usage_map.end()){
+					// 		func_usage_map[$1->temp_name] = 1;
+					// 	}
+					// }
+
+				}
+			}
+			else{
+				yyerror("Invalid function call");
+				$$->is_error=1;
+			}
+		}
+		else{
+			if($1->expType==4){
+				yyerror("constant expression cannot be used as lvalue");
+			}
+			$$->is_error=1;
+		}
+
+        // if(type=="")type=$3->type;
+        // $$->type=type;
     }
     | IDENdotIDEN '.' KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'      {
         vector<ASTNode*> s;
@@ -411,11 +515,19 @@ DimExpr:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("DimExpr", s);
+
+        if($3->type!="INT"){
+            fprintf(1,"Index of the array should be integer.");
+        }
     }
     | '[' Expression ']'        {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("DimExpr", s);
+
+        if($3->type!="INT"){
+            fprintf(1,"Index of the array should be integer.");
+        }
     }
 ;
 
@@ -1542,8 +1654,14 @@ VariableDeclarator1:
         delete $1;
         s.push_back($3);
         $$ = makeNode("VariableDeclarator1", s);
+
+
         if(type=="")type=$1->type;
         $$->type=type;
+        if($3->type!="INT"){
+            fprintf(1,"Index of the array should be integer.");
+        }
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1554,6 +1672,7 @@ VariableDeclarator1:
         $$ = makeNode("VariableDeclarator1", s);
         if(type=="")type=$1->type;
         $$->type=type;
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1565,6 +1684,7 @@ VariableDeclarator1:
         $$ = makeNode("VariableDeclarator1", s);
         if(type=="")type=$1->type;
         $$->type=type;
+        //
     }
 ;
 
@@ -1583,6 +1703,7 @@ VariableDeclarator2:
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 {
         vector<ASTNode*> s;
@@ -1592,6 +1713,7 @@ VariableDeclarator2:
         s.push_back($6);
         s.push_back($9);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3 {
         vector<ASTNode*> s;
@@ -1602,6 +1724,7 @@ VariableDeclarator2:
         s.push_back($9);
         s.push_back($12);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' List1 {
         vector<ASTNode*> s;
@@ -1613,6 +1736,7 @@ VariableDeclarator2:
         s.push_back($9);
         s.push_back($11);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' List2 {
         vector<ASTNode*> s;
@@ -1626,6 +1750,7 @@ VariableDeclarator2:
         s.push_back($15);
         s.push_back($17);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' List3 {
         vector<ASTNode*> s;
@@ -1641,6 +1766,7 @@ VariableDeclarator2:
         s.push_back($21);
         s.push_back($23);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1651,6 +1777,9 @@ VariableDeclarator2:
         s.push_back($7);
         s.push_back($9);
         $$ = makeNode("=", s);
+        // if($3->intvalue>cnt){
+            // fprintf("Index out of bounds");
+        // }
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1663,6 +1792,13 @@ VariableDeclarator2:
         s.push_back($12);
         s.push_back($15);
         $$ = makeNode("=", s);
+        //
+        // if($3->intvalue>cnt){
+            // fprintf("Index out of bounds");
+        // }
+        // if($6->intvalue>cnt){
+            // fprintf("Index out of bounds");
+        // }
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
@@ -1677,6 +1813,16 @@ VariableDeclarator2:
         s.push_back($18);
         s.push_back($21);
         $$ = makeNode("=", s);
+        //
+        // if($3->intvalue>cnt){
+            // fprintf("Index out of bounds");
+        // }
+        // if($6->intvalue>cnt){
+            // fprintf("Index out of bounds");
+        // }
+        // if($9->intvalue>cnt){
+            // fprintf("Index out of bounds");
+        // }
     }
 ;
 
@@ -1692,6 +1838,8 @@ ArrEle1:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+
+        cnt++;
     }
     | Expression {
        $$=$1;
@@ -1756,7 +1904,6 @@ MethodHeader:
         s.push_back($2);
         $$ = makeNode("void", s);
 
-
     }
 ;
 
@@ -1777,8 +1924,71 @@ IdenPara:
         s.push_back($3);
         $$ = makeNode("IdenPara", s);
 
-        if(type=="")type=$1->type;
-        $$->type=type;
+        // if(type=="")type=$1->type;
+        // $$->type=type;
+
+        string temp = postfixExpression($1->type,3);
+		if(temp.empty()){
+			temp = getFuncType($1->temp_name);
+		}
+
+		if(!($1->is_error || $4->is_error) && $1->expType!=4){
+			if(!temp.empty()){	
+				$$->type = temp;
+				if($1->expType ==3){
+					vector<string> funcArgs = getFuncArgs($1->temp_name);
+					vector<string> tempArgs =currArgs.back();
+					for(int i=0;i<funcArgs.size();i++){
+						if(funcArgs[i]=="...")break;
+						if(tempArgs.size()==i){
+							yyerror(("Too few Arguments to Function " + $1->temp_name).c_str());
+							break;
+						}
+						string msg = checkType(funcArgs[i],tempArgs[i]);
+
+						if(msg =="warning"){
+							warning(("Incompatible conversion of " +  tempArgs[i] + " to parameter of type " + funcArgs[i]).c_str());
+						}
+						else if(msg.empty()){
+							yyerror(("Incompatible Argument to the function " + $1->temp_name).c_str());
+							$$->is_error = 1;
+							break;
+						}
+						if(i==funcArgs.size()-1 && i<tempArgs.size()-1){
+							yyerror(("Too many Arguments to Function " + $1->temp_name).c_str());
+							$$->is_error = 1;
+							break;
+						}
+
+					}	
+
+					//--3AC
+					// if(!$$->is_error){
+					// 	qid q = newtemp($$->type);
+					// 	$$->place = q;
+					// 	$$->nextlist.clear();
+
+					// 	emit(qid("CALL", NULL), qid($1->temp_name,NULL), qid(to_string(currArgs.back().size()), NULL), q, -1);
+					// 	currArgs.pop_back();
+
+					// 	if(func_usage_map.find($1->temp_name) != func_usage_map.end()){
+					// 		func_usage_map[$1->temp_name] = 1;
+					// 	}
+					// }
+
+				}
+			}
+			else{
+				yyerror("Invalid function call");
+				$$->is_error=1;
+			}
+		}
+		else{
+			if($1->expType==4){
+				yyerror("constant expression cannot be used as lvalue");
+			}
+			$$->is_error=1;
+		}
     }
     | IDENTIFIER '(' ')' {
         vector<ASTNode*> s;
@@ -1786,8 +1996,41 @@ IdenPara:
         delete $1;
         $$ = makeNode("IdenPara", s);
 
-        if(type=="")type=$3->type;
-        $$->type=type;
+        // if(type=="")type=$3->type;
+        // $$->type=type;
+        if(!$1->is_error){
+			if($1->expType == 1) {
+				$$->temp_name = $1->temp_name;
+				$$->expType = 3;
+				$$->type = $1->type;
+				$$->size = getSize($$->type);
+
+				vector<string> temp = getFuncArgs($1->temp_name);
+				if((temp.size() == 1 && temp[0] == "#NO_FUNC") || funcArgs == temp){
+					insertFuncArg($$->temp_name, funcArgs, $$->type);
+					funcArgs.clear();
+					funcName = string($1->temp_name);
+					funcType = $1->type;
+				}
+				else {
+					yyerror(("Conflicting types for function " + $1->temp_name).c_str());
+					$$->is_error = 1;
+				}
+				//3AC
+				// $$->place = qid($$->temp_name, NULL);
+				// emit(pair<string,sym_entry*>("FUNC_" + $$->temp_name + " start :",NULL),pair<string,sym_entry*>("",NULL),pair<string,sym_entry*>("",NULL),pair<string,sym_entry*>("",NULL),-2);
+			}
+			else {
+				if($1->expType == 2){
+					yyerror( ($1->temp_name + "declared as array of function").c_str());
+				}
+				else{
+					yyerror( ($1->temp_name + "declared as function of function").c_str());
+				}
+				$$->is_error = 1;
+			}
+		}
+		else $$->is_error = 1;
     }
 ;
 formalparameters:
