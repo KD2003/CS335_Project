@@ -13,7 +13,9 @@ extern int yyrestart(FILE*);
 bool gotinputfile, gotoutputfile, verbosemode;
 
 int dump_sym_table=0;
+int isArray=0;
 string type;
+vector<int> array_dims;
 vector<vector<string> > curArgs(1,vector<string>() );
 
 int yylex();
@@ -1600,39 +1602,82 @@ VariableDeclarator1:
         else{
             printf("Type is not defined\n");
         }
+
+        if(currLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            insertSymbol(*curr_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1 +")" ));
-        delete $1;
         s.push_back($3);
         $$ = makeNode("VariableDeclarator1", s);
-
         $$->type=type;
         if($3->type!="INT"){
             fprintf(stdout,"Index of the array should be integer.");
         }
         //
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            array_dims.push_back($3->intVal);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1 +")" ));
-        delete $1;
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("VariableDeclarator1", s);
         $$->type=type;
+
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            array_dims.push_back($3->intVal);
+            array_dims.push_back($6->intVal);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back($9);
         $$ = makeNode("VariableDeclarator1", s);
         $$->type=type;
+
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            array_dims.push_back($3->intVal);
+            array_dims.push_back($6->intVal);
+            array_dims.push_back($9->intVal);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
 ;
 
@@ -1640,9 +1685,23 @@ VariableDeclarator2:
     IDENTIFIER '=' Expression {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         $$ = makeNode("=",s);
+
+        if(type!=$3->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(currLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            insertSymbol(*curr_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' List1 {
         vector<ASTNode*> s;
@@ -1651,6 +1710,7 @@ VariableDeclarator2:
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 {
         vector<ASTNode*> s;
