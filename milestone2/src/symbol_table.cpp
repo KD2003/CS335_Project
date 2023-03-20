@@ -1,4 +1,5 @@
 #include "symbol_table.h"
+#include <algorithm>
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
@@ -7,9 +8,9 @@ sym_table* cur_table;
 
 int avl = 0;
 
-// extern int isArray;
+extern int isArray;
 extern int dump_sym_table;
-// extern vector<int> array_dims;
+extern vector<int> array_dims;
 
 void symbolTableInit(){
 	parent_table.insert(make_pair(&global_st, nullptr));
@@ -43,21 +44,22 @@ sym_entry* curLookup(string id){
 
 void insertSymbol(sym_table& table, string id, string token, string lexeme, string type, int lineno, sym_table* ptr){
 	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr)));
-	// if(type[type.length()-1] == '*' && !array_dims.empty()){
-	// 	vector<int> temp;
-	// 	int cur = 1;
-	// 	for(int i = array_dims.size()-1; i>=1; i--){
-	// 		cur*=array_dims[i];
-	// 		temp.push_back(cur);
-	// 	}
-	// 	reverse(temp.begin(), temp.end());
-	// 	table[id]->array_dims = temp;
-	// 	if(isArray){
-	// 		table[id]->isArray = 1;
-	// 		isArray = 0;
-	// 	}
-	// 	array_dims.clear();
-	// }
+	if(!array_dims.empty()){
+		// vector<int> temp;
+		// int cur = 1;
+		// for(int i = array_dims.size()-1; i>=1; i--){
+		// 	cur*=array_dims[i];
+		// 	temp.push_back(cur);
+		// }
+		// reverse(temp.begin(), temp.end());
+		// table[id]->array_dims = temp;
+		table[id]->array_dims = array_dims;
+		if(isArray){
+			table[id]->isArray = 1;
+			isArray = 0;
+		}
+		array_dims.clear();
+	}
 }
 
 void makeSymbolTable(string name, string f_type, int lineno){

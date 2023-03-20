@@ -55,7 +55,7 @@ string addExp(string a, string b){
 }
 
 string shiftExp(string a, string b){
-    if(isInt(a) && isInt(b)) return "ok";
+    if(isInt(a) && isInt(b)) return promotedType(a,b);
     return "";
 }
 
