@@ -16,7 +16,8 @@ bool gotinputfile, gotoutputfile, verbosemode;
 int dump_sym_table=0;
 int isArray=0;
 int cnt1=0,cnt2=0,cnt3=0;
-string type;
+string type="";
+string class_type="";
 vector<int> array_dims;
 vector<vector<string> > curArgs(1,vector<string>() );
 
@@ -146,11 +147,13 @@ IDENdotIDEN:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
+        class_type=class_type+"."+*$3;
         delete $3;
         $$ = makeNode(".", s);
     }
     | IDENTIFIER    {
         $$ = makeLeaf("ID (" + *$1 + ")");
+        class_type=*$1;
         delete $1;
     }
 ;
@@ -170,14 +173,19 @@ PublicPrivateStatic:
 ClassType:
     IDENdotIDEN     {
         $$=$1;
+        $$->type = class_type;
     }
 ;
 ArrayType:
     PrimitiveType Dims      {
         $$=$1;
+        isArray=1;
+        $$->expType =2;
     }
     | ClassType Dims        {
         $$=$1;
+        isArray=1;
+        $$->expType=2;
     }
 ;
 Dims:
@@ -1601,8 +1609,9 @@ VariableDeclarator1:
         $$ = makeLeaf("ID (" + *$1 +")");
         $$->expType = 1;
         if(type!="") $$->type = type;
+        else if(class_type!="") $$->type=class_type;
         else{
-            printf("Type is not defined\n");
+            printf("Type is not defined at : %d\n",yylineno);
         }
 
         if(curLookup(*$1)){
@@ -1697,7 +1706,7 @@ VariableDeclarator2:
         $$ = makeNode("=",s);
 
         if(type!=$3->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1718,11 +1727,11 @@ VariableDeclarator2:
         s.push_back($6);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intvalue>cnt){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
         if(type!=$6->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1749,14 +1758,14 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
 
 
-        if($3!=NULL && $3->intvalue>cnt1){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intvalue>cnt2){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($6!=NULL && $6->intVal>cnt2){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
         if(type!=$9->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1786,18 +1795,18 @@ VariableDeclarator2:
         s.push_back($12);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intvalue>cnt1){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intvalue>cnt2){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($6!=NULL && $6->intVal>cnt2){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($9!=NULL && $9->intvalue>cnt3){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($9!=NULL && $9->intVal>cnt3){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
 
         if(type!=$12->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1829,12 +1838,12 @@ VariableDeclarator2:
         s.push_back($11);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intvalue>cnt1){
-            fprintf("Index out of bounds, not matching with intitalisers");
-            $$is_error=1;
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            $$->is_error=1;
         }
         if(type!=$7->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1855,7 +1864,6 @@ VariableDeclarator2:
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' List2 {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back(makeLeaf("new"));
@@ -1865,14 +1873,14 @@ VariableDeclarator2:
         s.push_back($17);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intvalue>cnt1){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intvalue>cnt2){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($6!=NULL && $6->intVal>cnt2){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
         if(type!=$10->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1906,17 +1914,17 @@ VariableDeclarator2:
         s.push_back($23);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intvalue>cnt1){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intvalue>cnt2){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($6!=NULL && $6->intVal>cnt2){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($9!=NULL && $9->intvalue>cnt3){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($9!=NULL && $9->intVal>cnt3){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
         if(type!=$13->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1946,11 +1954,11 @@ VariableDeclarator2:
         s.push_back($7);
         s.push_back($9);
         $$ = makeNode("=", s);
-        // if($3->intvalue>cnt){
-            // fprintf("Index out of bounds");
+        // if($3->intVal>cnt){
+            // fprintf(stdout,"Index out of bounds");
         // }
         if(type!=$7->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -1978,14 +1986,14 @@ VariableDeclarator2:
         s.push_back($15);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intvalue>cnt1){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($3!=NULL && $3->intVal>cnt1){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intvalue>cnt2){
-            fprintf("Index out of bounds, not matching with intitalisers");
+        if($6!=NULL && $6->intVal>cnt2){
+            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
         }
         if(type!=$10->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -2017,17 +2025,17 @@ VariableDeclarator2:
         s.push_back($21);
         $$ = makeNode("=", s);
         //
-        // if($3->intvalue>cnt){
-            // fprintf("Index out of bounds");
+        // if($3->intVal>cnt){
+            // fprintf(stdout,"Index out of bounds");
         // }
-        // if($6->intvalue>cnt){
-            // fprintf("Index out of bounds");
+        // if($6->intVal>cnt){
+            // fprintf(stdout,"Index out of bounds");
         // }
-        // if($9->intvalue>cnt){
-            // fprintf("Index out of bounds");
+        // if($9->intVal>cnt){
+            // fprintf(stdout,"Index out of bounds");
         // }
         if(type!=$13->type){
-            fprintf(stdout,"Type Clashing");
+            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
@@ -2395,9 +2403,12 @@ int main(int argc, char* argv[]){
     }
     yyrestart(yyin);
 
+    symbolTableInit();
+
     beginAST();
     if(yyparse()) return 0;
     endAST();
+    printSymbolTable(cur_table, "Global.csv");
     
     if(verbosemode){
         printf("Parser work completed..\n");
