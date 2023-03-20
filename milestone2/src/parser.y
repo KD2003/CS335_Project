@@ -1710,6 +1710,7 @@ VariableDeclarator2:
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("=", s);
+        //
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 {
         vector<ASTNode*> s;
