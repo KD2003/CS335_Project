@@ -16,6 +16,7 @@ typedef struct{
 	int is_error = 0;
 
 	string temp_name;
+	vector<int> dimension;
 	// qid place;
 }ASTNode;
 
