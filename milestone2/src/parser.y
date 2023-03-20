@@ -15,6 +15,7 @@ bool gotinputfile, gotoutputfile, verbosemode;
 
 int dump_sym_table=0;
 int isArray=0;
+int cnt1=0,cnt2=0,cnt3=0;
 string type;
 vector<int> array_dims;
 vector<vector<string> > curArgs(1,vector<string>() );
@@ -1631,7 +1632,8 @@ VariableDeclarator1:
         }
         else{
             isArray=1;
-            array_dims.push_back($3->intVal);
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
         delete $1;
@@ -1651,8 +1653,10 @@ VariableDeclarator1:
         }
         else{
             isArray=1;
-            array_dims.push_back($3->intVal);
-            array_dims.push_back($6->intVal);
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
         delete $1;
@@ -1673,9 +1677,12 @@ VariableDeclarator1:
         }
         else{
             isArray=1;
-            array_dims.push_back($3->intVal);
-            array_dims.push_back($6->intVal);
-            array_dims.push_back($9->intVal);
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
+            if($9==NULL) array_dims.push_back(0);
+            else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
         delete $1;
@@ -1723,7 +1730,8 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            array_dims.push_back($3->intVal);
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
         delete $1;
@@ -1748,8 +1756,10 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            array_dims.push_back($3->intVal);
-            array_dims.push_back($6->intVal);
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
         delete $1;
@@ -1775,9 +1785,12 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            array_dims.push_back($3->intVal);
-            array_dims.push_back($6->intVal);
-            array_dims.push_back($9->intVal);
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
+            if($9==NULL) array_dims.push_back(0);
+            else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
         delete $1;
@@ -1785,7 +1798,6 @@ VariableDeclarator2:
     | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' List1 {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back(makeLeaf("new"));
         s.push_back($7);
@@ -1793,6 +1805,23 @@ VariableDeclarator2:
         s.push_back($11);
         $$ = makeNode("=", s);
         //
+        if(type!=$7->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' List2 {
         vector<ASTNode*> s;
@@ -1807,11 +1836,29 @@ VariableDeclarator2:
         s.push_back($17);
         $$ = makeNode("=", s);
         //
+        if(type!=$10->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' List3 {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back($9);
@@ -1823,11 +1870,31 @@ VariableDeclarator2:
         s.push_back($23);
         $$ = makeNode("=", s);
         //
+        if(type!=$13->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
+            if($9==NULL) array_dims.push_back(0);
+            else array_dims.push_back($9->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back(makeLeaf("new"));
         s.push_back($7);
@@ -1836,11 +1903,27 @@ VariableDeclarator2:
         // if($3->intvalue>cnt){
             // fprintf("Index out of bounds");
         // }
+        if(type!=$7->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back(makeLeaf("new"));
@@ -1855,11 +1938,29 @@ VariableDeclarator2:
         // if($6->intvalue>cnt){
             // fprintf("Index out of bounds");
         // }
+        if(type!=$10->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
         s.push_back($3);
         s.push_back($6);
         s.push_back($9);
@@ -1879,6 +1980,27 @@ VariableDeclarator2:
         // if($9->intvalue>cnt){
             // fprintf("Index out of bounds");
         // }
+        if(type!=$13->type){
+            fprintf(stdout,"Type Clashing");
+            $$->is_error=1;
+        }
+        
+        if(curLookup(*$1)){
+				string errstr = *$1 + " is already declared";
+				yyerror(errstr.c_str());
+				$$->is_error = 1;            
+        }
+        else{
+            isArray=1;
+            if($3==NULL) array_dims.push_back(0);
+            else array_dims.push_back($3->intVal);
+            if($6==NULL) array_dims.push_back(0);
+            else array_dims.push_back($6->intVal);
+            if($9==NULL) array_dims.push_back(0);
+            else array_dims.push_back($9->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+        }
+        delete $1;
     }
 ;
 
@@ -1895,7 +2017,7 @@ ArrEle1:
         s.push_back($3);
         $$ = makeNode(",", s);
 
-        // cnt++;
+        // cnt1++;
     }
     | Expression {
        $$=$1;
@@ -1914,6 +2036,7 @@ ArrEle2:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+        //cnt2++;
     }
     | List1 {
         $$=$1;
@@ -1932,6 +2055,7 @@ ArrEle3:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+        //cnt3++;
     }
     | List2 {
         $$=$1;
