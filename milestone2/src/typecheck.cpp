@@ -174,7 +174,3 @@ bool isVoid(string type){
     else if(type.substr(0,4) == "void") return 1;
     else return 0;
 }
-
-int main(){
-    return 0;
-}
