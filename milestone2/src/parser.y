@@ -1111,8 +1111,7 @@ LocalVariableType:
     | KEY_VAR {
         $$ = makeLeaf("var");
 
-
-        if(type=="")type=*$1;
+        if(type=="")type="var";
         $$->type=type;
         delete $1;
     }
