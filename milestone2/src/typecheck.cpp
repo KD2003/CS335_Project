@@ -104,13 +104,14 @@ string condExp(string a,string b, string c,string op){
         return "";
     }
     if(a == "boolean" && b!="void" && c!= "void"){
-        if(a==b) return a;
-        return promotedType(a,b);
+        if(b==c) return b;
+        return promotedType(b,c);
     }
     return "";
 }
 
 string promotedType(string a, string b){
+    if(a == "boolean" || b =="boolean") return "";
     if(a == "double" || b=="double") return "double";
     if(a == "float" || b=="float") return "float";
     if(a == "long" || b=="long") return "long";
