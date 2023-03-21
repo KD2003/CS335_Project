@@ -18,13 +18,16 @@ void symbolTableInit(){
 	// insert keywords?
 }
 
-sym_entry* createEntry(string token, string lexeme, string type, int lineno, sym_table* ptr){
+sym_entry* createEntry(string token, string lexeme, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
 	sym_entry* new_symEnt = new sym_entry;
 	new_symEnt->token = token;
 	new_symEnt->lexeme = lexeme;
 	new_symEnt->type = type;
 	new_symEnt->lineno = lineno;
 	new_symEnt->entry = ptr;
+	new_symEnt->modifiers[0] = modifiers[0];
+	new_symEnt->modifiers[1] = modifiers[1];
+	new_symEnt->modifiers[2] = modifiers[2];
 	return new_symEnt;
 }
 
@@ -42,8 +45,8 @@ sym_entry* curLookup(string id){
 	return (*cur_table)[id];
 }
 
-void insertSymbol(sym_table& table, string id, string token, string lexeme, string type, int lineno, sym_table* ptr){
-	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr)));
+void insertSymbol(sym_table& table, string id, string token, string lexeme, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
+	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr, modifiers)));
 	if(!array_dims.empty()){
 		// vector<int> temp;
 		// int cur = 1;
@@ -62,13 +65,13 @@ void insertSymbol(sym_table& table, string id, string token, string lexeme, stri
 	}
 }
 
-void makeSymbolTable(string name, string f_type, int lineno){
+void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifiers){
 	if(!avl){
 		sym_table* new_table = new sym_table;
 
-		if(f_type != "") insertSymbol(*cur_table, name , "FUNC", f_type, "FUNC", lineno, new_table);
+		if(f_type != "") insertSymbol(*cur_table, name , "FUNC", f_type, "FUNC", lineno, new_table, modifiers);
 		else{
-			insertSymbol(*cur_table, name , "Block", "", "", lineno, new_table);
+			insertSymbol(*cur_table, name , "Block", "", "", lineno, new_table, modifiers);
 		}
 		parent_table.insert(make_pair(new_table, cur_table));
 
@@ -77,17 +80,17 @@ void makeSymbolTable(string name, string f_type, int lineno){
 	else{
 		avl = 0;
 		(*parent_table[cur_table]).erase("dummyF_name");
-		(*parent_table[cur_table]).insert(make_pair(name, createEntry("FUNC", f_type, "FUNC", lineno, cur_table)));
+		(*parent_table[cur_table]).insert(make_pair(name, createEntry("FUNC", f_type, "FUNC", lineno, cur_table, modifiers)));
 	}
 }
 
-void createParamList(int lineno){
-	makeSymbolTable("dummyF_name", "",lineno);
+void createParamList(int lineno, vector<int> &modifiers){
+	makeSymbolTable("dummyF_name", "",lineno, modifiers);
 	avl = 1;
 }
 
-void paramInsert(sym_table& table, string id, string token, string lexeme,string type, int lineno, sym_table* ptr){
-	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr)));
+void paramInsert(sym_table& table, string id, string token, string lexeme,string type, int lineno, sym_table* ptr, vector<int> &modifiers){
+	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr, modifiers)));
 }
 
 vector<string> getFuncArgs(string id){

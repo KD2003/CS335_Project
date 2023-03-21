@@ -19,6 +19,7 @@ int cnt1=0,cnt2=0,cnt3=0;
 string type="";
 string class_type="";
 vector<int> array_dims;
+vector<int> modifier ={1,0,0};
 vector<vector<string> > curArgs(1,vector<string>() );
 
 int yylex();
@@ -161,12 +162,15 @@ IDENdotIDEN:
 PublicPrivateStatic:
     KEY_public      {
         $$ = makeLeaf("public");
+        modifier[0]=2;
     }
     | KEY_private       {
         $$ = makeLeaf("private");
+        modifier[0]=1;
     }
     | KEY_static        {
         $$ = makeLeaf("static");
+        modifier[1]=1;
     }
 ;
 
@@ -1630,7 +1634,7 @@ VariableDeclarator1:
 				$$->is_error = 1;            
         }
         else{
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -1653,7 +1657,7 @@ VariableDeclarator1:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -1676,7 +1680,7 @@ VariableDeclarator1:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -1702,7 +1706,7 @@ VariableDeclarator1:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -1726,7 +1730,7 @@ VariableDeclarator2:
 				$$->is_error = 1;            
         }
         else{
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -1754,7 +1758,7 @@ VariableDeclarator2:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         cnt1=0;
         delete $1;
@@ -1790,7 +1794,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         cnt1=0;
         cnt2=0;
@@ -1833,7 +1837,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -1866,7 +1870,7 @@ VariableDeclarator2:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         cnt1=0;
         delete $1;
@@ -1905,7 +1909,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         cnt1=0,cnt2=0;
         delete $1;
@@ -1951,7 +1955,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -1981,7 +1985,7 @@ VariableDeclarator2:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2018,7 +2022,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2062,7 +2066,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2265,7 +2269,7 @@ IdenPara:
 		// 			$$->is_error = 1;
 		// 		}
 		// 		//3AC
-		// 		// $$->place = qid($$->temp_name, NULL);
+		// 		// $$->place = qid($$->temp_name, NULL, modifier);
 		// 		// emit(pair<string,sym_entry*>("FUNC_" + $$->temp_name + " start :",NULL),pair<string,sym_entry*>("",NULL),pair<string,sym_entry*>("",NULL),pair<string,sym_entry*>("",NULL),-2);
 		// 	}
 		// 	else {
