@@ -1148,7 +1148,18 @@ BlockStatement:
 ;
 
 LocalVariableDeclaration:
-    LocalVariableType VariableDeclaratorList {
+    KEY_final LocalVariableType VariableDeclaratorList {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("final"));
+        s.push_back($2);
+        s.push_back($3);
+        $$ = makeNode("LocalVariableDeclaration", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
+        $3->type=type;
+    }
+    | LocalVariableType VariableDeclaratorList {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($2);
@@ -2201,6 +2212,8 @@ IdenPara:
         delete $1;
         s.push_back($3);
         $$ = makeNode("IdenPara", s);
+        type="";
+        class_type="";
 
         // string temp = postfixExpression($1->type,3);
 		// if(temp.empty()){
@@ -2270,6 +2283,8 @@ IdenPara:
         s.push_back(makeLeaf("ID (" + *$1+")" ));
         delete $1;
         $$ = makeNode("IdenPara", s);
+        type="";
+        class_type="";
 
         // if(!$1->is_error){
 		// 	if($1->expType == 1) {
@@ -2315,6 +2330,8 @@ formalparameters:
     }
     | formalparameter {
         $$=$1;
+        type="";
+        class_type="";
     }
 ;
 
@@ -2328,6 +2345,16 @@ formalparameter:
         if(type=="")type=$1->type;
         $$->type=type;
     }
+    | KEY_final Type VariableDeclarator1 {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("final"));
+        s.push_back($2);
+        s.push_back($3);
+        $$ = makeNode("formalparameter", s);
+
+        if(type=="")type=$2->type;
+        $$->type=type;
+    }
     | Type DOT3 IDENTIFIER {
         vector<ASTNode*> s;
         s.push_back($1);
@@ -2335,6 +2362,18 @@ formalparameter:
         delete $2;
         s.push_back(makeLeaf("ID (" + *$3+")" ));
         delete $3;
+        $$ = makeNode("formalparameter", s);
+
+        $$->type=type;
+    }
+    | KEY_final Type DOT3 IDENTIFIER {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("final"));
+        s.push_back($2);
+        s.push_back(makeLeaf(*$3));
+        delete $3;
+        s.push_back(makeLeaf("ID (" + *$4+")" ));
+        delete $4;
         $$ = makeNode("formalparameter", s);
 
         $$->type=type;
