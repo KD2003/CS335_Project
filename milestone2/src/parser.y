@@ -367,14 +367,6 @@ MethodInvocation:
         s.push_back($3);
         $$ = makeNode("MethodInvocation", s);
 
-
-        // string t=postfixExpression($1->type,2);
-        // if(t.empty()){
-        //     t=getFuncType($1->temp_name);
-        // }
-
-        // if(type=="")type=$1->type;
-        // $$->type=type;
         string t = postfixExpression($1->type,2);
 		curArgs.push_back(vector<string>() ); 
 
@@ -594,15 +586,13 @@ Assignment:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                    $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -621,15 +611,13 @@ Assignment:
         string t=assignExp($1->type,$3->type,"=");
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                    $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -670,15 +658,13 @@ ConditionalOrExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -703,15 +689,13 @@ ConditionalAndExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -736,15 +720,13 @@ AndExpression:
         string t=assignExp($1->type,$3->type,"&");
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -769,15 +751,13 @@ ExclusiveOrExpression:
     string t=assignExp($1->type,$3->type,"^");
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -801,15 +781,13 @@ InclusiveOrExpression:
         string t=assignExp($1->type,$3->type,"|");
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -832,15 +810,13 @@ EqualityExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -865,15 +841,13 @@ RelationalExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -898,15 +872,13 @@ ShiftExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -931,15 +903,13 @@ AdditiveExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -964,15 +934,13 @@ MultiplicativeExpression:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -991,15 +959,13 @@ MultiplicativeExpression:
         string t=assignExp($1->type,$3->type,"*");
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=$1->type;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
         }
@@ -1019,15 +985,13 @@ UnaryExpression:
 
         string t=postfixExpression($2->type,6);
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=t;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
     }
@@ -1039,15 +1003,13 @@ UnaryExpression:
 
         string t=postfixExpression($2->type,6);
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=t;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
     }
@@ -1316,15 +1278,13 @@ StatementExpression:
 
         string t=postfixExpression($2->type,6);
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=t;
-                }
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
     }
@@ -1337,15 +1297,10 @@ StatementExpression:
 
         string t=postfixExpression($1->type,6);
             if(!t.empty()){
-                if(t=="ok"){
-                    $$->type=t;
-                }
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+                $$->type=t;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing");
+                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
                 $$->is_error=1;
             }
     }
@@ -1355,7 +1310,7 @@ StatementExpression:
 LeftHandSide:
     IDENdotIDEN {
         $$=$1;
-        if(type=="")type="IdendotIden String Name";
+        if(type==""||class_type!="")type=class_type;
         $$->type=type;
     }
     | FieldAccess {
@@ -1670,7 +1625,7 @@ VariableDeclarator1:
         }
 
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1690,7 +1645,7 @@ VariableDeclarator1:
         }
         //
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1711,7 +1666,7 @@ VariableDeclarator1:
         $$->type=type;
 
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1735,7 +1690,7 @@ VariableDeclarator1:
         $$->type=type;
 
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1759,14 +1714,14 @@ VariableDeclarator2:
         s.push_back(makeLeaf("ID (" + *$1+")" ));
         s.push_back($3);
         $$ = makeNode("=",s);
-
+        cout<<type<<" "<<$3->type<<endl;
         if(type!=$3->type){
             fprintf(stdout,"Type Clashing at : %d\n",yylineno);
             $$->is_error=1;
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1791,7 +1746,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1825,7 +1780,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1866,7 +1821,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1903,7 +1858,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1940,7 +1895,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -1984,7 +1939,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2018,7 +1973,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2053,7 +2008,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2095,7 +2050,7 @@ VariableDeclarator2:
         }
         
         if(curLookup(*$1)){
-				string errstr = *$1 + " is already declared";
+				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2187,12 +2142,17 @@ MethodHeader:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("MethodHeader", s);
+
+        $2->type=$1->type;
+        $$->type=$1->type;
     }
     | KEY_void Methodeclarator {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("void", s);
 
+        $2->type="void";
+        $$->type="void";
     }
 ;
 
