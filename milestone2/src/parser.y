@@ -1718,6 +1718,9 @@ VariableDeclarator2:
         s.push_back($6);
         $$ = makeNode("=", s);
         //
+        if($3!=NULL && $3->intvalue>cnt){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
         if(type!=$6->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -1734,6 +1737,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
+        cnt1=0;
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List2 {
@@ -1744,6 +1748,13 @@ VariableDeclarator2:
         s.push_back($9);
         $$ = makeNode("=", s);
 
+
+        if($3!=NULL && $3->intvalue>cnt1){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($6!=NULL && $6->intvalue>cnt2){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
         if(type!=$9->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -1762,6 +1773,8 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
+        cnt1=0;
+        cnt2=0;
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' List3 {
@@ -1773,6 +1786,16 @@ VariableDeclarator2:
         s.push_back($12);
         $$ = makeNode("=", s);
         //
+        if($3!=NULL && $3->intvalue>cnt1){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($6!=NULL && $6->intvalue>cnt2){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($9!=NULL && $9->intvalue>cnt3){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+
         if(type!=$12->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -1793,6 +1816,7 @@ VariableDeclarator2:
             else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
+        cnt1=0,cnt2=0,cnt3=0;
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' List1 {
@@ -1805,6 +1829,10 @@ VariableDeclarator2:
         s.push_back($11);
         $$ = makeNode("=", s);
         //
+        if($3!=NULL && $3->intvalue>cnt1){
+            fprintf("Index out of bounds, not matching with intitalisers");
+            $$is_error=1;
+        }
         if(type!=$7->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -1821,6 +1849,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
+        cnt1=0;
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' List2 {
@@ -1836,6 +1865,12 @@ VariableDeclarator2:
         s.push_back($17);
         $$ = makeNode("=", s);
         //
+        if($3!=NULL && $3->intvalue>cnt1){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($6!=NULL && $6->intvalue>cnt2){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
         if(type!=$10->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -1854,6 +1889,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
+        cnt1=0,cnt2=0;
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' '[' zerooroneExpression ']' '[' zerooroneExpression ']' List3 {
@@ -1870,6 +1906,15 @@ VariableDeclarator2:
         s.push_back($23);
         $$ = makeNode("=", s);
         //
+        if($3!=NULL && $3->intvalue>cnt1){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($6!=NULL && $6->intvalue>cnt2){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($9!=NULL && $9->intvalue>cnt3){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
         if(type!=$13->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -1890,6 +1935,7 @@ VariableDeclarator2:
             else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL);
         }
+        cnt1=0,cnt2=0,cnt3=0;
         delete $1;
     }
     | IDENTIFIER '[' zerooroneExpression ']' '=' KEY_new PrimitiveType '[' zerooroneExpression ']' {
@@ -1932,12 +1978,12 @@ VariableDeclarator2:
         s.push_back($15);
         $$ = makeNode("=", s);
         //
-        // if($3->intvalue>cnt){
-            // fprintf("Index out of bounds");
-        // }
-        // if($6->intvalue>cnt){
-            // fprintf("Index out of bounds");
-        // }
+        if($3!=NULL && $3->intvalue>cnt1){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
+        if($6!=NULL && $6->intvalue>cnt2){
+            fprintf("Index out of bounds, not matching with intitalisers");
+        }
         if(type!=$10->type){
             fprintf(stdout,"Type Clashing");
             $$->is_error=1;
@@ -2017,7 +2063,7 @@ ArrEle1:
         s.push_back($3);
         $$ = makeNode(",", s);
 
-        // cnt1++;
+        cnt1++;
     }
     | Expression {
        $$=$1;
@@ -2036,7 +2082,7 @@ ArrEle2:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
-        //cnt2++;
+        cnt2++;
     }
     | List1 {
         $$=$1;
@@ -2055,7 +2101,7 @@ ArrEle3:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
-        //cnt3++;
+        cnt3++;
     }
     | List2 {
         $$=$1;
