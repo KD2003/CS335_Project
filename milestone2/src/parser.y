@@ -51,7 +51,7 @@ Start:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("Start", s);
-        }
+    }
 ;
 
 ImportList:

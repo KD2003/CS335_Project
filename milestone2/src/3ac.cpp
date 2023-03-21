@@ -5,17 +5,17 @@ using namespace std;
 
 vector<quad> code; 
 
-long long counter = 0;
+long long cnt = 0;
 
 void emit(qid op, qid arg1, qid arg2, qid res, int idx){
-    quad temp;
-    temp.op = op;
-    temp.arg1 = arg1;
-    temp.arg2 = arg2;
-    temp.res = res;
-    temp.idx = idx;
-    if(idx == -1) temp.idx = code.size();
-    code.push_back(temp);
+    quad tmp;
+    tmp.op = op;
+    tmp.arg1 = arg1;
+    tmp.arg2 = arg2;
+    tmp.res = res;
+    tmp.idx = idx;
+    if(idx == -1) tmp.idx = code.size();
+    code.push_back(tmp);
 }
 
 void backpatch(vector<int>& bplist, int target){
@@ -25,20 +25,19 @@ void backpatch(vector<int>& bplist, int target){
 }
 
 
-void casepatch(vector<int>& bplist, qid target){
-    //backpatch for case statement
+// void casepatch(vector<int>& bplist, qid target){
+//     //backpatch for case statement
 
-    for(int i=0;i<bplist.size(); i++){
-        code[bplist[i]].arg1 = target;
-    }
-}
+//     for(int i=0;i<bplist.size(); i++){
+//         code[bplist[i]].arg1 = target;
+//     }
+// }
 
 qid newtemp(string type){
     // creating temp variables
-    string temp_var = "#V"+to_string(counter);
-    counter++;
-    insertSymbol(*curr_table, temp_var, type, getSize(type), NULL);
-    return qid(temp_var, lookup(temp_var));
+    string tmp = "#V"+to_string(cnt++); 
+    insertSymbol(*curr_table, tmp, type, getSize(type), NULL);
+    return qid(tmp, lookup(tmp));
 }
 
 int assign_exp(string op, string type, string type1,string type2, qid arg1, qid arg2){

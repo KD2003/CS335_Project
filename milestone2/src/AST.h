@@ -1,7 +1,7 @@
 #pragma once
 
 #include <bits/stdc++.h>
-// #include"3ac.h"
+#include"3ac.h"
 using namespace std;
 
 typedef struct{
@@ -15,8 +15,17 @@ typedef struct{
 	string strVal;
 	int is_error = 0;
 	
+	// for 3ac
 	string temp_name;
-	// qid place;
+	qid addr;
+	vector<quad> code;
+
+	vector<int> truelist;
+	vector<int> falselist;
+	vector<int> nextlist; 
+
+	
+
 }ASTNode;
 
 void beginAST();
