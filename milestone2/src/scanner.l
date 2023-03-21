@@ -90,19 +90,19 @@ import {return(KEY_import);}
 }
  
 {DECINUM}|{HEXNUM}|{OCTNUM}|{BINNUM} {
-    //cout << "Integar literal\n";
-    return(LITERAL);
+    yylval.st = new std::string(yytext);
+    return(INTLIT);
 }
 
 {HEXFLOAT}|{DECFLOAT} {
-    //cout << "Floating point\n";
-    return(LITERAL);
+    yylval.st = new std::string(yytext);
+    return(FPLIT);
 }
 
  
 {BOOLNULLLIT} {
-    //cout << "Literal\n";
-    return(LITERAL);
+    yylval.st = new std::string(yytext);
+    return(BOOLLIT);
 }
  
 {ID} {
@@ -115,17 +115,19 @@ import {return(KEY_import);}
 <txtblk>(["]{2}|["])([^"\\]|\n)+ {txt+=yytext;}
 <txtblk>["]{3} {
     txt+=yytext;
-    /*cout << "Text block\n";*/
+    yylval.st = new std::string(yytext);
     BEGIN(INITIAL);
-    return(LITERAL);}
+    return(STRLIT);}
 <txtblk><<EOF>> {printf("Line number: %d The text block did not close. Expected \"\"\"\n", yylineno); return 0;}
 
 {CHARLIT} {
-    return(LITERAL);
+    yylval.st = new std::string(yytext);
+    return(CHARLIT);
 }
 
 {STRLIT} {
-    return(LITERAL);
+    yylval.st = new std::string(yytext);
+    return(STRLIT);
 }
 
 "=" {return((int)yytext[0]);}
