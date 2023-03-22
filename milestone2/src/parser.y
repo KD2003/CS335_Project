@@ -397,8 +397,82 @@ ArrayAccess:
         s.push_back($3);
         $$ = makeNode("ArrayAccess", s);
 
-        if(type=="")type=$1->type;
-        $$->type=type;
+        if($1->temp_name.find('.') == string::npos){
+            string temp = primaryExpression($1->temp_name);
+            if(temp == ""){
+                yyerror(("Undeclared Identifier " + $1->temp_name).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                if(temp.substr(0, 5) == "FUNC_"){
+                    $$->expType = 3;
+                }
+                else if(temp.back() == '*'){
+                    $$->expType = 2; 
+                }
+                else $$->expType = 1;
+
+                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
+                    temp.pop_back();
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name; 
+                    // $$->nextlist.clear();
+                }
+                else{
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name;
+                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
+                    //--3AC
+                    // $$->place = qid(string($1), lookup(string($1)));
+                    // $$->nextlist.clear();
+
+                }
+            }
+        }
+        else{
+            int pos = $1->temp_name.find(".");
+            string sub = $1->temp_name.substr(0, pos);
+            string sub1 = $1->temp_name.substr(pos+1);
+            if(global_st.find(sub) == global_st.end()){
+                yyerror(("Undefined class " + sub).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                for(auto it: children_table[&global_st]){
+                    if(it.first == sub){
+                        if((*(it.second)).find(sub1) == (*(it.second)).end()){
+                            yyerror(("Undefined member of class " + sub).c_str());
+                            $$->is_error = 1;
+                        }
+                        else{
+                            string tem = (*(it.second))[sub1]->type;
+                            if(tem.substr(0, 5) == "FUNC_"){
+                                $$->expType = 3;
+                            }
+                            else if((*(it.second))[sub1]->isArray){
+                                $$->expType = 2; 
+                            }
+                            else $$->expType = 1;
+
+                            if(tem.substr(0,5)=="FUNC_" ){
+                                $$->type = tem;
+                                $$->temp_name = idendotiden; 
+                                // $$->nextlist.clear();
+                            }
+                            else{
+                                $$->type = tem;
+                                $$->temp_name = idendotiden;
+                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
+                                //--3AC
+                                // $$->place = qid(string($1), lookup(string($1)));
+                                // $$->nextlist.clear();
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
     }
     | PrimaryNoNewArray '[' Expression ']'      {
@@ -649,13 +723,13 @@ Assignment:
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                    $$->type=t;
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                yyerror("Incompatible Types when comparing");
+                yyerror(("Incompatible Types for "+ *$2).c_str());
                 $$->is_error=1;
             }
         }
@@ -672,15 +746,16 @@ Assignment:
         $$ = makeNode("=", s);
 
         string t=assignExp($1->type,$3->type,"=");
+
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
-                    $$->type=t;
+                $$->type=t;
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
             }
             else{
-                yyerror("Incompatible Types when comparing");
+                yyerror("Incompatible Types for =");
                 $$->is_error=1;
             }
         }
@@ -1495,7 +1570,82 @@ StatementExpression:
 LeftHandSide:
     IDENdotIDEN {
         $$=$1;
-        $$->type=type;
+        if($1->temp_name.find('.') == string::npos){
+            string temp = primaryExpression($1->temp_name);
+            if(temp == ""){
+                yyerror(("Undeclared Identifier " + $1->temp_name).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                if(temp.substr(0, 5) == "FUNC_"){
+                    $$->expType = 3;
+                }
+                else if(temp.back() == '*'){
+                    $$->expType = 2; 
+                }
+                else $$->expType = 1;
+
+                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
+                    temp.pop_back();
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name; 
+                    // $$->nextlist.clear();
+                }
+                else{
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name;
+                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
+                    //--3AC
+                    // $$->place = qid(string($1), lookup(string($1)));
+                    // $$->nextlist.clear();
+
+                }
+            }
+        }
+        else{
+            int pos = $1->temp_name.find(".");
+            string sub = $1->temp_name.substr(0, pos);
+            string sub1 = $1->temp_name.substr(pos+1);
+            if(global_st.find(sub) == global_st.end()){
+                yyerror(("Undefined class " + sub).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                for(auto it: children_table[&global_st]){
+                    if(it.first == sub){
+                        if((*(it.second)).find(sub1) == (*(it.second)).end()){
+                            yyerror(("Undefined member of class " + sub).c_str());
+                            $$->is_error = 1;
+                        }
+                        else{
+                            string tem = (*(it.second))[sub1]->type;
+                            if(tem.substr(0, 5) == "FUNC_"){
+                                $$->expType = 3;
+                            }
+                            else if((*(it.second))[sub1]->isArray){
+                                $$->expType = 2; 
+                            }
+                            else $$->expType = 1;
+
+                            if(tem.substr(0,5)=="FUNC_" ){
+                                $$->type = tem;
+                                $$->temp_name = idendotiden; 
+                                // $$->nextlist.clear();
+                            }
+                            else{
+                                $$->type = tem;
+                                $$->temp_name = idendotiden;
+                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
+                                //--3AC
+                                // $$->place = qid(string($1), lookup(string($1)));
+                                // $$->nextlist.clear();
+
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
     | FieldAccess {
         $$=$1;
@@ -1924,12 +2074,11 @@ VariableDeclarator2:
         s.push_back(makeLeaf("ID (" + *$1+")" ));
         s.push_back($3);
         $$ = makeNode("=",s);
-        // cout<<type<<" "<<$3->type<<endl;
-        if(type!=$3->type){
+        string t = assignExp(type, $3->type, "=");
+        if(t==""){
             yyerror("Type Clashing");
             $$->is_error=1;
         }
-        
         if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());

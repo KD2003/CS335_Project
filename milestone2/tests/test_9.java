@@ -25,7 +25,7 @@ class GFG {
 		// Print the first N numbers
 		for (int i = 0; i < N; i++) {
 
-			System.out.print(fib(i) + " ");
+			System.out.println(fib(i) + " ");
 		}
 	}
 }
