@@ -4,6 +4,7 @@ string primaryExpression(string id) {
     sym_entry* n = lookup(id);
     if(n){
         string s = n->type;
+        if(n->isArray) return s+"*";
         return s;     
     }
     string temp = funcProtoLookup(id);

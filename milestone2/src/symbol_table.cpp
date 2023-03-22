@@ -69,7 +69,7 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	if(!avl){
 		sym_table* new_table = new sym_table;
 
-		if(f_type != "") insertSymbol(*cur_table, name , "FUNC", f_type, "FUNC", lineno, new_table, modifiers);
+		if(f_type != "") insertSymbol(*cur_table, name , "FUNC_", f_type, "FUNC_" + f_type, lineno, new_table, modifiers);
 		else{
 			insertSymbol(*cur_table, name , "Block", "", "", lineno, new_table, modifiers);
 		}
@@ -80,7 +80,7 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	else{
 		avl = 0;
 		(*parent_table[cur_table]).erase("dummyF_name");
-		(*parent_table[cur_table]).insert(make_pair(name, createEntry("FUNC", f_type, "FUNC", lineno, cur_table, modifiers)));
+		(*parent_table[cur_table]).insert(make_pair(name, createEntry("FUNC_", f_type, "FUNC_" + f_type, lineno, cur_table, modifiers)));
 	}
 }
 

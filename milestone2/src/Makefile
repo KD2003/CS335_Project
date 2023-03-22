@@ -1,4 +1,4 @@
 compile:
-	bison -dv parser.y
+	bison -dtv parser.y
 	flex scanner.l
-	g++ -o milestone2 AST.cpp symbol_table.cpp typecheck.cpp parser.tab.c lex.yy.c -lfl
+	g++ -o milestone2 parser.tab.c lex.yy.c AST.cpp symbol_table.cpp typecheck.cpp

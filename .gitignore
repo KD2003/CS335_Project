@@ -4,5 +4,6 @@ milestone*/src/parser.tab.c
 milestone*/src/parser.output
 milestone*/src/milestone2
 milestone*/src/*.dot
-milestone*/src/*.pdf
+milestone*/src/*.
+milestone*/src/symbol_table1.h
 *.pdf

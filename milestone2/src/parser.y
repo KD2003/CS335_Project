@@ -1,10 +1,9 @@
 %{
+#include <stdio.h>
+#include <iostream>
 #include"AST.h"
 #include"typecheck.h"
-#include <stdio.h>
-#include <string>
 #include <fstream>
-using namespace std;
 
 FILE* dotfile;
 extern FILE* yyin;
@@ -16,10 +15,16 @@ bool gotinputfile, gotoutputfile, verbosemode;
 int dump_sym_table=0;
 int isArray=0;
 int cnt1=0,cnt2=0,cnt3=0;
+int block_count = 0;
+
 string type="";
 string class_type="";
+string idendotiden ="";
+string funcName="", funcType ="";
+
 vector<int> array_dims;
 vector<int> modifier ={1,0,0};
+vector<string> funcArgs;
 vector<vector<string> > curArgs(1,vector<string>() );
 
 int yylex();
@@ -37,7 +42,7 @@ int yyerror(const char *str);
 
 %type<st> KEYWORD IDENTIFIER INTLIT FPLIT BOOLLIT CHARLIT STRLIT OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
 
-%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal
+%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal F MethodIDEN
 %type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression postfixExpression
 %type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
@@ -149,12 +154,16 @@ IDENdotIDEN:
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         class_type=class_type+"."+*$3;
+        idendotiden = idendotiden + "." +*$3;
+        $$->temp_name = idendotiden;
         delete $3;
         $$ = makeNode(".", s);
     }
     | IDENTIFIER    {
         $$ = makeLeaf("ID (" + *$1 + ")");
         class_type=*$1;
+        idendotiden = *$1;
+        $$->temp_name = idendotiden;
         delete $1;
     }
 ;
@@ -188,8 +197,16 @@ ArrayType:
     }
     | ClassType Dims        {
         $$=$1;
-        isArray=1;
-        $$->expType=2;
+
+        if(idendotiden != "String"){
+            yyerror("Array of this type is not supported");
+        }
+        else{
+            $$->type = "String";
+            isArray =1;
+            type = "String";
+            $$->expType = 2;
+        }
     }
 ;
 Dims:
@@ -358,8 +375,8 @@ ArrayAccess:
 
         if(type=="")type=$1->type;
         $$->type=type;
-        if($3->type!="INT"){
-            fprintf(stdout,"Index of the array should be integer.");
+        if($3->type!="int"){
+            yyerror("Index of the array should be integer");
         }
     }
 ;
@@ -371,7 +388,7 @@ MethodInvocation:
         s.push_back($3);
         $$ = makeNode("MethodInvocation", s);
 
-        string t = postfixExpression($1->type,2);
+        string t = postfixExpression(idendotiden,2);
 		curArgs.push_back(vector<string>() ); 
 
 		if(t.empty()){
@@ -551,7 +568,7 @@ DimExpr:
         $$ = makeNode("DimExpr", s);
 
         if($3->type!="INT"){
-            fprintf(stdout,"Index of the array should be integer.");
+            yyerror("Index of the array should be integer");
         }
     }
     | '[' Expression ']'        {
@@ -560,7 +577,7 @@ DimExpr:
         $$ = makeNode("DimExpr", s);
 
         if($2->type!="INT"){
-            fprintf(stdout,"Index of the array should be integer.");
+            yyerror("Index of the array should be integer");
         }
     }
 ;
@@ -596,12 +613,12 @@ Assignment:
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types when comparing");
                 $$->is_error=1;
             }
         }
         else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+                fprintf(stdout,"Left side cannot be a constant");
         }
         $$->is_error=1;
         delete $2;
@@ -621,7 +638,7 @@ Assignment:
 				// }
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types when comparing");
                 $$->is_error=1;
             }
         }
@@ -645,7 +662,7 @@ ConditionalExpression:
         s.push_back($5);
         $$ = makeNode("ConditionalExpression", s);
 
-        //
+        //  left for later
     }
 ;
 
@@ -658,24 +675,19 @@ ConditionalOrExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("||", s);
-
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=condExp($1->type,$3->type,"",*$2);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types for ||");
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
 ;
@@ -690,23 +702,19 @@ ConditionalAndExpression:
         s.push_back($3);
         $$ = makeNode("&&", s);
 
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=condExp($1->type,$3->type,"",*$2);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types for &&");
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
 ;
@@ -721,23 +729,19 @@ AndExpression:
         s.push_back($3);
         $$ = makeNode("&", s);
 
-        string t=assignExp($1->type,$3->type,"&");
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=bitExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types for &");
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
     }
 ;
 
@@ -751,24 +755,19 @@ ExclusiveOrExpression:
         s.push_back($3);
         $$ = makeNode("^", s);
 
-
-    string t=assignExp($1->type,$3->type,"^");
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=bitExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types for ^");
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
     }
 ;       
 
@@ -782,23 +781,19 @@ InclusiveOrExpression:
         s.push_back($3);
         $$ = makeNode("|", s);
 
-        string t=assignExp($1->type,$3->type,"|");
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=bitExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types for |");
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
     }
 ;
 
@@ -811,23 +806,19 @@ EqualityExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(*$2, s);
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=eqExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror(("Incompatible Types for "+*$2).c_str());
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
 ;
@@ -842,23 +833,19 @@ RelationalExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=relExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror(("Incompatible Types for "+*$2).c_str());
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
 ;
@@ -873,23 +860,19 @@ ShiftExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=shiftExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror(("Incompatible Types for "+*$2).c_str());
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
 ;
@@ -904,23 +887,19 @@ AdditiveExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=addExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror(("Incompatible Types for "+*$2).c_str());
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
 ;
@@ -935,23 +914,19 @@ MultiplicativeExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
-        string t=assignExp($1->type,$3->type,*$2);
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=mulExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror(("Incompatible Types for "+*$2).c_str());
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
         delete $2;
     }
     | MultiplicativeExpression '*' UnaryExpression       {
@@ -960,23 +935,19 @@ MultiplicativeExpression:
         s.push_back($3);
         $$ = makeNode("*", s);
 
-        string t=assignExp($1->type,$3->type,"*");
-        if(!$1->is_error && !$3->is_error && $1->expType!=4){
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
+        string temp=mulExp($1->type,$3->type);
+        if(!$1->is_error && !$3->is_error){
+            if(!temp.empty()){
+                $$->type=temp;
             }
             else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
+                yyerror("Incompatible Types for *");
                 $$->is_error=1;
             }
         }
-        else if($1->expType==4){
-                fprintf(stdout,"Right side cannot be a constant");
+        else{
+            $$->is_error=1;
         }
-        $$->is_error=1;
     }
 ;
 
@@ -985,37 +956,57 @@ UnaryExpression:
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode(*$1, s);
+        if(!$2->is_error && $2->expType!=4){
+			string temp = postfixExpression($2->type,2);
+			if(!temp.empty()){
+				$$->type = temp;
+                if(*$1 == "++") $$->intVal = $2->intVal + 1;
+                else $$->intVal = $2->intVal -1;
+				//--3AC
+				// qid q = newtemp(temp);
+				// $$->place = q;
+				// $$->nextlist.clear();
+				// emit(qid("++S", NULL), $2->place, qid("", NULL), q, -1);
+			}
+			else{
+				yyerror("Increment not defined for this type");
+				$$->is_error = 1;
+			}
+		}
+		else{
+			if($2->expType==4){
+				yyerror("Cannot increment a constant");
+			}
+			$$->is_error = 1;
+		}
         delete $1;
-
-        string t=postfixExpression($2->type,6);
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
-            }
-            else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
-                $$->is_error=1;
-            }
     }
     | ADDOP UnaryExpression     {
         vector<ASTNode*> s;
         s.push_back($2);        
         $$ = makeNode(*$1, s);
+        if(!$2->is_error){
+			string temp = unaryExp($2->type,*$1);
+			if(!temp.empty()){
+				$$->type = temp;
+                // if(*$2=="-") $$->intval = - $2->intVal
+                // else $$->intVal = $2->intVal;
+				//--3AC
+				// qid q = newtemp(temp);
+				// $$->temp_name = $2->temp_name;
+				// $$->place = q;
+				// $$->nextlist.clear();
+				// emit($1->place, $2->place, qid("", NULL), q, -1);
+			}
+			else{
+				yyerror("Unary operator not defined for this type");
+				$$->is_error = 1;
+			}
+		}
+		else{
+			$$->is_error = 1;
+		}
         delete $1;
-
-        string t=postfixExpression($2->type,6);
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
-            }
-            else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
-                $$->is_error=1;
-            }
     }
     | UnaryExpressionNotPlusMinus   {
         $$ = $1;
@@ -1035,12 +1026,20 @@ UnaryExpressionNotPlusMinus:
         $$ = makeNode(*$1, s);
 
         if(!$2->is_error){
-            string t = unaryExp(*$1,$2->type);
-			if(!t.empty()){
-				$$->type = t;
+			string temp = unaryExp($2->type,*$1);
+			if(!temp.empty()){
+				$$->type = temp;
+                // if(*$2=="-") $$->intval = - $2->intVal
+                // else $$->intVal = $2->intVal;
+				//--3AC
+				// qid q = newtemp(temp);
+				// $$->temp_name = $2->temp_name;
+				// $$->place = q;
+				// $$->nextlist.clear();
+				// emit($1->place, $2->place, qid("", NULL), q, -1);
 			}
 			else{
-				yyerror("Type inconsistent with operator");
+				yyerror("Unary operator not defined for this type");
 				$$->is_error = 1;
 			}
 		}
@@ -1057,10 +1056,18 @@ CastExpression:
         s.push_back($2);
         s.push_back($4);
         $$ = makeNode("CastExpression", s);
-
-        if(type=="")type=$2->type;
-        $$->type=type;
-        //
+        if(!($2->is_error || $4->is_error)){
+			//Semantic
+			$$->type = $2->type;
+			// //--3AC
+			// // qid q = newtemp($$->type);
+			// $$->place = $4->place;
+			// $$->place.second->type = $2->type;
+			// $4->nextlist.clear();
+		}
+		else{
+			$$->is_error = 1;
+		}
     }
 ;
 
@@ -1068,17 +1075,73 @@ postfixExpression:
     Primary {
         $$ = $1;
     }
-    | IDENdotIDEN       {
+    | IDENdotIDEN      {
         $$ = $1;
+        if(idendotiden.find('.') != string::npos){
+            string temp = primaryExpression(idendotiden);
+            if(temp == ""){
+                yyerror(("Undeclared Identifier " + idendotiden).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                if(temp.substr(0, 5) == "FUNC_"){
+                    $$->expType = 3;
+                }
+                else if(temp.back() == '*'){
+                    $$->expType = 2; 
+                }
+                else $$->expType = 1;
+
+                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
+                    temp.pop_back();
+                    $$->type = temp;
+                    $$->temp_name = idendotiden; 
+                    // $$->nextlist.clear();
+                }
+                else{
+                    $$->type = temp;
+                    $$->temp_name = idendotiden;
+                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
+                    //--3AC
+                    // $$->place = qid(string($1), lookup(string($1)));
+                    // $$->nextlist.clear();
+
+                }
+            }
+        }
+        else{
+            // check in class
+        }
     }
     | postfixExpression ADDOP2      {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf(*$2));
         $$ = makeNode("Postfix Expression", s);
+        if(!$1->is_error && $1->expType!=4){
+			string temp = postfixExpression($1->type,2);
+			if(!temp.empty()){
+				$$->type = temp;
+                if(*$2 == "++") $$->intVal = $1->intVal + 1;
+                else $$->intVal = $1->intVal -1;
+				//--3AC
+				// qid q = newtemp(temp);
+				// $$->place = q;
+				// $$->nextlist.clear();
+				// emit(qid("++S", NULL), $1->place, qid("", NULL), q, -1);
+			}
+			else{
+				yyerror("Increment not defined for this type");
+				$$->is_error = 1;
+			}
+		}
+		else{
+			if($1->expType==4){
+				yyerror("Cannot increment a constant");
+			}
+			$$->is_error = 1;
+		}
         delete $2;
-
-        //
     }
 ;
 // 15 end
@@ -1278,35 +1341,61 @@ StatementExpression:
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode(*$1, s);
+        if(!$2->is_error && $2->expType!=4){
+			string temp = postfixExpression($2->type,2);
+			if(!temp.empty()){
+				$$->type = temp;
+                if(*$1 == "++") $$->intVal = $2->intVal + 1;
+                else $$->intVal = $2->intVal -1;
+				//--3AC
+				// qid q = newtemp(temp);
+				// $$->place = q;
+				// $$->nextlist.clear();
+				// emit(qid("++S", NULL), $2->place, qid("", NULL), q, -1);
+			}
+			else{
+				yyerror("Increment not defined for this type");
+				$$->is_error = 1;
+			}
+		}
+		else{
+			if($2->expType==4){
+				yyerror("Cannot increment a constant");
+			}
+			$$->is_error = 1;
+		}
         delete $1;
-
-        string t=postfixExpression($2->type,6);
-            if(!t.empty()){
-                $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
-            }
-            else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
-                $$->is_error=1;
-            }
     }
     | postfixExpression ADDOP2 {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf(*$2));
-        delete $2;
         $$ = makeNode("Statement Expression", s);
 
-        string t=postfixExpression($1->type,6);
-            if(!t.empty()){
-                $$->type=t;
-            }
-            else{
-                fprintf(stdout,"Incompatible Types when comparing at %d\n",yylineno);
-                $$->is_error=1;
-            }
+        if(!$1->is_error && $1->expType!=4){
+			string temp = postfixExpression($1->type,2);
+			if(!temp.empty()){
+				$$->type = temp;
+                if(*$2 == "++") $$->intVal = $1->intVal + 1;
+                else $$->intVal = $1->intVal -1;
+				//--3AC
+				// qid q = newtemp(temp);
+				// $$->place = q;
+				// $$->nextlist.clear();
+				// emit(qid("++S", NULL), $1->place, qid("", NULL), q, -1);
+			}
+			else{
+				yyerror("Increment not defined for this type");
+				$$->is_error = 1;
+			}
+		}
+		else{
+			if($1->expType==4){
+				yyerror("Cannot increment a constant");
+			}
+			$$->is_error = 1;
+		}
+        delete $2;
     }
     /* | ClassInstanceCreationExpression */
 ;
@@ -1314,7 +1403,6 @@ StatementExpression:
 LeftHandSide:
     IDENdotIDEN {
         $$=$1;
-        if(type==""||class_type!="")type=class_type;
         $$->type=type;
     }
     | FieldAccess {
@@ -1622,6 +1710,7 @@ VariableDeclarator1:
     IDENTIFIER {
         $$ = makeLeaf("ID (" + *$1 +")");
         $$->expType = 1;
+        $$->temp_name = *$1;
         if(type!="") $$->type = type;
         else if(class_type!="") $$->type=class_type;
         else{
@@ -1644,8 +1733,9 @@ VariableDeclarator1:
         s.push_back($3);
         $$ = makeNode("VariableDeclarator1", s);
         $$->type=type;
-        if($3->type!="INT"){
-            fprintf(stdout,"Index of the array should be integer.");
+        $$->temp_name = *$1;
+        if($3->type!="int"){
+            yyerror("Index of the array should be integer");
         }
         //
         if(curLookup(*$1)){
@@ -1655,6 +1745,7 @@ VariableDeclarator1:
         }
         else{
             isArray=1;
+            $$->expType = 2;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
@@ -1668,6 +1759,7 @@ VariableDeclarator1:
         s.push_back($6);
         $$ = makeNode("VariableDeclarator1", s);
         $$->type=type;
+        $$->temp_name = *$1;
 
         if(curLookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
@@ -1676,6 +1768,7 @@ VariableDeclarator1:
         }
         else{
             isArray=1;
+            $$->expType = 2;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
@@ -1692,6 +1785,7 @@ VariableDeclarator1:
         s.push_back($9);
         $$ = makeNode("VariableDeclarator1", s);
         $$->type=type;
+        $$->temp_name = *$1;
 
         if(curLookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
@@ -1700,6 +1794,7 @@ VariableDeclarator1:
         }
         else{
             isArray=1;
+            $$->expType =2;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
@@ -1720,7 +1815,7 @@ VariableDeclarator2:
         $$ = makeNode("=",s);
         cout<<type<<" "<<$3->type<<endl;
         if(type!=$3->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1742,10 +1837,10 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
         //
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$6->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1773,13 +1868,13 @@ VariableDeclarator2:
 
 
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($6!=NULL && $6->intVal>cnt2){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$9->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1810,17 +1905,17 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
         //
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($6!=NULL && $6->intVal>cnt2){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($9!=NULL && $9->intVal>cnt3){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
 
         if(type!=$12->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1853,11 +1948,11 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
         //
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
             $$->is_error=1;
         }
         if(type!=$7->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1888,13 +1983,13 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
         //
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($6!=NULL && $6->intVal>cnt2){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$10->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1929,16 +2024,16 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
         //
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($6!=NULL && $6->intVal>cnt2){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($9!=NULL && $9->intVal>cnt3){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$13->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -1972,7 +2067,7 @@ VariableDeclarator2:
             // fprintf(stdout,"Index out of bounds");
         // }
         if(type!=$7->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -2001,13 +2096,13 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
         //
         if($3!=NULL && $3->intVal>cnt1){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if($6!=NULL && $6->intVal>cnt2){
-            fprintf(stdout,"Index out of bounds, not matching with intitalisers");
+            yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$10->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -2049,7 +2144,7 @@ VariableDeclarator2:
             // fprintf(stdout,"Index out of bounds");
         // }
         if(type!=$13->type){
-            fprintf(stdout,"Type Clashing at : %d\n",yylineno);
+            yyerror("Type Clashing");
             $$->is_error=1;
         }
         
@@ -2169,120 +2264,68 @@ Methodeclarator:
     }
 ;
 
-IdenPara:
-    IDENTIFIER '(' formalparameters ')' {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
-        s.push_back($3);
-        $$ = makeNode("IdenPara", s);
-        type="";
+MethodIDEN:
+    IDENTIFIER      {
+        $$ = makeLeaf("ID (" + *$1+")" );
+        $$->temp_name = *$1;
+        funcName = *$1;
+        funcType = type;
+        $$->type =type;
+        type ="";
         class_type="";
-
-        // string temp = postfixExpression($1->type,3);
-		// if(temp.empty()){
-		// 	temp = getFuncType($1->temp_name);
-		// }
-
-		// if(!($1->is_error || $3->is_error) && $1->expType!=4){
-		// 	if(!temp.empty()){	
-		// 		$$->type = temp;
-		// 		if($1->expType ==3){
-		// 			vector<string> funcArgs = getFuncArgs($1->temp_name);
-		// 			vector<string> tempArgs =curArgs.back();
-		// 			for(int i=0;i<funcArgs.size();i++){
-		// 				if(funcArgs[i]=="...")break;
-		// 				if(tempArgs.size()==i){
-		// 					yyerror(("Too few Arguments to Function " + $1->temp_name).c_str());
-		// 					break;
-		// 				}
-		// 				string msg = checkType(funcArgs[i],tempArgs[i]);
-
-		// 				if(msg =="warning"){
-		// 					warning(("Incompatible conversion of " +  tempArgs[i] + " to parameter of type " + funcArgs[i]).c_str());
-		// 				}
-		// 				else if(msg.empty()){
-		// 					yyerror(("Incompatible Argument to the function " + $1->temp_name).c_str());
-		// 					$$->is_error = 1;
-		// 					break;
-		// 				}
-		// 				if(i==funcArgs.size()-1 && i<tempArgs.size()-1){
-		// 					yyerror(("Too many Arguments to Function " + $1->temp_name).c_str());
-		// 					$$->is_error = 1;
-		// 					break;
-		// 				}
-
-		// 			}	
-
-		// 			//--3AC
-		// 			// if(!$$->is_error){
-		// 			// 	qid q = newtemp($$->type);
-		// 			// 	$$->place = q;
-		// 			// 	$$->nextlist.clear();
-
-		// 			// 	emit(qid("CALL", NULL), qid($1->temp_name,NULL), qid(to_string(curArgs.back().size()), NULL), q, -1);
-		// 			// 	curArgs.pop_back();
-
-		// 			// 	if(func_usage_map.find($1->temp_name) != func_usage_map.end()){
-		// 			// 		func_usage_map[$1->temp_name] = 1;
-		// 			// 	}
-		// 			// }
-
-		// 		}
-		// 	}
-		// 	else{
-		// 		yyerror("Invalid function call");
-		// 		$$->is_error=1;
-		// 	}
-		// }
-		// else{
-		// 	if($1->expType==4){
-		// 		yyerror("constant expression cannot be used as lvalue");
-		// 	}
-		// 	$$->is_error=1;
-		// }
+        delete $1;
     }
-    | IDENTIFIER '(' ')' {
+;
+
+IdenPara:
+    MethodIDEN F '(' formalparameters ')' {
         vector<ASTNode*> s;
-        s.push_back(makeLeaf("ID (" + *$1+")" ));
-        delete $1;
+        s.push_back($1);
+        s.push_back($4);
         $$ = makeNode("IdenPara", s);
-        type="";
-        class_type="";
 
-        // if(!$1->is_error){
-		// 	if($1->expType == 1) {
-		// 		$$->temp_name = $1->temp_name;
-		// 		$$->expType = 3;
-		// 		$$->type = $1->type;
-		// 		$$->size = getSize($$->type);
+        if(!$4->is_error){
+            $$->temp_name = $1->temp_name;
+            $$->expType = 3;
+            $$->type = $1->type;
 
-		// 		vector<string> temp = getFuncArgs($1->temp_name);
-		// 		if((temp.size() == 1 && temp[0] == "#NO_FUNC") || funcArgs == temp){
-		// 			insertFuncArg($$->temp_name, funcArgs, $$->type);
-		// 			funcArgs.clear();
-		// 			funcName = string($1->temp_name);
-		// 			funcType = $1->type;
-		// 		}
-		// 		else {
-		// 			yyerror(("Conflicting types for function " + $1->temp_name).c_str());
-		// 			$$->is_error = 1;
-		// 		}
-		// 		//3AC
-		// 		// $$->place = qid($$->temp_name, NULL, modifier);
-		// 		// emit(pair<string,sym_entry*>("FUNC_" + $$->temp_name + " start :",NULL),pair<string,sym_entry*>("",NULL),pair<string,sym_entry*>("",NULL),pair<string,sym_entry*>("",NULL),-2);
-		// 	}
-		// 	else {
-		// 		if($1->expType == 2){
-		// 			yyerror( ($1->temp_name + "declared as array of function").c_str());
-		// 		}
-		// 		else{
-		// 			yyerror( ($1->temp_name + "declared as function of function").c_str());
-		// 		}
-		// 		$$->is_error = 1;
-		// 	}
-		// }
-		// else $$->is_error = 1;
+            vector<string> temp = getFuncArgs($1->temp_name);
+            if(curLookup($1->temp_name)){
+                yyerror(("Redeclaration of Parameter "+ $1->temp_name).c_str());
+                $$->is_error = 1;
+            }
+            else if(temp.size()==1 && temp[0] == "#NO_FUNC"){
+                insertFuncArg($$->temp_name, funcArgs, $$->type);
+                funcArgs.clear();
+            }
+        }
+        else{
+            $$->is_error = 1;
+        }
+    }
+    | MethodIDEN F '(' ')' {
+        vector<ASTNode*> s;
+        s.push_back($1);
+        $$ = makeNode("IdenPara", s);
+
+        if(1){
+            $$->temp_name = $1->temp_name;
+            $$->expType = 3;
+            $$->type = $1->type;
+
+            vector<string> temp = getFuncArgs($1->temp_name);
+            if(curLookup($1->temp_name)){
+                yyerror(("Redeclaration of Parameter "+ $1->temp_name).c_str());
+                $$->is_error = 1;
+            }
+            else if(temp.size()==1 && temp[0] == "#NO_FUNC"){
+                insertFuncArg($$->temp_name, funcArgs, $$->type);
+                funcArgs.clear();
+            }
+        }
+        else{
+            $$->is_error = 1;
+        }
     }
 ;
 formalparameters:
@@ -2308,6 +2351,21 @@ formalparameter:
 
         if(type=="")type=$1->type;
         $$->type=type;
+
+        if(!$1->is_error && !$2->is_error){
+            if($2->expType == 1 || $2->expType ==2){
+                if(curLookup($2->temp_name)){
+                    yyerror(("Redeclaration of parameter "+ $2->temp_name).c_str());
+                    $$->is_error = 1;
+                }
+                else{
+                    paramInsert(*cur_table, $2->temp_name, "IDENTIFIER", $2->temp_name,$2->type, yylineno, NULL, modifier);
+                }
+            }
+            funcArgs.push_back($2->type);
+        }
+        else $$->is_error = 1;
+        type ="";
     }
     | KEY_final Type VariableDeclarator1 {
         vector<ASTNode*> s;
@@ -2318,6 +2376,21 @@ formalparameter:
 
         if(type=="")type=$2->type;
         $$->type=type;
+        modifier[2]=1;
+        if(!$2->is_error && !$3->is_error){
+            if($3->expType == 1 || $3->expType ==2){
+                if(curLookup($3->temp_name)){
+                    yyerror(("Redeclaration of parameter "+ $3->temp_name).c_str());
+                    $$->is_error = 1;
+                }
+                else{
+                    paramInsert(*cur_table, $3->temp_name, "IDENTIFIER", $3->temp_name,$3->type, yylineno, NULL, modifier);
+                }
+            }
+            funcArgs.push_back($3->type);
+        }
+        else $$->is_error = 1;
+        type ="";
     }
     | Type DOT3 IDENTIFIER {
         vector<ASTNode*> s;
@@ -2325,10 +2398,25 @@ formalparameter:
         s.push_back(makeLeaf(*$2));
         delete $2;
         s.push_back(makeLeaf("ID (" + *$3+")" ));
-        delete $3;
         $$ = makeNode("formalparameter", s);
 
+        if(type=="")type=$1->type;
         $$->type=type;
+
+        if(!$1->is_error){
+            if(curLookup(*$3)){
+                yyerror(("Redeclaration of parameter "+ *$3).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                paramInsert(*cur_table, *$3, "IDENTIFIER", *$3,type, yylineno, NULL, modifier);
+            }
+            funcArgs.push_back("...");
+            funcArgs.push_back(type);
+        }
+        else $$->is_error = 1;
+        type ="";
+        delete $3;
     }
     | KEY_final Type DOT3 IDENTIFIER {
         vector<ASTNode*> s;
@@ -2337,10 +2425,25 @@ formalparameter:
         s.push_back(makeLeaf(*$3));
         delete $3;
         s.push_back(makeLeaf("ID (" + *$4+")" ));
-        delete $4;
         $$ = makeNode("formalparameter", s);
 
+        if(type=="")type=$2->type;
         $$->type=type;
+        modifier[2]=1;
+        if(!$2->is_error){
+            if(curLookup(*$4)){
+                yyerror(("Redeclaration of parameter "+ *$4).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                paramInsert(*cur_table, *$4, "IDENTIFIER", *$4,type, yylineno, NULL, modifier);
+            }
+            funcArgs.push_back("...");
+            funcArgs.push_back(type);
+        }
+        else $$->is_error = 1;
+        type ="";
+        delete $4;
     }
 ;
 
@@ -2363,6 +2466,22 @@ Modifiers:
     }
     |   {$$=NULL;}
 ;
+
+F:
+     {
+        $$ = makeLeaf("F");
+        if(global_st.find(funcName) != global_st.end()){
+            yyerror(("Redefinition of function " + funcName).c_str());
+            $$->is_error = 1;
+        }
+        else{
+            makeSymbolTable(funcName, funcType, yylineno, modifier);
+            $$->node_name = funcName;
+            block_count = 1;
+            type = "";
+            class_type = "";
+        }
+    }
 
 // Class and Method END
 %%

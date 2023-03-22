@@ -1,9 +1,9 @@
 %{
-#include<iostream>
-#include"AST.h"
-#include"parser.tab.h"
+#include <stdio.h>
+#include <iostream>
 using namespace std;
-
+#include "AST.h"
+#include "parser.tab.h"
 
 string txt;
 
@@ -170,13 +170,8 @@ import {return(KEY_import);}
 
 %%
 
-void showError(){
-    printf("Error: Line %d: Illegal character %s\n", yylineno, yytext);
-}
-
 int yyerror(const char *str){
     printf("Error on line %d : %s\n", yylineno,str);
-    printf("%s\n", yytext);
     return 0;
 }
 

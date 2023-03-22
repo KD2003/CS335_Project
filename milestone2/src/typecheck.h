@@ -1,5 +1,6 @@
+#pragma once
 #include "symbol_table.h"
-#include <string>
+#include <bits/stdc++.h>
 using namespace std;
 
 string primaryExpression(string id);

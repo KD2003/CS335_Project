@@ -17,8 +17,12 @@ typedef struct sym_entry{
 }sym_entry;
 
 typedef map<string, sym_entry* > sym_table;
-extern sym_table* cur_table;
 
+extern sym_table* cur_table;
+extern sym_table global_st;
+extern map<sym_table*, sym_table*> parent_table;
+extern map<string, pair<string,vector<string> > > func_arg;
+extern int avl;
 
 void symbolTableInit();
 sym_entry* createEntry(string, string, string, int, sym_table*, vector<int>&);
