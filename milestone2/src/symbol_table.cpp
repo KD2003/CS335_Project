@@ -3,17 +3,18 @@
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
+map<sym_table*, vector<sym_table*>> children_table;
 map<string, pair< string,vector<string> > > func_arg;
 sym_table* cur_table;
 
 int avl = 0;
 
 extern int isArray;
-extern int dump_sym_table;
 extern vector<int> array_dims;
 
 void symbolTableInit(){
 	parent_table.insert(make_pair(&global_st, nullptr));
+	children_table.insert(make_pair(&global_st, vector<sym_table*> ()));
 	cur_table = &global_st;
 	// insert keywords?
 }
@@ -74,7 +75,10 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 			insertSymbol(*cur_table, name , "Block", "", "", lineno, new_table, modifiers);
 		}
 		parent_table.insert(make_pair(new_table, cur_table));
-
+		if(children_table.find(cur_table) == children_table.end()){
+			children_table.insert(make_pair(new_table, vector<sym_table*> ()));
+		}
+		children_table[cur_table].push_back(new_table);
 		cur_table = new_table;
 	}
 	else{
@@ -109,13 +113,23 @@ void insertFuncArg(string &func, vector<string> &arg, string &tp){
 	func_arg.insert(make_pair(func, make_pair(string("FUNC_" +tp),arg)));
 }
 
-void printSymbolTable(sym_table* table, string file_name){
-	if(!dump_sym_table) return;
-	FILE* file = fopen(file_name.c_str(), "w");
-  	fprintf( file,"Name, Token, Lexeme, Type, Lineno\n");
-  	for(auto it: (*table)){
+void recurPrintST(FILE* file, sym_table* table){
+	for(auto it: (*table)){
     	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
   	}
+	for(auto it: children_table[table]){
+		recurPrintST(file, it);
+	}
+	return;
+}
+
+void printSymbolTable(sym_table* table, string file_name){
+	FILE* file = fopen(file_name.c_str(), "w");
+  	fprintf( file,"Name, Token, Lexeme, Type, Lineno\n");
+	recurPrintST(file, table);
+  	// for(auto it: (*table)){
+    // 	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
+  	// }
   	fclose(file);
 }
 
