@@ -1,5 +1,3 @@
-import java.util.Scanner;
-
 // Binary Search in Java
 
 class Main {
@@ -36,16 +34,10 @@ class Main {
 
     // create a sorted array
     int array[] = { 3, 4, 5, 6, 7, 8, 9 };
-    int n = array.length;
-
-    // get input from user for element to be searched
-    Scanner input = new Scanner(System.in);
-
-    System.out.println("Enter element to be searched:");
+    int n = 7;
 
     // element to be searched
-    int element = input.nextInt();
-    input.close();
+    int element = 5;
 
     // call the binary search method
     // pass arguments: array, element, index of first and last element
@@ -53,6 +45,6 @@ class Main {
     if (result == -1)
       System.out.println("Not found");
     else
-      System.out.println("Element found at index " + result);
+      System.out.println(result);
   }
 }
