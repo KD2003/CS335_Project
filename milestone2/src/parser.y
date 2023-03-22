@@ -19,6 +19,7 @@ int isArray=0;
 int cnt1=0,cnt2=0,cnt3=0;
 int block_count = 0;
 int func_flag=0;
+int for_flag=0;
 
 string type="";
 string class_type="";
@@ -47,7 +48,7 @@ int yyerror(const char *str);
 
 %type<st> KEYWORD IDENTIFIER INTLIT FPLIT BOOLLIT CHARLIT STRLIT OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
 
-%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal F MethodIDEN C
+%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal F MethodIDEN C A
 %type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression postfixExpression
 %type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
@@ -1414,6 +1415,13 @@ Statement:
     }
     | ForStatement {
         $$=$1;
+        int bc = block_stack.top();
+        block_stack.pop();
+        string str = "Block" + to_string(bc);
+        string name = funcName+str+".csv";
+        printSymbolTable(cur_table, name);
+        endSymbolTable();
+        for_flag=0;
     }
 ;
 
@@ -1451,6 +1459,7 @@ StatementNoShortIf:
 StatementWithoutTrailingSubstatement:		// left try statement
     Block   {
         $$=$1;
+
     }
     | ';' {
         $$=NULL;
@@ -1703,66 +1712,75 @@ BreakContinueStatement:
         type="";
     }
 ;
+A:
+    {
+        for_flag=1;
+        string str = "Block" +to_string(block_count);
+        block_stack.push(block_count);
+        block_count++;
+        makeSymbolTable(str, "", yylineno, modifier);
+    }    
+;
 
 ForStatement:
-    KEY_for '(' ForInit ';' ';' ')' Statement {
+    KEY_for '(' A ForInit ';' ';' ')' Statement {
         vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($7);
-        $$ = makeNode("for", s);
-    }
-    | KEY_for '(' ForInit ';' Expression ';' ')' Statement {
-        vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($5);
+        s.push_back($4);
         s.push_back($8);
         $$ = makeNode("for", s);
     }
-    | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' Statement {
+    | KEY_for '(' A ForInit ';' Expression ';' ')' Statement {
         vector<ASTNode*> s;
-        s.push_back($3);
+        s.push_back($4);
         s.push_back($6);
-        s.push_back($8);
+        s.push_back($9);
         $$ = makeNode("for", s);
     }
-    | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' Statement {
+    | KEY_for '(' A ForInit ';' ';' StatementExpressionList ')' Statement {
         vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($5);
+        s.push_back($4);
         s.push_back($7);
         s.push_back($9);
+        $$ = makeNode("for", s);
+    }
+    | KEY_for '(' A ForInit ';' Expression ';' StatementExpressionList ')' Statement {
+        vector<ASTNode*> s;
+        s.push_back($4);
+        s.push_back($6);
+        s.push_back($8);
+        s.push_back($10);
         $$ = makeNode("for", s);
     }
     /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement */
 ;
 
 ForStatementNoShortIf:
-    KEY_for '(' ForInit ';' ';' ')' StatementNoShortIf {
+    KEY_for '(' A ForInit ';' ';' ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($7);
-        $$ = makeNode("for", s);
-    }
-    | KEY_for '(' ForInit ';' Expression ';' ')' StatementNoShortIf {
-        vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($5);
+        s.push_back($4);
         s.push_back($8);
         $$ = makeNode("for", s);
     }
-    | KEY_for '(' ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf {
+    | KEY_for '(' A ForInit ';' Expression ';' ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back($3);
+        s.push_back($4);
         s.push_back($6);
-        s.push_back($8);
+        s.push_back($9);
         $$ = makeNode("for", s);
     }
-    | KEY_for '(' ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf {
+    | KEY_for '(' A ForInit ';' ';' StatementExpressionList ')' StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($5);
+        s.push_back($4);
         s.push_back($7);
         s.push_back($9);
+        $$ = makeNode("for", s);
+    }
+    | KEY_for '(' A ForInit ';' Expression ';' StatementExpressionList ')' StatementNoShortIf {
+        vector<ASTNode*> s;
+        s.push_back($4);
+        s.push_back($6);
+        s.push_back($8);
+        s.push_back($10);
         $$ = makeNode("for", s);
     }
 ;
@@ -1884,14 +1902,16 @@ ClassBody:
 ;
 CHANGE_TABLE:
      {
-		if(func_flag){
-			string str = "Block" +to_string(block_count);
-			block_stack.push(block_count);
-			block_count++;
-			func_flag++;
-			makeSymbolTable(str, "", yylineno, modifier);
-		}
-		else func_flag++;
+        if(!for_flag){
+            if(func_flag){
+                string str = "Block" +to_string(block_count);
+                block_stack.push(block_count);
+                block_count++;
+                func_flag++;
+                makeSymbolTable(str, "", yylineno, modifier);
+            }
+            else func_flag++;
+        }
 	}
 ;
 
@@ -1978,7 +1998,7 @@ VariableDeclarator1:
         }
 
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2000,7 +2020,7 @@ VariableDeclarator1:
         }
         //
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2023,7 +2043,7 @@ VariableDeclarator1:
         $$->temp_name = *$1;
 
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2049,7 +2069,7 @@ VariableDeclarator1:
         $$->temp_name = *$1;
 
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2080,7 +2100,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2105,7 +2125,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2139,7 +2159,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2180,7 +2200,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2217,7 +2237,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2254,7 +2274,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2298,7 +2318,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2332,7 +2352,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2367,7 +2387,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2409,7 +2429,7 @@ VariableDeclarator2:
         }
         
         if(lookup(*$1)){
-				string errstr = *$1 + " is already declared\n";
+				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
         }
@@ -2439,7 +2459,7 @@ ArrEle1:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
-
+        $$->type=$3->type;
         cnt1++;
     }
     | Expression {
@@ -2459,6 +2479,7 @@ ArrEle2:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+        $$->type=$3->type;
         cnt2++;
     }
     | List1 {
@@ -2478,6 +2499,7 @@ ArrEle3:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+        $$->type=$3->type;
         cnt3++;
     }
     | List2 {
@@ -2741,6 +2763,7 @@ F:
         func_flag=0;
     }
 ;
+
 
 C:
     {
