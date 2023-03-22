@@ -18,6 +18,8 @@ void symbolTableInit(){
 	parent_table.insert(make_pair(&global_st, nullptr));
 	children_table.insert(make_pair(&global_st, vector<sym_table*> ()));
 	cur_table = &global_st;
+	vector<int> temp = {1,0,0};
+	insertSymbol(*cur_table, "String" , "CLASS", "String", "CLASS", 0, NULL, temp);
 	// insert keywords?
 }
 
