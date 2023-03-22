@@ -22,5 +22,5 @@ typedef struct{
 void beginAST();
 void endAST();
 
-ASTNode *makeLeaf(string);
+ASTNode *makeLeaf(string, int = 0);
 ASTNode *makeNode(string , vector<ASTNode*>&);

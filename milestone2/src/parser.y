@@ -9,6 +9,7 @@ FILE* dotfile;
 extern FILE* yyin;
 extern int yyrestart(FILE*);
 extern int yylineno;
+extern map<sym_table*, vector<pair<string,sym_table*>>> children_table;
 
 bool gotinputfile, gotoutputfile, verbosemode;
 
@@ -16,7 +17,7 @@ bool gotinputfile, gotoutputfile, verbosemode;
 int tempo=0;
 int isArray=0;
 int cnt1=0,cnt2=0,cnt3=0;
-// int block_count = 0;
+int block_count = 0;
 int func_flag=0;
 
 string type="";
@@ -29,7 +30,7 @@ vector<int> modifier ={1,0,0};
 vector<string> funcArgs;
 vector<vector<string> > curArgs(1,vector<string>() );
 
-// stack<int> block_stack;
+stack<int> block_stack;
 
 int yylex();
 int yyerror(const char *str);
@@ -159,6 +160,7 @@ IDENdotIDEN:
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         class_type=class_type+"."+*$3;
         idendotiden = idendotiden + "." +*$3;
+        $$->type=type;
         $$->temp_name = idendotiden;
         delete $3;
         $$ = makeNode(".", s);
@@ -167,6 +169,17 @@ IDENdotIDEN:
         $$ = makeLeaf("ID (" + *$1 + ")");
         class_type=*$1;
         idendotiden = *$1;
+        // if(type==""){
+        //     if(lookup(*$1)){
+        //         type=lookup(*$1)->type;
+        //     }
+        //     else{
+        //         yyerror(("ON reading "+*$1+" Something error\n").c_str());
+        //         // cout<<"Something Error"<<endl;
+        //         $$->is_error;
+        //     }
+        // }
+        $$->type=type;
         $$->temp_name = idendotiden;
         delete $1;
     }
@@ -190,7 +203,33 @@ PublicPrivateStatic:
 ClassType:
     IDENdotIDEN     {
         $$=$1;
-        $$->type = class_type;
+        int pos = class_type.find(".");
+        string sub = class_type.substr(0, pos);
+        if(global_st.find(sub) != global_st.end()){
+            yyerror(("Undefined class " + sub).c_str());
+            $$->is_error = 1;
+        }
+        else{
+            if(class_type.find('.')!=string::npos){
+                string sub1 = class_type.substr(pos+1);
+                for(auto it: children_table[&global_st]){
+                    if(it.first == sub){
+                        if((*(it.second)).find(sub1) != (*(it.second)).end()){
+                            yyerror(("Undefined member of class " + sub).c_str());
+                            $$->is_error = 1;
+                        }
+                        else{
+                            $$->type = class_type;
+                            type = class_type;
+                        }
+                    }
+                }
+            }
+            else{
+                $$->type = class_type;
+                type = class_type;
+            }
+        }
     }
 ;
 ArrayType:
@@ -810,6 +849,7 @@ EqualityExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(*$2, s);
+        // cout<<$1->type<<" :1"<<$3->type<<"\n";
         string temp=eqExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
@@ -1155,11 +1195,16 @@ postfixExpression:
 Block:
     '{' CHANGE_TABLE BlockStatements '}' {
         $$=$3;
-        // int bc = block_stack.top();
-        // block_stack.pop();
-        // string str = "Block" + to_string(bc);
-        // string name = funcName+str+".csv";
         // printSymbolTable(cur_table, name);
+        if(func_flag>=2){
+            int bc = block_stack.top();
+            block_stack.pop();
+            string str = "Block" + to_string(bc);
+            string name = funcName+str+".csv";
+            printSymbolTable(cur_table, name);
+            endSymbolTable();
+            func_flag--;
+        }
     }
 ;
 
@@ -1579,6 +1624,8 @@ NormalClassDeclaration:
         string filename=*$3;
         printSymbolTable(cur_table,filename + ".csv");
         endSymbolTable();
+        func_flag=0;
+        modifier={1,0,0};
         delete $3;
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassBody {
@@ -1588,7 +1635,7 @@ NormalClassDeclaration:
         s.push_back($4);
         s.push_back($5);
         $$ = makeNode("class", s);
-
+        modifier={1,0,0};
         delete $3;
     }
     | Modifiers KEY_class IDENTIFIER ClassPermits ClassBody {
@@ -1598,7 +1645,7 @@ NormalClassDeclaration:
         s.push_back($4);
         s.push_back($5);
         $$ = makeNode("class", s);
-
+        modifier={1,0,0};
         delete $3;
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassPermits ClassBody {
@@ -1609,7 +1656,7 @@ NormalClassDeclaration:
         s.push_back($5);
         s.push_back($6);
         $$ = makeNode("class", s);
-
+        modifier={1,0,0};
         delete $3;
     }
 ;
@@ -1650,7 +1697,9 @@ ClassBody:
 CHANGE_TABLE:
      {
 		if(func_flag){
-			string str = class_type;
+			string str = "Block" +to_string(block_count);
+			block_stack.push(block_count);
+			block_count++;
 			func_flag++;
 			makeSymbolTable(str, "", yylineno, modifier);
 		}
@@ -1676,6 +1725,7 @@ ClassBodyDeclaration:
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("ClassBodyDeclaration", s);
+        modifier={1,0,0};
     }
     | ClassDeclaration {
         $$=$1;
@@ -1693,7 +1743,7 @@ ClassBodyDeclaration:
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("ClassBodyDeclaration", s);
-
+        modifier={1,0,0};
     }
     | MethodDeclaration {
         $$=$1;
@@ -1739,7 +1789,7 @@ VariableDeclarator1:
             printf("Type is not defined at : %d\n",yylineno);
         }
 
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1761,7 +1811,7 @@ VariableDeclarator1:
             yyerror("Index of the array should be integer");
         }
         //
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1784,7 +1834,7 @@ VariableDeclarator1:
         $$->type=type;
         $$->temp_name = *$1;
 
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1810,7 +1860,7 @@ VariableDeclarator1:
         $$->type=type;
         $$->temp_name = *$1;
 
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1842,7 +1892,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1867,7 +1917,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1901,7 +1951,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1942,7 +1992,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -1979,7 +2029,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -2016,7 +2066,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -2060,7 +2110,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -2094,7 +2144,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -2129,7 +2179,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -2171,7 +2221,7 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         
-        if(curLookup(*$1)){
+        if(lookup(*$1)){
 				string errstr = *$1 + " is already declared\n";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -2257,12 +2307,14 @@ MethodDeclaration:
         $$ = makeNode("MethodDeclaration", s);
 
         string fName = funcName;
-        // cout << funcName << cur_table <<"\n";
+        cout << funcName << cur_table <<"\n";
         // for(auto it: *cur_table){
         //     cout << it.first << " ";
         // }
         printSymbolTable(cur_table ,fName + ".csv");
         endSymbolTable();
+        func_flag=0;
+        modifier={1,0,0};
         // func_flag--;
     }
 ;
@@ -2312,19 +2364,14 @@ IdenPara:
         s.push_back($1);
         s.push_back($4);
         $$ = makeNode("IdenPara", s);
-        
 
-        if(!$4->is_error){
+        if(!$4->is_error && !$2->is_error){
             $$->temp_name = $1->temp_name;
             $$->expType = 3;
             $$->type = $1->type;
 
             vector<string> temp = getFuncArgs($1->temp_name);
-            if(curLookup($1->temp_name)){
-                yyerror(("Redeclaration of Method "+ $1->temp_name).c_str());
-                $$->is_error = 1;
-            }
-            else if(temp.size()==1 && temp[0] == "#NO_FUNC"){
+            if(temp.size()==1 && temp[0] == "#NO_FUNC"){
                 insertFuncArg($$->temp_name, funcArgs, $$->type);
                 funcArgs.clear();
             }
@@ -2338,17 +2385,17 @@ IdenPara:
         s.push_back($1);
         $$ = makeNode("IdenPara", s);
 
-        if(1){
+        if(!$2->is_error){
             $$->temp_name = $1->temp_name;
             $$->expType = 3;
             $$->type = $1->type;
 
             vector<string> temp = getFuncArgs($1->temp_name);
-            if(curLookup($1->temp_name)){
-                yyerror(("Redeclaration of Method "+ $1->temp_name).c_str());
-                $$->is_error = 1;
-            }
-            else if(temp.size()==1 && temp[0] == "#NO_FUNC"){
+            // if(lookup($1->temp_name)){
+            //     yyerror(("Redeclaration of Method "+ $1->temp_name).c_str());
+            //     $$->is_error = 1;
+            // }
+            if(temp.size()==1 && temp[0] == "#NO_FUNC"){
                 insertFuncArg($$->temp_name, funcArgs, $$->type);
                 funcArgs.clear();
             }
@@ -2388,7 +2435,7 @@ formalparameter:
                 // for(auto it: *cur_table){
                 //     cout << it.first << " ";
                 // }
-                // if(curLookup($2->temp_name)){
+                // if(lookup($2->temp_name)){
                 //     string filename="debug"+to_string(tempo)+".csv";
                 //     tempo++;
                 //     printSymbolTable(cur_table,filename);
@@ -2417,7 +2464,7 @@ formalparameter:
         modifier[2]=1;
         if(!$2->is_error && !$3->is_error){
             if($3->expType == 1 || $3->expType ==2){
-                if(curLookup($3->temp_name)){
+                if(lookup($3->temp_name)){
                     yyerror(("Redeclaration of parameter "+ $3->temp_name).c_str());
                     $$->is_error = 1;
                 }
@@ -2442,7 +2489,7 @@ formalparameter:
         $$->type=type;
 
         if(!$1->is_error){
-            if(curLookup(*$3)){
+            if(lookup(*$3)){
                 yyerror(("Redeclaration of parameter "+ *$3).c_str());
                 $$->is_error = 1;
             }
@@ -2469,7 +2516,7 @@ formalparameter:
         $$->type=type;
         modifier[2]=1;
         if(!$2->is_error){
-            if(curLookup(*$4)){
+            if(lookup(*$4)){
                 yyerror(("Redeclaration of parameter "+ *$4).c_str());
                 $$->is_error = 1;
             }
@@ -2507,16 +2554,16 @@ Modifiers:
 
 F:
      {
-        $$ = makeLeaf("F");
+        $$ = makeLeaf("F",1);
         if((*cur_table).find(funcName) != (*cur_table).end()){
-            yyerror(("Redefinition of function " + funcName).c_str());
+            yyerror(("Redefinition of method " + funcName).c_str());
             $$->is_error = 1;
         }
         else{
-            // cout << funcType<<"\n";
+            cout << funcName<< cur_table<<"\n";
             makeSymbolTable(funcName, funcType, yylineno, modifier);
             $$->node_name = funcName;
-            // block_count = 1;
+            block_count = 1;
             
         }
         type = "";
@@ -2527,9 +2574,9 @@ F:
 
 C:
     {
-        $$ = makeLeaf("C");
+        $$ = makeLeaf("C",1);
         if(global_st.find(idendotiden) != global_st.end()){
-            yyerror(("Redefinition of function " + class_type).c_str());
+            yyerror(("Redefinition of method " + class_type).c_str());
             $$->is_error = 1;
         }
         else{
@@ -2629,13 +2676,13 @@ int main(int argc, char* argv[]){
 
     symbolTableInit();
 
-    /* cout << "Start" << cur_table << "\n"; */
+    cout << "Start" << cur_table << "\n";
 
     beginAST();
     if(yyparse()) return 0;
     endAST();
     printSymbolTable(cur_table, "Global.csv");
-    /* cout<<"End "<<cur_table<<endl; */
+    cout<<"End "<<cur_table<<endl;
     
     if(verbosemode){
         printf("Parser work completed..\n");

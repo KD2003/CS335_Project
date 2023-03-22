@@ -5,7 +5,7 @@ using namespace std;
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
-map<sym_table*, vector<sym_table*>> children_table;
+map<sym_table*, vector<pair<string, sym_table*>>> children_table;
 map<string, pair< string,vector<string> > > func_arg;
 sym_table* cur_table;
 
@@ -16,7 +16,7 @@ extern vector<int> array_dims;
 
 void symbolTableInit(){
 	parent_table.insert(make_pair(&global_st, nullptr));
-	children_table.insert(make_pair(&global_st, vector<sym_table*> ()));
+	children_table.insert(make_pair(&global_st, vector<pair<string, sym_table*>> ()));
 	cur_table = &global_st;
 	vector<int> temp = {1,0,0};
 	insertSymbol(*cur_table, "String" , "CLASS", "String", "CLASS", 0, NULL, temp);
@@ -86,9 +86,9 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 		}
 		parent_table.insert(make_pair(new_table, cur_table));
 		if(children_table.find(cur_table) == children_table.end()){
-			children_table.insert(make_pair(new_table, vector<sym_table*> ()));
+			children_table.insert(make_pair(new_table, vector<pair<string, sym_table*>> ()));
 		}
-		children_table[cur_table].push_back(new_table);
+		children_table[cur_table].push_back(make_pair(name,new_table));
 		cur_table = new_table;
 	}
 	else{
@@ -128,7 +128,7 @@ void recurPrintST(FILE* file, sym_table* table){
     	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
   	}
 	for(auto it: children_table[table]){
-		recurPrintST(file, it);
+		recurPrintST(file, it.second);
 	}
 	return;
 }

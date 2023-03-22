@@ -11,9 +11,10 @@ void endAST(){
 	fprintf(dotfile, "}\n");
 }
 
-ASTNode *makeLeaf(string str){
+ASTNode *makeLeaf(string str, int fl){
 	//making leaf node and printing it in dot file
 	ASTNode *node = new ASTNode;
+	if(fl) return node;
 	node->node_id = NodeCounter++;
 	
 	string tmp = "";
