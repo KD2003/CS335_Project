@@ -12,10 +12,12 @@ extern int yylineno;
 
 bool gotinputfile, gotoutputfile, verbosemode;
 
-int dump_sym_table=0;
+// int dump_sym_table=0;
+int tempo=0;
 int isArray=0;
 int cnt1=0,cnt2=0,cnt3=0;
-int block_count = 0;
+// int block_count = 0;
+int func_flag=0;
 
 string type="";
 string class_type="";
@@ -26,6 +28,8 @@ vector<int> array_dims;
 vector<int> modifier ={1,0,0};
 vector<string> funcArgs;
 vector<vector<string> > curArgs(1,vector<string>() );
+
+// stack<int> block_stack;
 
 int yylex();
 int yyerror(const char *str);
@@ -42,7 +46,7 @@ int yyerror(const char *str);
 
 %type<st> KEYWORD IDENTIFIER INTLIT FPLIT BOOLLIT CHARLIT STRLIT OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
 
-%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal F MethodIDEN
+%type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal F MethodIDEN C
 %type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression postfixExpression
 %type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
@@ -1149,8 +1153,13 @@ postfixExpression:
 // Productions from §14 (Blocks, Statements, and Patterns)
 
 Block:
-    '{' BlockStatements '}' {
-        $$=$2;
+    '{' CHANGE_TABLE BlockStatements '}' {
+        $$=$3;
+        // int bc = block_stack.top();
+        // block_stack.pop();
+        // string str = "Block" + to_string(bc);
+        // string name = funcName+str+".csv";
+        // printSymbolTable(cur_table, name);
     }
 ;
 
@@ -1561,13 +1570,15 @@ ClassDeclaration:
     }
 ;
 NormalClassDeclaration:
-    Modifiers KEY_class IDENTIFIER ClassBody {
+    Modifiers KEY_class IDENTIFIER{idendotiden=*$3;} ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3+")" ));
-        s.push_back($4);
+        s.push_back($5);
         $$ = makeNode("class", s);
-
+        string filename=*$3;
+        printSymbolTable(cur_table,filename + ".csv");
+        endSymbolTable();
         delete $3;
     }
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassBody {
@@ -1632,10 +1643,21 @@ cTypeName:
 ;
 
 ClassBody:
-    '{' ClassBodyDeclarations '}' {
-        $$=$2;
+    '{' C ClassBodyDeclarations '}' {
+        $$=$3;
     }
 ;
+CHANGE_TABLE:
+     {
+		if(func_flag){
+			string str = class_type;
+			func_flag++;
+			makeSymbolTable(str, "", yylineno, modifier);
+		}
+		else func_flag++;
+	}
+;
+
 ClassBodyDeclarations:
     ClassBodyDeclarations ClassBodyDeclaration {
         vector<ASTNode*> s;
@@ -1723,7 +1745,8 @@ VariableDeclarator1:
 				$$->is_error = 1;            
         }
         else{
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            // cout << *$1<<cur_table <<"\n";
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -1813,7 +1836,7 @@ VariableDeclarator2:
         s.push_back(makeLeaf("ID (" + *$1+")" ));
         s.push_back($3);
         $$ = makeNode("=",s);
-        cout<<type<<" "<<$3->type<<endl;
+        // cout<<type<<" "<<$3->type<<endl;
         if(type!=$3->type){
             yyerror("Type Clashing");
             $$->is_error=1;
@@ -2232,6 +2255,15 @@ MethodDeclaration:
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("MethodDeclaration", s);
+
+        string fName = funcName;
+        // cout << funcName << cur_table <<"\n";
+        // for(auto it: *cur_table){
+        //     cout << it.first << " ";
+        // }
+        printSymbolTable(cur_table ,fName + ".csv");
+        endSymbolTable();
+        // func_flag--;
     }
 ;
 
@@ -2245,13 +2277,10 @@ MethodHeader:
         $2->type=$1->type;
         $$->type=$1->type;
     }
-    | KEY_void Methodeclarator {
+    | KEY_void {type = "void";} Methodeclarator {
         vector<ASTNode*> s;
-        s.push_back($2);
+        s.push_back($3);
         $$ = makeNode("void", s);
-
-        $2->type="void";
-        $$->type="void";
     }
 ;
 
@@ -2283,6 +2312,7 @@ IdenPara:
         s.push_back($1);
         s.push_back($4);
         $$ = makeNode("IdenPara", s);
+        
 
         if(!$4->is_error){
             $$->temp_name = $1->temp_name;
@@ -2291,7 +2321,7 @@ IdenPara:
 
             vector<string> temp = getFuncArgs($1->temp_name);
             if(curLookup($1->temp_name)){
-                yyerror(("Redeclaration of Parameter "+ $1->temp_name).c_str());
+                yyerror(("Redeclaration of Method "+ $1->temp_name).c_str());
                 $$->is_error = 1;
             }
             else if(temp.size()==1 && temp[0] == "#NO_FUNC"){
@@ -2315,7 +2345,7 @@ IdenPara:
 
             vector<string> temp = getFuncArgs($1->temp_name);
             if(curLookup($1->temp_name)){
-                yyerror(("Redeclaration of Parameter "+ $1->temp_name).c_str());
+                yyerror(("Redeclaration of Method "+ $1->temp_name).c_str());
                 $$->is_error = 1;
             }
             else if(temp.size()==1 && temp[0] == "#NO_FUNC"){
@@ -2354,13 +2384,21 @@ formalparameter:
 
         if(!$1->is_error && !$2->is_error){
             if($2->expType == 1 || $2->expType ==2){
-                if(curLookup($2->temp_name)){
-                    yyerror(("Redeclaration of parameter "+ $2->temp_name).c_str());
-                    $$->is_error = 1;
-                }
-                else{
-                    paramInsert(*cur_table, $2->temp_name, "IDENTIFIER", $2->temp_name,$2->type, yylineno, NULL, modifier);
-                }
+                // cout << $2->temp_name << "\n";
+                // for(auto it: *cur_table){
+                //     cout << it.first << " ";
+                // }
+                // if(curLookup($2->temp_name)){
+                //     string filename="debug"+to_string(tempo)+".csv";
+                //     tempo++;
+                //     printSymbolTable(cur_table,filename);
+
+                //     yyerror(("Redeclaration of parameter "+ $2->temp_name).c_str());
+                //     $$->is_error = 1;
+                // }
+                // else{
+                //     paramInsert(*cur_table, $2->temp_name, "IDENTIFIER", $2->temp_name,$2->type, yylineno, NULL, modifier);
+                // }
             }
             funcArgs.push_back($2->type);
         }
@@ -2470,18 +2508,38 @@ Modifiers:
 F:
      {
         $$ = makeLeaf("F");
-        if(global_st.find(funcName) != global_st.end()){
+        if((*cur_table).find(funcName) != (*cur_table).end()){
             yyerror(("Redefinition of function " + funcName).c_str());
             $$->is_error = 1;
         }
         else{
+            // cout << funcType<<"\n";
             makeSymbolTable(funcName, funcType, yylineno, modifier);
             $$->node_name = funcName;
-            block_count = 1;
-            type = "";
-            class_type = "";
+            // block_count = 1;
+            
         }
+        type = "";
+        class_type = "";
+        func_flag=0;
     }
+;
+
+C:
+    {
+        $$ = makeLeaf("C");
+        if(global_st.find(idendotiden) != global_st.end()){
+            yyerror(("Redefinition of function " + class_type).c_str());
+            $$->is_error = 1;
+        }
+        else{
+            makeSymbolTable(idendotiden, "CLASS", yylineno, modifier);
+            $$->node_name = idendotiden;
+        }
+        type = "";
+        class_type = "";
+    }
+;
 
 // Class and Method END
 %%
@@ -2571,10 +2629,13 @@ int main(int argc, char* argv[]){
 
     symbolTableInit();
 
+    /* cout << "Start" << cur_table << "\n"; */
+
     beginAST();
     if(yyparse()) return 0;
     endAST();
     printSymbolTable(cur_table, "Global.csv");
+    /* cout<<"End "<<cur_table<<endl; */
     
     if(verbosemode){
         printf("Parser work completed..\n");

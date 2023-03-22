@@ -38,4 +38,4 @@ void insertFuncArg(string &, vector<string> &, string &);
 void printSymbolTable(sym_table*, string);
 string funcProtoLookup(string);
 void removeFuncProto();
-void endSymbolTable(string);
+void endSymbolTable();

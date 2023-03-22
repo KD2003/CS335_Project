@@ -1,5 +1,7 @@
 #include "symbol_table.h"
 #include <algorithm>
+#include<iostream>
+using namespace std;
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
@@ -69,10 +71,16 @@ void insertSymbol(sym_table& table, string id, string token, string lexeme, stri
 void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifiers){
 	if(!avl){
 		sym_table* new_table = new sym_table;
-
-		if(f_type != "") insertSymbol(*cur_table, name , "FUNC_", f_type, "FUNC_" + f_type, lineno, new_table, modifiers);
+		// cout << name << cur_table<< "\n";
+		
+		if(f_type == "CLASS"){
+			insertSymbol(*cur_table, name , f_type, name, f_type, lineno, new_table, modifiers);
+		}
+		else if(f_type != ""){
+			insertSymbol(*cur_table, name , "FUNC_", name, "FUNC_" + f_type, lineno, new_table, modifiers);
+		}
 		else{
-			insertSymbol(*cur_table, name , "Block", "", "", lineno, new_table, modifiers);
+			insertSymbol(*cur_table, name , "Block", name, "", lineno, new_table, modifiers);
 		}
 		parent_table.insert(make_pair(new_table, cur_table));
 		if(children_table.find(cur_table) == children_table.end()){
@@ -126,10 +134,11 @@ void recurPrintST(FILE* file, sym_table* table){
 void printSymbolTable(sym_table* table, string file_name){
 	FILE* file = fopen(file_name.c_str(), "w");
   	fprintf( file,"Name, Token, Lexeme, Type, Lineno\n");
-	recurPrintST(file, table);
-  	// for(auto it: (*table)){
-    // 	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
-  	// }
+	// cout << table << "in print\n";
+	// recurPrintST(file, table);
+  	for(auto it: (*table)){
+    	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
+  	}
   	fclose(file);
 }
 
@@ -140,11 +149,11 @@ string funcProtoLookup(string id){
 
 void removeFuncProto(){
 	avl = 0;
-	endSymbolTable("dummyF_name");
+	endSymbolTable();
 	parent_table.erase((*cur_table)["dummyF_name"]->entry);
 	(*cur_table).erase("dummyF_name");
 }
 
-void endSymbolTable(string id){
+void endSymbolTable(){
 	cur_table = parent_table[cur_table];
 }
