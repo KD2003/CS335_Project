@@ -27,7 +27,7 @@ string funcName="", funcType ="";
 
 vector<int> array_dims;
 vector<int> modifier ={1,0,0};
-vector<string> funcArgs;
+vector<string> funcArgs, tempArgs1;
 vector<vector<string> > curArgs(1,vector<string>() );
 
 stack<int> block_stack;
@@ -158,29 +158,20 @@ IDENdotIDEN:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
+        $$ = makeNode(".", s);
         class_type=class_type+"."+*$3;
         idendotiden = idendotiden + "." +*$3;
         $$->type=type;
-        $$->temp_name = idendotiden;
+        $$->temp_name = $1->temp_name + "." + *$3;
         delete $3;
-        $$ = makeNode(".", s);
+        
     }
     | IDENTIFIER    {
         $$ = makeLeaf("ID (" + *$1 + ")");
         class_type=*$1;
         idendotiden = *$1;
-        // if(type==""){
-        //     if(lookup(*$1)){
-        //         type=lookup(*$1)->type;
-        //     }
-        //     else{
-        //         yyerror(("ON reading "+*$1+" Something error\n").c_str());
-        //         // cout<<"Something Error"<<endl;
-        //         $$->is_error;
-        //     }
-        // }
         $$->type=type;
-        $$->temp_name = idendotiden;
+        $$->temp_name = *$1;
         delete $1;
     }
 ;
@@ -205,7 +196,7 @@ ClassType:
         $$=$1;
         int pos = class_type.find(".");
         string sub = class_type.substr(0, pos);
-        if(global_st.find(sub) != global_st.end()){
+        if(global_st.find(sub) == global_st.end()){
             yyerror(("Undefined class " + sub).c_str());
             $$->is_error = 1;
         }
@@ -214,7 +205,7 @@ ClassType:
                 string sub1 = class_type.substr(pos+1);
                 for(auto it: children_table[&global_st]){
                     if(it.first == sub){
-                        if((*(it.second)).find(sub1) != (*(it.second)).end()){
+                        if((*(it.second)).find(sub1) == (*(it.second)).end()){
                             yyerror(("Undefined member of class " + sub).c_str());
                             $$->is_error = 1;
                         }
@@ -431,23 +422,30 @@ MethodInvocation:
         s.push_back($3);
         $$ = makeNode("MethodInvocation", s);
 
-        string t = postfixExpression(idendotiden,2);
+        string t = postfixExpression(idendotiden,1);
 		curArgs.push_back(vector<string>() ); 
 
 		if(t.empty()){
 			t = getFuncType($1->temp_name);
+            if(t.substr(0,5)=="FUNC_"){
+                t = t.substr(5);
+            }
+            $1->expType = 3;
 		}
 
-		if(!($1->is_error) && $1->expType!=4){
+        if($1->temp_name == "System.out.println"){
+            $$->type = "";
+        }
+		else if(!($1->is_error) && $1->expType!=4){
 			if(!t.empty()){	
-				$$->type = t;
                 if($1->expType==3){
                     vector<string> funcArg = getFuncArgs($1->temp_name);
-                    if(funcArg.empty()){
-                        yyerror(("Too few Arguments to Function " + $1->temp_name).c_str());
+                    if(funcArg != tempArgs1){
+                        yyerror(("Function " + $1->temp_name + " arguments do not match").c_str());
+                        $$->is_error = 1;
                     }
                     else{
-                        //3ac
+                        $$->type = t;
                     }
                 }
             }
@@ -460,8 +458,7 @@ MethodInvocation:
             if($1->expType==4)yyerror("Constant Expression");
             $$->is_error=1;
         }
-
-
+        tempArgs1.clear();
     }
     | Primary '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'     {
         vector<ASTNode*> s;
@@ -557,9 +554,11 @@ ArgumentList:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+        tempArgs1.push_back($3->type);
     }
     | Expression        {
         $$ = $1;
+        tempArgs1.push_back($$->type);
     }
 ;
 
@@ -718,7 +717,7 @@ ConditionalOrExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("||", s);
-        string temp=condExp($1->type,$3->type,"",*$2);
+        string temp=condExp($1->type,$3->type,"","||");
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
@@ -731,7 +730,6 @@ ConditionalOrExpression:
         else{
             $$->is_error=1;
         }
-        delete $2;
     }
 ;
 
@@ -745,7 +743,7 @@ ConditionalAndExpression:
         s.push_back($3);
         $$ = makeNode("&&", s);
 
-        string temp=condExp($1->type,$3->type,"",*$2);
+        string temp=condExp($1->type,$3->type,"","&&");
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
@@ -758,7 +756,6 @@ ConditionalAndExpression:
         else{
             $$->is_error=1;
         }
-        delete $2;
     }
 ;
 
@@ -1121,7 +1118,7 @@ postfixExpression:
     }
     | IDENdotIDEN      {
         $$ = $1;
-        if(idendotiden.find('.') != string::npos){
+        if(idendotiden.find('.') == string::npos){
             string temp = primaryExpression(idendotiden);
             if(temp == ""){
                 yyerror(("Undeclared Identifier " + idendotiden).c_str());
@@ -1154,7 +1151,48 @@ postfixExpression:
             }
         }
         else{
-            // check in class
+            int pos = class_type.find(".");
+            string sub = class_type.substr(0, pos);
+            string sub1 = class_type.substr(pos+1);
+            if(global_st.find(sub) == global_st.end()){
+                yyerror(("Undefined class " + sub).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                for(auto it: children_table[&global_st]){
+                    if(it.first == sub){
+                        if((*(it.second)).find(sub1) == (*(it.second)).end()){
+                            yyerror(("Undefined member of class " + sub).c_str());
+                            $$->is_error = 1;
+                        }
+                        else{
+                            string tem = (*(it.second))[sub1]->type;
+                            if(tem.substr(0, 5) == "FUNC_"){
+                                $$->expType = 3;
+                            }
+                            else if((*(it.second))[sub1]->isArray){
+                                $$->expType = 2; 
+                            }
+                            else $$->expType = 1;
+
+                            if(tem.substr(0,5)=="FUNC_" ){
+                                $$->type = tem;
+                                $$->temp_name = idendotiden; 
+                                // $$->nextlist.clear();
+                            }
+                            else{
+                                $$->type = tem;
+                                $$->temp_name = idendotiden;
+                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
+                                //--3AC
+                                // $$->place = qid(string($1), lookup(string($1)));
+                                // $$->nextlist.clear();
+
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
     | postfixExpression ADDOP2      {
@@ -1807,7 +1845,7 @@ VariableDeclarator1:
         $$ = makeNode("VariableDeclarator1", s);
         $$->type=type;
         $$->temp_name = *$1;
-        if($3->type!="int"){
+        if($3!=NULL && $3->type!="int"){
             yyerror("Index of the array should be integer");
         }
         //
@@ -2307,7 +2345,7 @@ MethodDeclaration:
         $$ = makeNode("MethodDeclaration", s);
 
         string fName = funcName;
-        cout << funcName << cur_table <<"\n";
+        // cout << funcName << cur_table <<"\n";
         // for(auto it: *cur_table){
         //     cout << it.first << " ";
         // }
@@ -2430,23 +2468,6 @@ formalparameter:
         $$->type=type;
 
         if(!$1->is_error && !$2->is_error){
-            if($2->expType == 1 || $2->expType ==2){
-                // cout << $2->temp_name << "\n";
-                // for(auto it: *cur_table){
-                //     cout << it.first << " ";
-                // }
-                // if(lookup($2->temp_name)){
-                //     string filename="debug"+to_string(tempo)+".csv";
-                //     tempo++;
-                //     printSymbolTable(cur_table,filename);
-
-                //     yyerror(("Redeclaration of parameter "+ $2->temp_name).c_str());
-                //     $$->is_error = 1;
-                // }
-                // else{
-                //     paramInsert(*cur_table, $2->temp_name, "IDENTIFIER", $2->temp_name,$2->type, yylineno, NULL, modifier);
-                // }
-            }
             funcArgs.push_back($2->type);
         }
         else $$->is_error = 1;
@@ -2560,7 +2581,7 @@ F:
             $$->is_error = 1;
         }
         else{
-            cout << funcName<< cur_table<<"\n";
+            // cout << funcName<< cur_table<<"\n";
             makeSymbolTable(funcName, funcType, yylineno, modifier);
             $$->node_name = funcName;
             block_count = 1;
@@ -2666,6 +2687,8 @@ int main(int argc, char* argv[]){
         printf("Starting the parser...\n");
     }
 
+    system("rm *.csv");
+
     if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 
     if(dotfile==NULL){
@@ -2676,13 +2699,13 @@ int main(int argc, char* argv[]){
 
     symbolTableInit();
 
-    cout << "Start" << cur_table << "\n";
+    /* cout << "Start" << cur_table << "\n"; */
 
     beginAST();
     if(yyparse()) return 0;
     endAST();
     printSymbolTable(cur_table, "Global.csv");
-    cout<<"End "<<cur_table<<endl;
+    /* cout<<"End "<<cur_table<<endl; */
     
     if(verbosemode){
         printf("Parser work completed..\n");
