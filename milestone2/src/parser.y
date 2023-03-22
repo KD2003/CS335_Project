@@ -514,9 +514,16 @@ ArgumentList:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+
+        //3ac
+        emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL));
     }
     | Expression        {
         $$ = $1;
+
+        //3ac
+        emit(qid("param",NULL),$1->addr,qid("",NULL),qid("",NULL));
+
     }
 ;
 
@@ -598,7 +605,7 @@ AssignmentExpression:
 ;
 
 Assignment:
-    LeftHandSide ASSIGNOP Expression	    {
+    LeftHandSide ASSIGNOP Expression	    { 
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
@@ -611,6 +618,68 @@ Assignment:
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
+
+                //3ac
+                if(*$2=="="){
+                    $$->addr=$1->addr;
+                    emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr); 
+                }
+                else if(*$2=="*="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("*",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="/="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("/",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="%="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("%",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="+="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("+",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="-="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("-",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="<<="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("<<",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2==">>="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid(">>",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2==">>>="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid(">>>",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="&="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("&",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="\^="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("^",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="\|="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("|",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+
             }
             else{
                 yyerror("Incompatible Types when comparing");
@@ -636,6 +705,10 @@ Assignment:
                 // if($1->expType == 3 && $3->isInit){
 				// 	updInit($1->temp_name);
 				// }
+
+                //3ac
+                $$->addr=$1->addr;
+                emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr);
             }
             else{
                 yyerror("Incompatible Types when comparing");

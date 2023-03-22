@@ -18,7 +18,7 @@ typedef struct{
 	string temp_name;
 	
 	// 3ac
-	qid place;
+	qid addr;
 
 	vector <int> truelist;
 	vector <int> falselist;
