@@ -7,9 +7,10 @@ using namespace std;
 
 typedef struct sym_entry{
     string token;
-    string lexeme;
 	string type;
     int lineno;
+	int size;
+	// int offset;
 	map<string, sym_entry* > * entry;
 	int isArray = 0;
 	vector<int> array_dims;
@@ -24,15 +25,16 @@ extern map<sym_table*, sym_table*> parent_table;
 extern map<string, pair<string,vector<string> > > func_arg;
 
 void symbolTableInit();
-sym_entry* createEntry(string, string, string, int, sym_table*, vector<int>&);
+sym_entry* createEntry(string, string, int, sym_table*, vector<int>&, int, int);
 sym_entry* lookup(string id);
 sym_entry* curLookup(string id);
-void insertSymbol(sym_table&, string, string, string, int, sym_table*, vector<int>&);
+void insertSymbol(sym_table&, string, string, string, int, sym_table*, vector<int>&, int);
 void makeSymbolTable(string, string, int, vector<int>&);
-void paramInsert(sym_table&, string, string, string, int, sym_table*, vector<int>&);
+void paramInsert(sym_table&, string, string, string, int, sym_table*, vector<int>&, int);
 vector<string> getFuncArgs(string);
 string getFuncType(string);
 void insertFuncArg(string &, vector<string> &, string &);
 void printSymbolTable(sym_table*, string);
 string funcProtoLookup(string);
 void endSymbolTable();
+int getSize(string);

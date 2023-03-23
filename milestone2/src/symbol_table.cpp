@@ -15,20 +15,21 @@ void symbolTableInit(){
 	children_table.insert(make_pair(&global_st, vector<pair<string, sym_table*>> ()));
 	cur_table = &global_st;
 	vector<int> temp = {1,0,0};
-	insertSymbol(*cur_table, "String" , "CLASS", "CLASS", 0, NULL, temp);
+	insertSymbol(*cur_table, "String" , "CLASS", "CLASS", 0, NULL, temp, 0);
 	// insert keywords?
 }
 
-sym_entry* createEntry(string token, string lexeme, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
+sym_entry* createEntry(string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size){
 	sym_entry* new_symEnt = new sym_entry;
 	new_symEnt->token = token;
-	new_symEnt->lexeme = lexeme;
 	new_symEnt->type = type;
 	new_symEnt->lineno = lineno;
 	new_symEnt->entry = ptr;
 	new_symEnt->modifiers[0] = modifiers[0];
 	new_symEnt->modifiers[1] = modifiers[1];
 	new_symEnt->modifiers[2] = modifiers[2];
+	new_symEnt->size = size;
+	// new_symEnt->offset = offset;
 	return new_symEnt;
 }
 
@@ -46,8 +47,8 @@ sym_entry* curLookup(string id){
 	return (*cur_table)[id];
 }
 
-void insertSymbol(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
-	table.insert(make_pair(id, createEntry(token, id, type, lineno, ptr, modifiers)));
+void insertSymbol(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size){
+	table.insert(make_pair(id, createEntry(token, type, lineno, ptr, modifiers, size)));
 	if(!array_dims.empty()){
 		// vector<int> temp;
 		// int cur = 1;
@@ -70,13 +71,13 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	sym_table* new_table = new sym_table;
 	
 	if(f_type == "CLASS"){
-		insertSymbol(*cur_table, name , f_type, f_type, lineno, new_table, modifiers);
+		insertSymbol(*cur_table, name , f_type, f_type, lineno, new_table, modifiers, 0);
 	}
 	else if(f_type != ""){
-		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers);
+		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers, 0);
 	}
 	else{
-		insertSymbol(*cur_table, name , "Block", "", lineno, new_table, modifiers);
+		insertSymbol(*cur_table, name , "Block", "", lineno, new_table, modifiers, 0);
 	}
 	parent_table.insert(make_pair(new_table, cur_table));
 	if(children_table.find(cur_table) == children_table.end()){
@@ -86,8 +87,8 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	cur_table = new_table;
 }
 
-void paramInsert(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
-	table.insert(make_pair(id, createEntry(token, id, type, lineno, ptr, modifiers)));
+void paramInsert(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size){
+	table.insert(make_pair(id, createEntry(token, type, lineno, ptr, modifiers, size)));
 }
 
 vector<string> getFuncArgs(string id){
@@ -108,7 +109,9 @@ void insertFuncArg(string &func, vector<string> &arg, string &tp){
 
 void recurPrintST(FILE* file, sym_table* table){
 	for(auto it: (*table)){
-    	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
+		string st = "Private";
+		if(it.second->modifiers[0]==2) st="Public";
+    	fprintf(file,"%s,%s,%s,%d,%s\n", it.second->token.c_str(), it.first.c_str() ,it.second->type.c_str(), it.second->lineno, st.c_str());
   	}
 	for(auto it: children_table[table]){
 		recurPrintST(file, it.second);
@@ -136,4 +139,23 @@ string funcProtoLookup(string id){
 
 void endSymbolTable(){
 	cur_table = parent_table[cur_table];
+}
+
+int classLookup(string id){
+	if(id == "String") return 2;
+	return 0;
+}
+
+int getSize(string id){
+	int x =classLookup(id);
+	if(x) return x;
+	if(id == "byte") return 1;
+	if(id == "short") return 2;
+	if(id == "int") return 4;
+	if(id == "long") return 8;
+	if(id == "float") return 4;
+	if(id == "double") return 8;
+	if(id == "boolean") return 1;
+	if(id == "char") return 0;
+	return 0;
 }

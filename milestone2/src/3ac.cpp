@@ -4,18 +4,19 @@
 using namespace std;
 
 vector<quad> code; 
-
-long long counter = 0;
+extern int yylineno;
+long long cnt = 0;
+long long lcnt = 0;
 
 void emit(qid op, qid arg1, qid arg2, qid res, int idx){
-    quad temp;
-    temp.op = op;
-    temp.arg1 = arg1;
-    temp.arg2 = arg2;
-    temp.res = res;
-    temp.idx = idx;
-    if(idx == -1) temp.idx = code.size();
-    code.push_back(temp);
+    quad tmp;
+    tmp.op = op;
+    tmp.arg1 = arg1;
+    tmp.arg2 = arg2;
+    tmp.res = res;
+    tmp.idx = idx;
+    if(idx == -1) tmp.idx = code.size();
+    code.push_back(tmp);
 }
 
 void backpatch(vector<int>& bplist, int target){
@@ -35,10 +36,10 @@ void casepatch(vector<int>& bplist, qid target){
 
 qid newtemp(string type){
     // creating temp variables
-    string temp_var = "#V"+to_string(counter);
-    counter++;
-    insertSymbol(*curr_table, temp_var, type, getSize(type), NULL);
-    return qid(temp_var, lookup(temp_var));
+    string id = "#V"+to_string(cnt++);
+    vector<int> def={1,0,0};
+    insertSymbol(*cur_table, id, "Temp_var", type, yylineno, NULL, def, getSize(type));
+    return qid(id, lookup(id));
 }
 
 int assign_exp(string op, string type, string type1,string type2, qid arg1, qid arg2){
@@ -110,4 +111,16 @@ void print3AC_code(){
     for(int i=0;i<code.size(); i++){
         tac_file<<code[i].op.first<<","<<code[i].arg1.first<<","<<code[i].arg2.first<<","<<code[i].res.first<<","<<code[i].idx<<","<<i<<endl;
     }
+}
+
+string newlabel(){
+    string tmp="#L"+to_string(lcnt++);
+    return tmp;
+}
+
+vector<int> mergelist(vector <int> &list1, vector <int> &list2){
+    vector<int> temp;
+    for(auto i:list1) temp.push_back(i);
+    for(auto i:list2) temp.push_back(i);
+    return temp;
 }

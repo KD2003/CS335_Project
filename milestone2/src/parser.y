@@ -20,6 +20,7 @@ int cnt1=0,cnt2=0,cnt3=0;
 int block_count = 0;
 int func_flag=0;
 int for_flag=0;
+int arr_dm;
 
 string type="";
 string class_type="";
@@ -392,7 +393,7 @@ ArrayAccess:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("ArrayAccess", s);
-
+        arr_dm=0;
         if($1->temp_name.find('.') == string::npos){
             string temp = primaryExpression($1->temp_name);
             if(temp == ""){
@@ -404,7 +405,11 @@ ArrayAccess:
                     $$->expType = 3;
                 }
                 else if(temp.back() == '*'){
-                    $$->expType = 2; 
+                    $$->expType = 2;
+                    // if($3->intVal >= lookup($1->temp_name)->array_dims[arr_dm]){
+                    //     yyerror("Index out of bounds");
+                    //     $$->is_error = 1;
+                    // }
                 }
                 else $$->expType = 1;
 
@@ -448,6 +453,10 @@ ArrayAccess:
                             }
                             else if((*(it.second))[sub1]->isArray){
                                 $$->expType = 2; 
+                                // if($3->intVal >= (*(it.second))[sub1]->array_dims[arr_dm]){
+                                //     yyerror("Index out of bounds");
+                                //     $$->is_error = 1;
+                                // }
                             }
                             else $$->expType = 1;
 
@@ -478,10 +487,94 @@ ArrayAccess:
         s.push_back($3);
         $$ = makeNode("ArrayAccess", s);
 
-        if(type=="")type=$1->type;
-        $$->type=type;
         if($3->type!="int"){
             yyerror("Index of the array should be integer");
+        }
+        arr_dm++;
+        if($1->temp_name.find('.') == string::npos){
+            string temp = primaryExpression($1->temp_name);
+            if(temp == ""){
+                yyerror(("Undeclared Identifier " + $1->temp_name).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                if(temp.substr(0, 5) == "FUNC_"){
+                    $$->expType = 3;
+                }
+                else if(temp.back() == '*'){
+                    $$->expType = 2;
+                    // if($3->intVal >= lookup($1->temp_name)->array_dims[arr_dm]){
+                    //     yyerror("Index out of bounds");
+                    //     $$->is_error = 1;
+                    // }
+                }
+                else $$->expType = 1;
+
+                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
+                    temp.pop_back();
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name; 
+                    // $$->nextlist.clear();
+                }
+                else{
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name;
+                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
+                    //--3AC
+                    // $$->place = qid(string($1), lookup(string($1)));
+                    // $$->nextlist.clear();
+
+                }
+            }
+        }
+        else{
+            int pos = $1->temp_name.find(".");
+            string sub = $1->temp_name.substr(0, pos);
+            sub = primaryExpression(sub);
+            string sub1 = $1->temp_name.substr(pos+1);
+            if(global_st.find(sub) == global_st.end()){
+                yyerror(("Undefined class " + sub).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                for(auto it: children_table[&global_st]){
+                    if(it.first == sub){
+                        if((*(it.second)).find(sub1) == (*(it.second)).end()){
+                            yyerror(("Undefined member of class " + sub).c_str());
+                            $$->is_error = 1;
+                        }
+                        else{
+                            string tem = (*(it.second))[sub1]->type;
+                            if(tem.substr(0, 5) == "FUNC_"){
+                                $$->expType = 3;
+                            }
+                            else if((*(it.second))[sub1]->isArray){
+                                $$->expType = 2; 
+                                // if($3->intVal >= (*(it.second))[sub1]->array_dims[arr_dm]){
+                                //     yyerror("Index out of bounds");
+                                //     $$->is_error = 1;
+                                // }
+                            }
+                            else $$->expType = 1;
+
+                            if(tem.substr(0,5)=="FUNC_" ){
+                                $$->type = tem;
+                                $$->temp_name = idendotiden; 
+                                // $$->nextlist.clear();
+                            }
+                            else{
+                                $$->type = tem;
+                                $$->temp_name = idendotiden;
+                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
+                                //--3AC
+                                // $$->place = qid(string($1), lookup(string($1)));
+                                // $$->nextlist.clear();
+
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 ;
@@ -736,9 +829,6 @@ Assignment:
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
                 $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
             }
             else{
                 yyerror(("Incompatible Types for "+ *$2).c_str());
@@ -762,9 +852,6 @@ Assignment:
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
                 $$->type=t;
-                // if($1->expType == 3 && $3->isInit){
-				// 	updInit($1->temp_name);
-				// }
             }
             else{
                 yyerror("Incompatible Types for =");
@@ -2017,7 +2104,7 @@ VariableDeclarator1:
         }
         else{
             // cout << *$1<<cur_table <<"\n";
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
         }
         delete $1;
     }
@@ -2042,7 +2129,7 @@ VariableDeclarator1:
             $$->expType = 2;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
         }
         delete $1;
     }
@@ -2067,7 +2154,7 @@ VariableDeclarator1:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
         }
         delete $1;
     }
@@ -2095,7 +2182,7 @@ VariableDeclarator1:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
         }
         delete $1;
     }
@@ -2118,7 +2205,7 @@ VariableDeclarator2:
 				$$->is_error = 1;            
         }
         else{
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
         }
         delete $1;
     }
@@ -2129,7 +2216,7 @@ VariableDeclarator2:
         s.push_back($6);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intVal>cnt1){
+        if($3!=NULL && $3->intVal!=cnt1){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$6->type){
@@ -2144,9 +2231,9 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
+            if($3==NULL) array_dims.push_back(cnt1);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
         }
         cnt1=0;
         delete $1;
@@ -2160,10 +2247,10 @@ VariableDeclarator2:
         $$ = makeNode("=", s);
 
 
-        if($3!=NULL && $3->intVal>cnt1){
+        if($3!=NULL && $3->intVal!=cnt1){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intVal>cnt2){
+        if($6!=NULL && $6->intVal!=cnt2){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$9->type){
@@ -2178,11 +2265,11 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
+            if($3==NULL) array_dims.push_back(cnt1);
             else array_dims.push_back($3->intVal);
-            if($6==NULL) array_dims.push_back(0);
+            if($6==NULL) array_dims.push_back(cnt2);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
         }
         cnt1=0;
         cnt2=0;
@@ -2197,13 +2284,13 @@ VariableDeclarator2:
         s.push_back($12);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intVal>cnt1){
+        if($3!=NULL && $3->intVal!=cnt1){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intVal>cnt2){
+        if($6!=NULL && $6->intVal!=cnt2){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
-        if($9!=NULL && $9->intVal>cnt3){
+        if($9!=NULL && $9->intVal!=cnt3){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
 
@@ -2219,13 +2306,13 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
+            if($3==NULL) array_dims.push_back(cnt1);
             else array_dims.push_back($3->intVal);
-            if($6==NULL) array_dims.push_back(0);
+            if($6==NULL) array_dims.push_back(cnt2);
             else array_dims.push_back($6->intVal);
-            if($9==NULL) array_dims.push_back(0);
+            if($9==NULL) array_dims.push_back(cnt3);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -2240,7 +2327,7 @@ VariableDeclarator2:
         s.push_back($11);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intVal>cnt1){
+        if($3!=NULL && $3->intVal!=cnt1){
             yyerror("Index out of bounds, not matching with intitalisers");
             $$->is_error=1;
         }
@@ -2256,9 +2343,9 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
+            if($3==NULL) array_dims.push_back(cnt1);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
         }
         cnt1=0;
         delete $1;
@@ -2275,10 +2362,10 @@ VariableDeclarator2:
         s.push_back($17);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intVal>cnt1){
+        if($3!=NULL && $3->intVal!=cnt1){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intVal>cnt2){
+        if($6!=NULL && $6->intVal!=cnt2){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$10->type){
@@ -2297,7 +2384,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
         }
         cnt1=0,cnt2=0;
         delete $1;
@@ -2316,13 +2403,13 @@ VariableDeclarator2:
         s.push_back($23);
         $$ = makeNode("=", s);
         //
-        if($3!=NULL && $3->intVal>cnt1){
+        if($3!=NULL && $3->intVal!=cnt1){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
-        if($6!=NULL && $6->intVal>cnt2){
+        if($6!=NULL && $6->intVal!=cnt2){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
-        if($9!=NULL && $9->intVal>cnt3){
+        if($9!=NULL && $9->intVal!=cnt3){
             yyerror("Index out of bounds, not matching with intitalisers");
         }
         if(type!=$13->type){
@@ -2343,7 +2430,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -2356,9 +2443,6 @@ VariableDeclarator2:
         s.push_back($7);
         s.push_back($9);
         $$ = makeNode("=", s);
-        // if($3->intVal>cnt){
-            // fprintf(stdout,"Index out of bounds");
-        // }
         if(type!=$7->type){
             yyerror("Type Clashing");
             $$->is_error=1;
@@ -2371,9 +2455,9 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
-            else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            if($9==NULL) array_dims.push_back(0);
+            else array_dims.push_back($9->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
         }
         delete $1;
     }
@@ -2387,13 +2471,7 @@ VariableDeclarator2:
         s.push_back($12);
         s.push_back($15);
         $$ = makeNode("=", s);
-        //
-        if($3!=NULL && $3->intVal>cnt1){
-            yyerror("Index out of bounds, not matching with intitalisers");
-        }
-        if($6!=NULL && $6->intVal>cnt2){
-            yyerror("Index out of bounds, not matching with intitalisers");
-        }
+    
         if(type!=$10->type){
             yyerror("Type Clashing");
             $$->is_error=1;
@@ -2406,11 +2484,11 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
-            else array_dims.push_back($3->intVal);
-            if($6==NULL) array_dims.push_back(0);
-            else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            if($12==NULL) array_dims.push_back(0);
+            else array_dims.push_back($12->intVal);
+            if($15==NULL) array_dims.push_back(0);
+            else array_dims.push_back($15->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
         }
         delete $1;
     }
@@ -2426,16 +2504,7 @@ VariableDeclarator2:
         s.push_back($18);
         s.push_back($21);
         $$ = makeNode("=", s);
-        //
-        // if($3->intVal>cnt){
-            // fprintf(stdout,"Index out of bounds");
-        // }
-        // if($6->intVal>cnt){
-            // fprintf(stdout,"Index out of bounds");
-        // }
-        // if($9->intVal>cnt){
-            // fprintf(stdout,"Index out of bounds");
-        // }
+        
         if(type!=$13->type){
             yyerror("Type Clashing");
             $$->is_error=1;
@@ -2448,13 +2517,13 @@ VariableDeclarator2:
         }
         else{
             isArray=1;
-            if($3==NULL) array_dims.push_back(0);
-            else array_dims.push_back($3->intVal);
-            if($6==NULL) array_dims.push_back(0);
-            else array_dims.push_back($6->intVal);
-            if($9==NULL) array_dims.push_back(0);
-            else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
+            if($15==NULL) array_dims.push_back(0);
+            else array_dims.push_back($15->intVal);
+            if($18==NULL) array_dims.push_back(0);
+            else array_dims.push_back($18->intVal);
+            if($21==NULL) array_dims.push_back(0);
+            else array_dims.push_back($21->intVal);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
         }
         delete $1;
     }
@@ -2477,6 +2546,7 @@ ArrEle1:
     }
     | Expression {
        $$=$1;
+       cnt1++;
     }
 ;
 
@@ -2497,6 +2567,7 @@ ArrEle2:
     }
     | List1 {
         $$=$1;
+        cnt2++;
     }
 ;
 
@@ -2517,6 +2588,7 @@ ArrEle3:
     }
     | List2 {
         $$=$1;
+        cnt3++;
     }
 ;
 
@@ -2635,6 +2707,7 @@ formalparameters:
         $$=$1;
         type="";
         class_type="";
+        modifier = {1,0,0};
     }
 ;
 
@@ -2654,32 +2727,22 @@ formalparameter:
         else $$->is_error = 1;
         type ="";
     }
-    | KEY_final Type VariableDeclarator1 {
+    | KEY_final {modifier[2]=1;} Type VariableDeclarator1 {
         vector<ASTNode*> s;
         s.push_back(makeLeaf("final"));
-        s.push_back($2);
         s.push_back($3);
+        s.push_back($4);
         $$ = makeNode("formalparameter", s);
 
-        if(type=="")type=$2->type;
+        if(type=="")type=$3->type;
         $$->type=type;
-        modifier[2]=1;
-        if(!$2->is_error && !$3->is_error){
-            if($3->expType == 1 || $3->expType ==2){
-                if(lookup($3->temp_name)){
-                    yyerror(("Redeclaration of parameter "+ $3->temp_name).c_str());
-                    $$->is_error = 1;
-                }
-                else{
-                    paramInsert(*cur_table, $3->temp_name, "IDENTIFIER", $3->type, yylineno, NULL, modifier);
-                }
-            }
-            funcArgs.push_back($3->type);
+        if(!$3->is_error && !$4->is_error){
+            funcArgs.push_back($4->type);
         }
         else $$->is_error = 1;
         type ="";
     }
-    | Type DOT3 IDENTIFIER {
+    /* | Type DOT3 IDENTIFIER {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf(*$2));
@@ -2696,7 +2759,7 @@ formalparameter:
                 $$->is_error = 1;
             }
             else{
-                paramInsert(*cur_table, *$3, "IDENTIFIER", type, yylineno, NULL, modifier);
+                paramInsert(*cur_table, *$3, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
             }
             funcArgs.push_back("...");
             funcArgs.push_back(type);
@@ -2723,7 +2786,7 @@ formalparameter:
                 $$->is_error = 1;
             }
             else{
-                paramInsert(*cur_table, *$4, "IDENTIFIER", type, yylineno, NULL, modifier);
+                paramInsert(*cur_table, *$4, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
             }
             funcArgs.push_back("...");
             funcArgs.push_back(type);
@@ -2731,7 +2794,7 @@ formalparameter:
         else $$->is_error = 1;
         type ="";
         delete $4;
-    }
+    } */
 ;
 
 MethodBody:
