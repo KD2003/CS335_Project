@@ -431,9 +431,18 @@ ArrayAccess:
                     $$->type = temp;
                     $$->temp_name = $1->temp_name;
                     if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
-                    //--3AC
-                    // $$->place = qid(string($1), lookup(string($1)));
-                    // $$->nextlist.clear();
+                    temp=temp.substr(0,temp.size()-1);
+                    //3ac
+
+                    qid tmp=newtemp("int");
+                    if($3->type=="int")
+                        emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                    else 
+                        emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    qid tmp2=newtemp(temp);
+                    emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                    $$->addr=tmp2;
+
 
                 }
             }
@@ -976,7 +985,6 @@ ConditionalOrExpression:
         s.push_back($4);
         $$ = makeNode("||", s);
 
-        $$->intVal= $1->intVal||$3->intVal;
 
         string temp=condExp($1->type,$4->type,"","||");
         if(!$1->is_error && !$4->is_error){
@@ -1013,7 +1021,6 @@ ConditionalAndExpression:
         s.push_back($4);
         $$ = makeNode("&&", s);
 
-        $$->intVal= $1->intVal&&$3->intVal;
 
         string temp=condExp($1->type,$4->type,"","&&");
         if(!$1->is_error && !$4->is_error){
@@ -1047,7 +1054,6 @@ AndExpression:
         $$ = makeNode("&", s);
 
         $$->intVal= $1->intVal&$3->intVal;
-        $$->realVal= $1->realVal&$3->realVal;
 
         string temp=bitExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
@@ -1077,7 +1083,6 @@ ExclusiveOrExpression:
         $$ = makeNode("^", s);
 
         $$->intVal= $1->intVal^$3->intVal;
-        $$->realVal= $1->realVal^$3->realVal;
 
         string temp=bitExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
@@ -1227,15 +1232,9 @@ ShiftExpression:
 
         if(*$2=="<<"){
             $$->intVal= $1->intVal<<$3->intVal;
-            $$->realVal= $1->realVal<<$3->realVal;
         }
         else if(*$2==">>"){
             $$->intVal= $1->intVal>>$3->intVal;
-            $$->realVal= $1->realVal>>$3->realVal;
-        }
-        else{
-            $$->intVal= $1->intVal>>>$3->intVal;
-            $$->realVal= $1->realVal>>>$3->realVal;
         }
 
 
@@ -1991,9 +1990,8 @@ LeftHandSide:
                     $$->type = temp;
                     $$->temp_name = $1->temp_name;
                     if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
-                    //--3AC
-                    // $$->place = qid(string($1), lookup(string($1)));
-                    // $$->nextlist.clear();
+                    
+                    //3ac
 
                 }
             }

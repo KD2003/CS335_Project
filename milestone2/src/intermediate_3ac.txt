@@ -1,38 +1,26 @@
-= 10  #V0
-= #V0  n
-=   array
+= 100  #V0
+= #V0  intVar
 = 0  #V1
-= #V1  c
-- n  #V2
-< c #V2 #V3
-if #V3  goto
-goto   
-+ c 1 #V4
+= #V1  longVar
+= 0  #V2
+= #V2  floatVar
+= 0  #V3
+= #V3  doubleVar
+= 0  #V4
+= #V4  dVar
 = 0  #V5
-= #V5  d
-- n c #V6
-- #V6  #V7
-< d #V7 #V8
-if #V8  goto
-goto   
-+ d 1 #V9
-+ d  #V10
->   #V11
-if #V11  goto
-goto   
-= 0  #V12
-= #V12  swap
-+ d  #V13
+= #V5  lVar
+= 0  #V6
+= #V6  iVar
++   #V7
+param #V7  
++ intVar longVar #V8
+* dVar floatVar #V9
++ #V8 #V9 #V10
++ #V10 lVar #V11
++ #V11 doubleVar #V12
++ #V12 iVar #V13
 = 0  #V14
-= #V14  
-+ d  #V15
-= 0  #V16
-= #V16  
-param   
-= 0  #V17
-= #V17  c
-< c n #V18
-if #V18  goto
-goto   
-+ c 1 #V19
-param   
+= #V14  exp
++  exp #V15
+param #V15  
