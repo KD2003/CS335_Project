@@ -16,7 +16,7 @@ typedef struct{
 	int size;
 	
 	string temp_name;
-	qid place;
+	qid addr;
 	vector<int> truelist;
 	vector<int> falselist;
 	vector<int> breaklist;

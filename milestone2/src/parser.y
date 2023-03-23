@@ -624,6 +624,8 @@ MethodInvocation:
                         }
                         else{
                             $$->type = t;
+                            //3ac
+                            emit(qid("call",NULL),$1->addr,qid(to_string(funcArg.size()),NULL),qid("",NULL));
                         }
                     }
                 }
@@ -734,10 +736,16 @@ ArgumentList:
         s.push_back($3);
         $$ = makeNode(",", s);
         tempArgs1.push_back($3->type);
+
+        //3ac
+        emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL));
     }
     | Expression        {
         $$ = $1;
         tempArgs1.push_back($$->type);
+
+        //3ac
+        emit(qid("param",NULL),$1->addr,qid("",NULL),qid("",NULL));
     }
 ;
 
@@ -829,6 +837,67 @@ Assignment:
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
                 $$->type=t;
+
+                //3ac
+                if(*$2=="="){
+                    $$->addr=$1->addr;
+                    emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr); 
+                }
+                else if(*$2=="*="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("*",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="/="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("/",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="%="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("%",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="+="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("+",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="-="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("-",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="<<="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("<<",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2==">>="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid(">>",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2==">>>="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid(">>>",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="&="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("&",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="\^="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("^",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
+                else if(*$2=="\|="){
+                    qid temp=newtemp($1->type,curr_table);
+                    emit(qid("|",NULL),$1->addr,$3->addr,temp);
+                    $$->addr=temp;
+                }
             }
             else{
                 yyerror(("Incompatible Types for "+ *$2).c_str());
@@ -852,6 +921,10 @@ Assignment:
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
                 $$->type=t;
+
+                //3ac
+                $$->addr=$1->addr;
+                emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr);
             }
             else{
                 yyerror("Incompatible Types for =");
@@ -886,7 +959,7 @@ ConditionalOrExpression:
     ConditionalAndExpression        {
         $$ = $1;
     }
-    | ConditionalOrExpression CONDOR ConditionalAndExpression       {
+    | ConditionalOrExpression CONDOR MarkerNT ConditionalAndExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
@@ -895,6 +968,11 @@ ConditionalOrExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                backpatch($1->falselist,$3);
+                $$->truelist=mergelist($1->truelist,$4->truelist);
+                $$->falselist=$4->falselist;
             }
             else{
                 yyerror("Incompatible Types for ||");
@@ -907,11 +985,15 @@ ConditionalOrExpression:
     }
 ;
 
+MarkerNT:
+      {$$=code.size();} //check if -1 or not
+;
+
 ConditionalAndExpression:
     InclusiveOrExpression   {
         $$ = $1;
     }
-    | ConditionalAndExpression CONDAND InclusiveOrExpression        {
+    | ConditionalAndExpression CONDAND MarkerNT InclusiveOrExpression        {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($3);
@@ -921,6 +1003,11 @@ ConditionalAndExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                backpatch($1->truelist,$3);
+                $$->falselist=mergelist($1->falselist,$4->falselist);
+                $$->truelist=$4->truelist;
             }
             else{
                 yyerror("Incompatible Types for &&");
@@ -947,6 +1034,13 @@ AndExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                if($1->type=="boolean" && $3->type="boolean"){
+                    backpatch($1->truelist,$3);
+                    $$->falselist=mergelist($1->falselist,$4->falselist);
+                    $$->truelist=$4->truelist;
+                }
             }
             else{
                 yyerror("Incompatible Types for &");
@@ -999,6 +1093,13 @@ InclusiveOrExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                if($1->type=="boolean" && $3->type="boolean"){
+                backpatch($1->falselist,$3);
+                $$->truelist=mergelist($1->truelist,$4->truelist);
+                $$->falselist=$4->falselist;
+                }
             }
             else{
                 yyerror("Incompatible Types for |");
@@ -1025,6 +1126,15 @@ EqualityExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                qid tmp=newtemp(temp,curr_table);
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                $$->addr=tmp;
+                $$->truelist.push_back(code.size()); // check if -1 or not
+                $$->falselist.push_back(code.size()-1);
+                emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
+                emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1052,6 +1162,15 @@ RelationalExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                qid tmp=newtemp(temp,curr_table);
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                $$->addr=tmp;
+                $$->truelist.push_back(code.size()); // check if -1 or not
+                $$->falselist.push_back(code.size()-1);
+                emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
+                emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1079,6 +1198,11 @@ ShiftExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                qid tmp=newtemp(temp,curr_table);
+                $$->addr=tmp;
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1106,6 +1230,11 @@ AdditiveExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                 //3ac
+                qid tmp=newtemp(temp,curr_table);
+                $$->addr=tmp;
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1133,6 +1262,11 @@ MultiplicativeExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                qid tmp=newtemp(temp,curr_table);
+                $$->addr=tmp;
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1154,6 +1288,11 @@ MultiplicativeExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+
+                //3ac
+                qid tmp=newtemp(temp,curr_table);
+                $$->addr=tmp;
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
             }
             else{
                 yyerror("Incompatible Types for *");
@@ -1175,13 +1314,24 @@ UnaryExpression:
 			string temp = postfixExpression($2->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$1 == "++") $$->intVal = $2->intVal + 1;
-                else $$->intVal = $2->intVal -1;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit(qid("++S", NULL), $2->place, qid("", NULL), q, -1);
+
+                if(*$1 == "++"){
+                    $$->intVal = $2->intVal + 1;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp);
+                }
+                else{
+                    $$->intVal = $2->intVal -1;
+                    
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp);
+                }
+                
 			}
 			else{
 				yyerror("Increment not defined for this type");
@@ -1204,14 +1354,20 @@ UnaryExpression:
 			string temp = unaryExp($2->type,*$1);
 			if(!temp.empty()){
 				$$->type = temp;
-                // if(*$2=="-") $$->intval = - $2->intVal
-                // else $$->intVal = $2->intVal;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->temp_name = $2->temp_name;
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit($1->place, $2->place, qid("", NULL), q, -1);
+                
+                if(*$2=="-"){ 
+                    $$->intval = - $2->intVal;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid(-,NULL),$2->addr,qid("",NULL),tmp);
+
+                }
+                else{ 
+                    $$->intVal = $2->intVal;
+                    $$->addr=$2->addr;
+                }
 			}
 			else{
 				yyerror("Unary operator not defined for this type");
@@ -1244,14 +1400,11 @@ UnaryExpressionNotPlusMinus:
 			string temp = unaryExp($2->type,*$1);
 			if(!temp.empty()){
 				$$->type = temp;
-                // if(*$2=="-") $$->intval = - $2->intVal
-                // else $$->intVal = $2->intVal;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->temp_name = $2->temp_name;
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit($1->place, $2->place, qid("", NULL), q, -1);
+            
+                //3ac
+                qid tmp=newtemp(temp,curr_table);
+                $$->addr=tmp;
+                emit(qid(*$1,NULL),$2->addr,qid("",NULL),tmp);
 			}
 			else{
 				yyerror("Unary operator not defined for this type");
@@ -1274,11 +1427,9 @@ CastExpression:
         if(!($2->is_error || $4->is_error)){
 			//Semantic
 			$$->type = $2->type;
-			// //--3AC
-			// // qid q = newtemp($$->type);
-			// $$->place = $4->place;
-			// $$->place.second->type = $2->type;
-			// $4->nextlist.clear();
+			
+            //3ac
+            $$->addr=$4->addr;
 		}
 		else{
 			$$->is_error = 1;
@@ -1379,13 +1530,22 @@ postfixExpression:
 			string temp = postfixExpression($1->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$2 == "++") $$->intVal = $1->intVal + 1;
-                else $$->intVal = $1->intVal -1;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit(qid("++S", NULL), $1->place, qid("", NULL), q, -1);
+                if(*$1 == "++"){
+                    $$->intVal = $1->intVal + 1;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp);
+                }
+                else{
+                    $$->intVal = $1->intVal -1;
+                    
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp);
+                }
 			}
 			else{
 				yyerror("Increment not defined for this type");
@@ -1492,25 +1652,41 @@ Statement:
         $$ = makeNode("Statement", s);
         delete $1;
     }
-    | KEY_if '(' Expression ')' Statement {
+    | KEY_if '(' Expression ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("if", s);
+
+        //3ac
+        backpath($3->truelist,$5);
+        $$->nextlist=mergelist($3->nextlist,$5->nextlist);
     }
-    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement {
+    | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT Statement {
         vector<ASTNode*> s,s1;
         s1.push_back($7);
         s.push_back($3);
         s.push_back($5);
         s.push_back(makeNode("else", s1));
         $$ = makeNode("if", s);
+
+        //3ac
+        backpatch($3->truelist, $5);
+        backpatch($3->falselist, $9) ;
+        auto tmp = mergelist($6->nextlist, $7->nextlist) ;
+        $$->nextlist = mergelist(tmp, $10->nextlist);
     }
-    | KEY_while '(' Expression ')' Statement {
+    | KEY_while MarkerNT '(' Expression ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("while", s);
+
+        //3ac
+        backpatch($7->nextlist, $2) ;
+        backpatch($4->truelist, $6) ;
+        $$->nextlist = $4->falselist;
+        emit(qid("goto",NULL),qid(to_string($2),NULL),qid("",NULL),qid("",NULL),-1);
     }
     | ForStatement {
         $$=$1;
@@ -1521,6 +1697,13 @@ Statement:
         printSymbolTable(cur_table, name);
         endSymbolTable();
         for_flag=0;
+    }
+;
+
+MarkerNT2:
+      {
+        $$=code.size(); //check if -1 or not
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
 ;
 
@@ -1536,19 +1719,31 @@ StatementNoShortIf:
         s.push_back($3);
         $$ = makeNode("StatementNoShortIf", s);
     }
-    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf {
+    | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT StatementNoShortIf {
         vector<ASTNode*> s,s1;
         s1.push_back($7);
         s.push_back($3);
         s.push_back($5);
         s.push_back(makeNode("else", s1));
         $$ = makeNode("if", s);
+
+        //3ac
+        backpatch($3->truelist, $5);
+        backpatch($3->falselist, $9) ;
+        auto tmp = mergelist($6->nextlist, $7->nextlist) ;
+        $$->nextlist = mergelist(tmp, $10->nextlist);
     }
-    | KEY_while '(' Expression ')' StatementNoShortIf {
+    | KEY_while MarkerNT '(' Expression ')' MarkerNT StatementNoShortIf {
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("while", s);
+
+        //3ac
+        backpatch($7->nextlist, $2) ;
+        backpatch($4->truelist, $6) ;
+        $$->nextlist = $4->falselist;
+        emit(qid("goto",NULL),qid(to_string($2),NULL),qid("",NULL),qid("",NULL),-1);
     }
     | ForStatementNoShortIf {
         $$=$1;
@@ -1573,16 +1768,25 @@ StatementWithoutTrailingSubstatement:		// left try statement
     }
     | BreakContinueStatement {
         $$=$1;
+
+        //3ac not done
     }
     | KEY_return ';' {
         $$ = makeLeaf("return");
         type="";
+
+        //3ac
+        emit(qid("return",NULL),qid("",NULL),qid("",NULL),qid("",NULL),-1);
     }
     | KEY_return Expression ';' {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("return", s);
         type="";
+
+        //3ac
+        backpatch($2->nextlist,code.size());
+        emit(qid("RETURN", NULL), $2->place, qid("", NULL), qid("", NULL), -1);
     }
     | KEY_yield Expression ';' {
         vector<ASTNode*> s;
@@ -1620,13 +1824,23 @@ StatementExpression:
 			string temp = postfixExpression($2->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$1 == "++") $$->intVal = $2->intVal + 1;
-                else $$->intVal = $2->intVal -1;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit(qid("++S", NULL), $2->place, qid("", NULL), q, -1);
+
+                if(*$1 == "++"){
+                    $$->intVal = $2->intVal + 1;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp);
+                }
+                else{
+                    $$->intVal = $2->intVal -1;
+                    
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp);
+                }
 			}
 			else{
 				yyerror("Increment not defined for this type");
@@ -1651,13 +1865,23 @@ StatementExpression:
 			string temp = postfixExpression($1->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$2 == "++") $$->intVal = $1->intVal + 1;
-                else $$->intVal = $1->intVal -1;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit(qid("++S", NULL), $1->place, qid("", NULL), q, -1);
+
+                if(*$1 == "++"){
+                    $$->intVal = $1->intVal + 1;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp);
+                }
+                else{
+                    $$->intVal = $1->intVal -1;
+                    
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp);
+                }
 			}
 			else{
 				yyerror("Increment not defined for this type");
@@ -2593,11 +2817,12 @@ ArrEle3:
 ;
 
 MethodDeclaration:
-    Modifiers MethodHeader MethodBody {
+    Methodbegin Modifiers MethodHeader MethodBody Methodend {
+        // change in grammer
         vector<ASTNode*> s;
-        s.push_back($1);
         s.push_back($2);
         s.push_back($3);
+        s.push_back($4);
         $$ = makeNode("MethodDeclaration", s);
 
         string fName = funcName;
@@ -2605,6 +2830,18 @@ MethodDeclaration:
         endSymbolTable();
         func_flag=0;
         modifier={1,0,0};
+    }
+;
+
+Methodbegin:
+     {
+        emit(qid("beginfunc",NULL),qid("",NULL),,qid("",NULL),,qid("",NULL),-1);
+    }
+;
+
+Methodend:
+     {
+        emit(qid("endfunc",NULL),qid("",NULL),,qid("",NULL),,qid("",NULL),-1);
     }
 ;
 
