@@ -3080,7 +3080,7 @@ C:
     {
         $$ = makeLeaf("C",1);
         if(global_st.find(idendotiden) != global_st.end()){
-            yyerror(("Redefinition of method " + class_type).c_str());
+            yyerror(("Redefinition of class " + class_type).c_str());
             $$->is_error = 1;
         }
         else{
