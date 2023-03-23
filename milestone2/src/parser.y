@@ -1834,7 +1834,7 @@ ClassDeclaration:
     }
 ;
 NormalClassDeclaration:
-    Modifiers KEY_class IDENTIFIER{idendotiden=*$3;modifier={1,0,0};} ClassBody {
+    Modifiers KEY_class IDENTIFIER{idendotiden=*$3;} ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3+")" ));
@@ -2789,6 +2789,7 @@ C:
         }
         type = "";
         class_type = "";
+        modifier={1,0,0};
     }
 ;
 
