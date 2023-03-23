@@ -405,6 +405,7 @@ MethodInvocation:
                     }
                     else{
                         //3ac
+                        emit(qid("call",NULL),$1->addr,qid("",NULL),qid("",NULL)); //size yet to be added
                     }
                 }
             }
@@ -1399,29 +1400,56 @@ Statement:
         $$ = makeNode("Statement", s);
         delete $1;
     }
-    | KEY_if '(' Expression ')' Statement {
+    | KEY_if '(' Expression ')' MarkerNT Statement {
+        //markerNT added
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("if", s);
+
+        //3ac
+        backpath($3->truelist,$5);
+        $$->nextlist=mergelist($3->nextlist,$5->nextlist);
+    
     }
-    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else Statement {
+    | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT Statement {
+        //markerNT MarkerNT2
         vector<ASTNode*> s,s1;
         s1.push_back($7);
         s.push_back($3);
         s.push_back($5);
         s.push_back(makeNode("else", s1));
         $$ = makeNode("if", s);
+
+        //3ac
+        backpatch($3->truelist, $5);
+        backpatch($3->falselist, $9) ;
+        auto tmp = mergelist($6->nextlist, $7->nextlist) ;
+        $$->nextlist = mergelist(tmp, $10->nextlist);
+
+
     }
-    | KEY_while '(' Expression ')' Statement {
+    | KEY_while MarkerNT '(' Expression ')' MarkerNT Statement {
+        //MarkerNT
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("while", s);
+
+        //3ac
+        backpatch($7->nextlist, $2) ;
+        backpatch($4->truelist, $6) ;
+        $$->nextlist = $4->falselist;
+        emit(qid("goto",NULL),qid(to_string($2),NULL),qid("",NULL),qid("",NULL),-1);
     }
     | ForStatement {
         $$=$1;
     }
+;
+
+MarkerNT2:
+    $$=code.size(); //check if -1 or not
+    emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
 ;
 
 StatementNoShortIf:
@@ -1435,20 +1463,36 @@ StatementNoShortIf:
         s.push_back(makeLeaf(":"));
         s.push_back($3);
         $$ = makeNode("StatementNoShortIf", s);
+
+        //not done 3ac
     }
-    | KEY_if '(' Expression ')' StatementNoShortIf KEY_else StatementNoShortIf {
+    | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT StatementNoShortIf {
+        // MarkerNT MarkerNT2
         vector<ASTNode*> s,s1;
         s1.push_back($7);
         s.push_back($3);
         s.push_back($5);
         s.push_back(makeNode("else", s1));
         $$ = makeNode("if", s);
+
+        //3ac
+        backpatch($3->truelist, $5);
+        backpatch($3->falselist, $9) ;
+        auto tmp = mergelist($6->nextlist, $7->nextlist) ;
+        $$->nextlist = mergelist(tmp, $10->nextlist);
     }
-    | KEY_while '(' Expression ')' StatementNoShortIf {
+    | KEY_while MarkerNT '(' Expression ')' MarkerNT StatementNoShortIf {
+        //MarkerNT
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($5);
         $$ = makeNode("while", s);
+
+        //3ac
+        backpatch($7->nextlist, $2) ;
+        backpatch($4->truelist, $6) ;
+        $$->nextlist = $4->falselist;
+        emit(qid("goto",NULL),qid(to_string($2),NULL),qid("",NULL),qid("",NULL),-1);
     }
     | ForStatementNoShortIf {
         $$=$1;
@@ -1472,16 +1516,25 @@ StatementWithoutTrailingSubstatement:		// left try statement
     }
     | BreakContinueStatement {
         $$=$1;
+
+        //3ac not done
     }
     | KEY_return ';' {
         $$ = makeLeaf("return");
         type="";
+
+        //3ac
+        emit(qid("return",NULL),qid("",NULL),qid("",NULL),qid("",NULL),-1);
     }
     | KEY_return Expression ';' {
         vector<ASTNode*> s;
         s.push_back($2);
         $$ = makeNode("return", s);
         type="";
+
+        //3ac
+        backpatch($2->nextlist,code.size());
+        emit(qid("RETURN", NULL), $2->place, qid("", NULL), qid("", NULL), -1);
     }
     | KEY_yield Expression ';' {
         vector<ASTNode*> s;
@@ -1519,13 +1572,23 @@ StatementExpression:
 			string temp = postfixExpression($2->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$1 == "++") $$->intVal = $2->intVal + 1;
-                else $$->intVal = $2->intVal -1;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit(qid("++S", NULL), $2->place, qid("", NULL), q, -1);
+                if(*$1 == "++"){
+                    $$->intVal = $2->intVal + 1;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp);
+                }
+                else{
+                    $$->intVal = $2->intVal -1;
+                    
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp);
+                }
+				
 			}
 			else{
 				yyerror("Increment not defined for this type");
@@ -1550,13 +1613,23 @@ StatementExpression:
 			string temp = postfixExpression($1->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$2 == "++") $$->intVal = $1->intVal + 1;
-                else $$->intVal = $1->intVal -1;
-				//--3AC
-				// qid q = newtemp(temp);
-				// $$->place = q;
-				// $$->nextlist.clear();
-				// emit(qid("++S", NULL), $1->place, qid("", NULL), q, -1);
+                
+                if(*$1 == "++"){
+                    $$->intVal = $1->intVal + 1;
+
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp);
+                }
+                else{
+                    $$->intVal = $1->intVal -1;
+                    
+                    //3ac
+                    qid tmp=newtemp(temp,curr_table);
+                    $$->addr=tmp;
+                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp);
+                }
 			}
 			else{
 				yyerror("Increment not defined for this type");
@@ -1743,7 +1816,7 @@ NormalClassDeclaration:
         $$ = makeNode("class", s);
 
         delete $3;
-    }
+    }   
     | Modifiers KEY_class IDENTIFIER ClassExtends ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
@@ -2400,12 +2473,25 @@ ArrEle3:
 ;
 
 MethodDeclaration:
-    Modifiers MethodHeader MethodBody {
+    Methodbegin Modifiers MethodHeader MethodBody Methodend{
+        // Methodbegin,Methodend added
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($2);
         s.push_back($3);
         $$ = makeNode("MethodDeclaration", s);
+    }
+;
+
+Methodbegin:
+     {
+        emit(qid("beginfunc",NULL),qid("",NULL),,qid("",NULL),,qid("",NULL),-1);
+    }
+;
+
+Methodend:
+     {
+        emit(qid("endfunc",NULL),qid("",NULL),,qid("",NULL),,qid("",NULL),-1);
     }
 ;
 
