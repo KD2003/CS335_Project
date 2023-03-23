@@ -6,6 +6,7 @@ using namespace std;
 vector<quad> code; 
 extern int yylineno;
 long long cnt = 0;
+long long lcnt = 0;
 
 void emit(qid op, qid arg1, qid arg2, qid res, int idx){
     quad tmp;
@@ -110,4 +111,16 @@ void print3AC_code(){
     for(int i=0;i<code.size(); i++){
         tac_file<<code[i].op.first<<","<<code[i].arg1.first<<","<<code[i].arg2.first<<","<<code[i].res.first<<","<<code[i].idx<<","<<i<<endl;
     }
+}
+
+string newlabel(){
+    string tmp="#L"+to_string(lcnt++);
+    return tmp;
+}
+
+vector<int> mergelist(vector <int> &list1, vector <int> &list2){
+    vector<int> temp;
+    for(auto i:list1) temp.push_back(i);
+    for(auto i:list2) temp.push_back(i);
+    return temp;
 }
