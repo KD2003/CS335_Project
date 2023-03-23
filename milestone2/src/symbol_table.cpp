@@ -6,9 +6,11 @@ map<sym_table*, sym_table*> parent_table;
 map<sym_table*, vector<pair<string, sym_table*>>> children_table;
 map<string, pair< string,vector<string> > > func_arg;
 sym_table* cur_table;
+map<string, vector<pair<string, int>>> classVariable;
 
 extern int isArray;
 extern vector<int> array_dims;
+string curClass="";
 
 void symbolTableInit(){
 	parent_table.insert(make_pair(&global_st, nullptr));
@@ -65,6 +67,9 @@ void insertSymbol(sym_table& table, string id, string token, string type, int li
 		}
 		array_dims.clear();
 	}
+	if(parent_table[&table] == &global_st){
+		classVariable[curClass].push_back(make_pair(id, size));
+	}
 }
 
 void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifiers){
@@ -72,6 +77,8 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	
 	if(f_type == "CLASS"){
 		insertSymbol(*cur_table, name , f_type, f_type, lineno, new_table, modifiers, 0);
+		curClass = name;
+		classVariable.insert(make_pair(curClass, vector<pair<string, int>> ()));
 	}
 	else if(f_type != ""){
 		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers, 0);
@@ -143,12 +150,24 @@ void endSymbolTable(){
 
 int classLookup(string id){
 	if(id == "String") return 2;
-	return 0;
+	int sum=0;
+	for(auto it: children_table[&global_st]){
+		if(it.first == id){
+			for(auto it1: *(it.second)){
+				string st = it1.second->type;
+				if(st.substr(0,5)!="FUNC_"){
+					sum += getSize(st);
+				}
+			}
+			return sum;
+		}
+	}
+	return -1;
 }
 
 int getSize(string id){
 	int x =classLookup(id);
-	if(x) return x;
+	if(x!=-1) return x;
 	if(id == "byte") return 1;
 	if(id == "short") return 2;
 	if(id == "int") return 4;
@@ -158,4 +177,15 @@ int getSize(string id){
 	if(id == "boolean") return 1;
 	if(id == "char") return 0;
 	return 0;
+}
+
+int getOffset(string class_name, string id){
+	int curOff=0;
+	for(auto it: classVariable[class_name]){
+		if(it.first == id){
+			return curOff;
+		}
+		curOff += it.second;
+	}
+	return -1;		// id not found
 }

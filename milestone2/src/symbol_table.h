@@ -38,3 +38,4 @@ void printSymbolTable(sym_table*, string);
 string funcProtoLookup(string);
 void endSymbolTable();
 int getSize(string);
+int getOffset(string, string);
