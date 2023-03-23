@@ -1,15 +1,11 @@
 #include "symbol_table.h"
 #include <algorithm>
-#include<iostream>
-using namespace std;
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
 map<sym_table*, vector<pair<string, sym_table*>>> children_table;
 map<string, pair< string,vector<string> > > func_arg;
 sym_table* cur_table;
-
-int avl = 0;
 
 extern int isArray;
 extern vector<int> array_dims;
@@ -19,7 +15,7 @@ void symbolTableInit(){
 	children_table.insert(make_pair(&global_st, vector<pair<string, sym_table*>> ()));
 	cur_table = &global_st;
 	vector<int> temp = {1,0,0};
-	insertSymbol(*cur_table, "String" , "CLASS", "String", "CLASS", 0, NULL, temp);
+	insertSymbol(*cur_table, "String" , "CLASS", "CLASS", 0, NULL, temp);
 	// insert keywords?
 }
 
@@ -50,8 +46,8 @@ sym_entry* curLookup(string id){
 	return (*cur_table)[id];
 }
 
-void insertSymbol(sym_table& table, string id, string token, string lexeme, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
-	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr, modifiers)));
+void insertSymbol(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
+	table.insert(make_pair(id, createEntry(token, id, type, lineno, ptr, modifiers)));
 	if(!array_dims.empty()){
 		// vector<int> temp;
 		// int cur = 1;
@@ -71,40 +67,27 @@ void insertSymbol(sym_table& table, string id, string token, string lexeme, stri
 }
 
 void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifiers){
-	if(!avl){
-		sym_table* new_table = new sym_table;
-		// cout << name << cur_table<< "\n";
-		
-		if(f_type == "CLASS"){
-			insertSymbol(*cur_table, name , f_type, name, f_type, lineno, new_table, modifiers);
-		}
-		else if(f_type != ""){
-			insertSymbol(*cur_table, name , "FUNC_", name, "FUNC_" + f_type, lineno, new_table, modifiers);
-		}
-		else{
-			insertSymbol(*cur_table, name , "Block", name, "", lineno, new_table, modifiers);
-		}
-		parent_table.insert(make_pair(new_table, cur_table));
-		if(children_table.find(cur_table) == children_table.end()){
-			children_table.insert(make_pair(new_table, vector<pair<string, sym_table*>> ()));
-		}
-		children_table[cur_table].push_back(make_pair(name,new_table));
-		cur_table = new_table;
+	sym_table* new_table = new sym_table;
+	
+	if(f_type == "CLASS"){
+		insertSymbol(*cur_table, name , f_type, f_type, lineno, new_table, modifiers);
+	}
+	else if(f_type != ""){
+		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers);
 	}
 	else{
-		avl = 0;
-		(*parent_table[cur_table]).erase("dummyF_name");
-		(*parent_table[cur_table]).insert(make_pair(name, createEntry("FUNC_", f_type, "FUNC_" + f_type, lineno, cur_table, modifiers)));
+		insertSymbol(*cur_table, name , "Block", "", lineno, new_table, modifiers);
 	}
+	parent_table.insert(make_pair(new_table, cur_table));
+	if(children_table.find(cur_table) == children_table.end()){
+		children_table.insert(make_pair(new_table, vector<pair<string, sym_table*>> ()));
+	}
+	children_table[cur_table].push_back(make_pair(name,new_table));
+	cur_table = new_table;
 }
 
-void createParamList(int lineno, vector<int> &modifiers){
-	makeSymbolTable("dummyF_name", "",lineno, modifiers);
-	avl = 1;
-}
-
-void paramInsert(sym_table& table, string id, string token, string lexeme,string type, int lineno, sym_table* ptr, vector<int> &modifiers){
-	table.insert(make_pair(id, createEntry(token, lexeme, type, lineno, ptr, modifiers)));
+void paramInsert(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers){
+	table.insert(make_pair(id, createEntry(token, id, type, lineno, ptr, modifiers)));
 }
 
 vector<string> getFuncArgs(string id){
@@ -134,12 +117,12 @@ void recurPrintST(FILE* file, sym_table* table){
 }
 
 void printSymbolTable(sym_table* table, string file_name){
+	if((*table).empty()) return;
 	FILE* file = fopen(file_name.c_str(), "w");
-  	fprintf( file,"Name, Token, Lexeme, Type, Lineno\n");
-	// cout << table << "in print\n";
+  	fprintf( file,"Token, Lexeme, Type, Lineno\n");
 	// recurPrintST(file, table);
   	for(auto it: (*table)){
-    	fprintf(file,"%s,%s,%s,%s,%d\n", it.first.c_str(), it.second->token.c_str(), it.second->lexeme.c_str() ,it.second->type.c_str(), it.second->lineno);
+    	fprintf(file,"%s,%s,%s,%d\n", it.second->token.c_str(), it.first.c_str() ,it.second->type.c_str(), it.second->lineno);
   	}
   	fclose(file);
 }
@@ -147,13 +130,6 @@ void printSymbolTable(sym_table* table, string file_name){
 string funcProtoLookup(string id){
 	if(func_arg.find(id)!= func_arg.end())return func_arg[id].first;
 	else return "";
-}
-
-void removeFuncProto(){
-	avl = 0;
-	endSymbolTable();
-	parent_table.erase((*cur_table)["dummyF_name"]->entry);
-	(*cur_table).erase("dummyF_name");
 }
 
 void endSymbolTable(){

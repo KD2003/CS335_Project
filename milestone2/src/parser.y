@@ -197,6 +197,9 @@ ClassType:
         $$=$1;
         int pos = class_type.find(".");
         string sub = class_type.substr(0, pos);
+        if(pos != -1){
+            sub = primaryExpression(sub);
+        }
         if(global_st.find(sub) == global_st.end()){
             yyerror(("Undefined class " + sub).c_str());
             $$->is_error = 1;
@@ -232,16 +235,17 @@ ArrayType:
     }
     | ClassType Dims        {
         $$=$1;
-
-        if(idendotiden != "String"){
-            yyerror("Array of this type is not supported");
-        }
-        else{
-            $$->type = "String";
-            isArray =1;
-            type = "String";
-            $$->expType = 2;
-        }
+        isArray =1;
+        $$->expType = 2;
+        // if(idendotiden != "String"){
+        //     yyerror("Array of this type is not supported");
+        // }
+        // else{
+        //     $$->type = "String";
+        //     isArray =1;
+        //     type = "String";
+        //     $$->expType = 2;
+        // }
     }
 ;
 Dims:
@@ -433,6 +437,7 @@ ArrayAccess:
         else{
             int pos = $1->temp_name.find(".");
             string sub = $1->temp_name.substr(0, pos);
+            sub = primaryExpression(sub);
             string sub1 = $1->temp_name.substr(pos+1);
             if(global_st.find(sub) == global_st.end()){
                 yyerror(("Undefined class " + sub).c_str());
@@ -497,41 +502,56 @@ MethodInvocation:
         s.push_back($3);
         $$ = makeNode("MethodInvocation", s);
 
-        string t = postfixExpression(idendotiden,1);
-		curArgs.push_back(vector<string>() ); 
-
-		if(t.empty()){
-			t = getFuncType($1->temp_name);
-            if(t.substr(0,5)=="FUNC_"){
-                t = t.substr(5);
-            }
-            $1->expType = 3;
-		}
-
         if($1->temp_name == "System.out.println"){
             $$->type = "";
         }
-		else if(!($1->is_error) && $1->expType!=4){
-			if(!t.empty()){	
-                if($1->expType==3){
-                    vector<string> funcArg = getFuncArgs($1->temp_name);
-                    if(funcArg != tempArgs1){
-                        yyerror(("Function " + $1->temp_name + " arguments do not match").c_str());
-                        $$->is_error = 1;
+        else{
+            string st= $1->temp_name;
+            int pos = st.find(".");
+            if(pos != -1){
+                string sub = st.substr(0,pos);
+                sub = primaryExpression(sub);
+                string sub1 = $1->temp_name.substr(pos+1);
+                if(global_st.find(sub) == global_st.end()){
+                    yyerror(("Undefined class " + sub).c_str());
+                    $$->is_error = 1;
+                }
+                else{
+                    st = st.substr(pos+1);
+                }
+            }
+            string t = postfixExpression(st,1);
+            curArgs.push_back(vector<string>() ); 
+
+            if(t.empty()){
+                t = getFuncType(st);
+                if(t.substr(0,5)=="FUNC_"){
+                    t = t.substr(5);
+                    $1->expType = 3;
+                }
+            }
+            if(!($1->is_error) && $1->expType!=4){
+                if(!t.empty()){	
+                    if($1->expType==3){
+                        vector<string> funcArg = getFuncArgs(st);
+                        if(funcArg != tempArgs1){
+                            yyerror(("Function " + st + " arguments do not match").c_str());
+                            $$->is_error = 1;
+                        }
+                        else{
+                            $$->type = t;
+                        }
                     }
-                    else{
-                        $$->type = t;
-                    }
+                }
+                else{
+                    yyerror(("Function " + $1->temp_name + " not declared in this scope").c_str());
+                    $$->is_error=1;
                 }
             }
             else{
-				yyerror(("Function " + $1->temp_name + " not declared in this scope").c_str());
+                if($1->expType==4)yyerror("Constant Expression");
                 $$->is_error=1;
             }
-        }
-        else{
-            if($1->expType==4)yyerror("Constant Expression");
-            $$->is_error=1;
         }
         tempArgs1.clear();
     }
@@ -1229,6 +1249,7 @@ postfixExpression:
         else{
             int pos = class_type.find(".");
             string sub = class_type.substr(0, pos);
+            sub = primaryExpression(sub);
             string sub1 = class_type.substr(pos+1);
             if(global_st.find(sub) == global_st.end()){
                 yyerror(("Undefined class " + sub).c_str());
@@ -1614,6 +1635,7 @@ LeftHandSide:
         else{
             int pos = $1->temp_name.find(".");
             string sub = $1->temp_name.substr(0, pos);
+            sub = primaryExpression(sub);
             string sub1 = $1->temp_name.substr(pos+1);
             if(global_st.find(sub) == global_st.end()){
                 yyerror(("Undefined class " + sub).c_str());
@@ -2004,7 +2026,7 @@ VariableDeclarator1:
         }
         else{
             // cout << *$1<<cur_table <<"\n";
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2029,7 +2051,7 @@ VariableDeclarator1:
             $$->expType = 2;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2054,7 +2076,7 @@ VariableDeclarator1:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2082,7 +2104,7 @@ VariableDeclarator1:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table, *$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2105,7 +2127,7 @@ VariableDeclarator2:
 				$$->is_error = 1;            
         }
         else{
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2133,7 +2155,7 @@ VariableDeclarator2:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         cnt1=0;
         delete $1;
@@ -2169,7 +2191,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         cnt1=0;
         cnt2=0;
@@ -2212,7 +2234,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -2245,7 +2267,7 @@ VariableDeclarator2:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         cnt1=0;
         delete $1;
@@ -2284,7 +2306,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         cnt1=0,cnt2=0;
         delete $1;
@@ -2330,7 +2352,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -2360,7 +2382,7 @@ VariableDeclarator2:
             isArray=1;
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2397,7 +2419,7 @@ VariableDeclarator2:
             else array_dims.push_back($3->intVal);
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2441,7 +2463,7 @@ VariableDeclarator2:
             else array_dims.push_back($6->intVal);
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", *$1, type, yylineno, NULL, modifier);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier);
         }
         delete $1;
     }
@@ -2661,7 +2683,7 @@ formalparameter:
                     $$->is_error = 1;
                 }
                 else{
-                    paramInsert(*cur_table, $3->temp_name, "IDENTIFIER", $3->temp_name,$3->type, yylineno, NULL, modifier);
+                    paramInsert(*cur_table, $3->temp_name, "IDENTIFIER", $3->type, yylineno, NULL, modifier);
                 }
             }
             funcArgs.push_back($3->type);
@@ -2686,7 +2708,7 @@ formalparameter:
                 $$->is_error = 1;
             }
             else{
-                paramInsert(*cur_table, *$3, "IDENTIFIER", *$3,type, yylineno, NULL, modifier);
+                paramInsert(*cur_table, *$3, "IDENTIFIER", type, yylineno, NULL, modifier);
             }
             funcArgs.push_back("...");
             funcArgs.push_back(type);
@@ -2713,7 +2735,7 @@ formalparameter:
                 $$->is_error = 1;
             }
             else{
-                paramInsert(*cur_table, *$4, "IDENTIFIER", *$4,type, yylineno, NULL, modifier);
+                paramInsert(*cur_table, *$4, "IDENTIFIER", type, yylineno, NULL, modifier);
             }
             funcArgs.push_back("...");
             funcArgs.push_back(type);
