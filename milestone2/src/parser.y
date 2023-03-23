@@ -961,7 +961,7 @@ ConditionalExpression:
         s.push_back(makeLeaf(":"));
         s.push_back($5);
         $$ = makeNode("ConditionalExpression", s);
-
+        
         //  left for later
     }
 ;
@@ -975,6 +975,9 @@ ConditionalOrExpression:
         s.push_back($1);
         s.push_back($4);
         $$ = makeNode("||", s);
+
+        $$->intVal= $1->intVal||$3->intVal;
+
         string temp=condExp($1->type,$4->type,"","||");
         if(!$1->is_error && !$4->is_error){
             if(!temp.empty()){
@@ -1010,6 +1013,8 @@ ConditionalAndExpression:
         s.push_back($4);
         $$ = makeNode("&&", s);
 
+        $$->intVal= $1->intVal&&$3->intVal;
+
         string temp=condExp($1->type,$4->type,"","&&");
         if(!$1->is_error && !$4->is_error){
             if(!temp.empty()){
@@ -1041,6 +1046,9 @@ AndExpression:
         s.push_back($3);
         $$ = makeNode("&", s);
 
+        $$->intVal= $1->intVal&$3->intVal;
+        $$->realVal= $1->realVal&$3->realVal;
+
         string temp=bitExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
@@ -1068,6 +1076,9 @@ ExclusiveOrExpression:
         s.push_back($3);
         $$ = makeNode("^", s);
 
+        $$->intVal= $1->intVal^$3->intVal;
+        $$->realVal= $1->realVal^$3->realVal;
+
         string temp=bitExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
@@ -1093,6 +1104,8 @@ InclusiveOrExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("|", s);
+
+        $$->intVal= $1->intVal|$3->intVal;
 
         string temp=bitExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
@@ -1120,6 +1133,13 @@ EqualityExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(*$2, s);
+
+        if(*$2=="=="){
+            $$->intVal= $1->intVal==$3->intVal;
+        }
+        else{
+            $$->intVal= $1->intVal!=$3->intVal;
+        }
         // cout<<$1->type<<" :1"<<$3->type<<"\n";
         string temp=eqExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
@@ -1157,6 +1177,18 @@ RelationalExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
+        if(*$2=="<"){
+            $$->intVal= $1->intVal<$3->intVal;
+        }
+        else if(*$2==">"){
+            $$->intVal= $1->intVal>$3->intVal;
+        }
+        else if(*$2=="<="){
+            $$->intVal= $1->intVal<=$3->intVal;
+        }
+        else{
+            $$->intVal= $1->intVal>=$1->intVal;
+        }
         string temp=relExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
@@ -1192,6 +1224,19 @@ ShiftExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(*$2, s);
+
+        if(*$2=="<<"){
+            $$->intVal= $1->intVal<<$3->intVal;
+            $$->realVal= $1->realVal<<$3->realVal;
+        }
+        else if(*$2==">>"){
+            $$->intVal= $1->intVal>>$3->intVal;
+            $$->realVal= $1->realVal>>$3->realVal;
+        }
+        else{
+            $$->intVal= $1->intVal>>>$3->intVal;
+            $$->realVal= $1->realVal>>>$3->realVal;
+        }
 
 
         string temp=shiftExp($1->type,$3->type);
@@ -1272,7 +1317,6 @@ MultiplicativeExpression:
         $$->realVal=$1->realVal/$3->realVal;}
         else{
             $$->intVal=$1->intVal%$3->intVal;
-            $$->realVal=$1->realVal%$3->realVal;
         }
 
         string temp=mulExp($1->type,$3->type);
