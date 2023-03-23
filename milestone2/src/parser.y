@@ -962,10 +962,10 @@ ConditionalOrExpression:
     | ConditionalOrExpression CONDOR MarkerNT ConditionalAndExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back($3);
+        s.push_back($5);
         $$ = makeNode("||", s);
-        string temp=condExp($1->type,$3->type,"","||");
-        if(!$1->is_error && !$3->is_error){
+        string temp=condExp($1->type,$4->type,"","||");
+        if(!$1->is_error && !$5->is_error){
             if(!temp.empty()){
                 $$->type=temp;
 
@@ -996,11 +996,11 @@ ConditionalAndExpression:
     | ConditionalAndExpression CONDAND MarkerNT InclusiveOrExpression        {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back($3);
+        s.push_back($4);
         $$ = makeNode("&&", s);
 
-        string temp=condExp($1->type,$3->type,"","&&");
-        if(!$1->is_error && !$3->is_error){
+        string temp=condExp($1->type,$4->type,"","&&");
+        if(!$1->is_error && !$4->is_error){
             if(!temp.empty()){
                 $$->type=temp;
 
@@ -1655,7 +1655,7 @@ Statement:
     | KEY_if '(' Expression ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($3);
-        s.push_back($5);
+        s.push_back($6);
         $$ = makeNode("if", s);
 
         //3ac
@@ -1664,9 +1664,9 @@ Statement:
     }
     | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT Statement {
         vector<ASTNode*> s,s1;
-        s1.push_back($7);
+        s1.push_back($8);
         s.push_back($3);
-        s.push_back($5);
+        s.push_back($6);
         s.push_back(makeNode("else", s1));
         $$ = makeNode("if", s);
 
@@ -1678,8 +1678,8 @@ Statement:
     }
     | KEY_while MarkerNT '(' Expression ')' MarkerNT Statement {
         vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($5);
+        s.push_back($4);
+        s.push_back($7);
         $$ = makeNode("while", s);
 
         //3ac
@@ -1721,9 +1721,9 @@ StatementNoShortIf:
     }
     | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT StatementNoShortIf {
         vector<ASTNode*> s,s1;
-        s1.push_back($7);
+        s1.push_back($8);
         s.push_back($3);
-        s.push_back($5);
+        s.push_back($6);
         s.push_back(makeNode("else", s1));
         $$ = makeNode("if", s);
 
@@ -1735,8 +1735,8 @@ StatementNoShortIf:
     }
     | KEY_while MarkerNT '(' Expression ')' MarkerNT StatementNoShortIf {
         vector<ASTNode*> s;
-        s.push_back($3);
-        s.push_back($5);
+        s.push_back($4);
+        s.push_back($7);
         $$ = makeNode("while", s);
 
         //3ac
