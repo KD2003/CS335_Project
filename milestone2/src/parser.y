@@ -45,6 +45,7 @@ int yyerror(const char *str);
 %union{
     std::string *st;
     ASTNode *ptr;
+    int x;
 }
 
 %type<st> KEYWORD IDENTIFIER INTLIT FPLIT BOOLLIT CHARLIT STRLIT OPERATOR INTTYPE FPTYPE BOOLTYPE ASSIGNOP CONDOR CONDAND EQALITYOP RELATIONOP SHIFTOP ADDOP MULTOP ADDOP2 UNARYOP KEY_VAR KEY_assert KEY_yield KEY_throw KEY_break KEY_continue KEY_return KEY_if KEY_else KEY_for KEY_permits KEY_while KEY_sync KEY_final KEY_extends KEY_super KEY_this KEY_class KEY_void KEY_public KEY_new KEY_static DOT3 KEY_private KEY_import
@@ -53,7 +54,8 @@ int yyerror(const char *str);
 %type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression postfixExpression
 %type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
-%type<int> MarkerNT MarkerNT2
+%type<x> MarkerNT 
+%type<ptr> MarkerNT2
 %left ADDOP MULTOP SHIFTOP EQALITYOP ADDOP2 '*'
 %right ASSIGNOP '='
 
@@ -174,6 +176,12 @@ IDENdotIDEN:
         idendotiden = *$1;
         $$->type=type;
         $$->temp_name = *$1;
+
+        //3ac
+        qid tmp=qid(*$1,lookup(*$1));
+        $$->addr=tmp;
+
+
         delete $1;
     }
 ;
@@ -625,7 +633,7 @@ MethodInvocation:
                         else{
                             $$->type = t;
                             //3ac
-                            emit(qid("call",NULL),$1->addr,qid(to_string(funcArg.size()),NULL),qid("",NULL));
+                            emit(qid("call",NULL),$1->addr,qid(to_string(funcArg.size()),NULL),qid("",NULL),-1);
                         }
                     }
                 }
@@ -738,14 +746,14 @@ ArgumentList:
         tempArgs1.push_back($3->type);
 
         //3ac
-        emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL));
+        emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
     }
     | Expression        {
         $$ = $1;
         tempArgs1.push_back($$->type);
 
         //3ac
-        emit(qid("param",NULL),$1->addr,qid("",NULL),qid("",NULL));
+        emit(qid("param",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
     }
 ;
 
@@ -838,64 +846,66 @@ Assignment:
             if(!t.empty()){
                 $$->type=t;
 
-                //3ac
                 if(*$2=="="){
+                    cout << "assignop" ;
                     $$->addr=$1->addr;
-                    emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr); 
+                    qid tmp=newtemp($3->type);
+                    emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1); 
                 }
                 else if(*$2=="*="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("*",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("*",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2=="/="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("/",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("/",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2=="%="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("%",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("%",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2=="+="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("+",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("+",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2=="-="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("-",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("-",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2=="<<="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("<<",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("<<",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2==">>="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid(">>",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid(">>",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2==">>>="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid(">>>",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid(">>>",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
                 else if(*$2=="&="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("&",NULL),$1->addr,$3->addr,temp);
+                    qid temp=newtemp($1->type);
+                    emit(qid("&",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
-                else if(*$2=="\^="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("^",NULL),$1->addr,$3->addr,temp);
+                else if(*$2=="^="){
+                    qid temp=newtemp($1->type);
+                    emit(qid("^",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
-                else if(*$2=="\|="){
-                    qid temp=newtemp($1->type,curr_table);
-                    emit(qid("|",NULL),$1->addr,$3->addr,temp);
+                else if(*$2=="|="){
+                    qid temp=newtemp($1->type);
+                    emit(qid("|",NULL),$1->addr,$3->addr,temp,-1);
                     $$->addr=temp;
                 }
             }
@@ -921,10 +931,11 @@ Assignment:
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
                 $$->type=t;
-
                 //3ac
                 $$->addr=$1->addr;
-                emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr);
+                qid tmp=newtemp($3->type);
+                emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
             }
             else{
                 yyerror("Incompatible Types for =");
@@ -962,10 +973,10 @@ ConditionalOrExpression:
     | ConditionalOrExpression CONDOR MarkerNT ConditionalAndExpression       {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back($5);
+        s.push_back($4);
         $$ = makeNode("||", s);
         string temp=condExp($1->type,$4->type,"","||");
-        if(!$1->is_error && !$5->is_error){
+        if(!$1->is_error && !$4->is_error){
             if(!temp.empty()){
                 $$->type=temp;
 
@@ -986,7 +997,7 @@ ConditionalOrExpression:
 ;
 
 MarkerNT:
-      {$$=code.size();} //check if -1 or not
+      {$$=nextinstr();} //check if -1 or not
 ;
 
 ConditionalAndExpression:
@@ -1035,12 +1046,6 @@ AndExpression:
             if(!temp.empty()){
                 $$->type=temp;
 
-                //3ac
-                if($1->type=="boolean" && $3->type="boolean"){
-                    backpatch($1->truelist,$3);
-                    $$->falselist=mergelist($1->falselist,$4->falselist);
-                    $$->truelist=$4->truelist;
-                }
             }
             else{
                 yyerror("Incompatible Types for &");
@@ -1094,12 +1099,6 @@ InclusiveOrExpression:
             if(!temp.empty()){
                 $$->type=temp;
 
-                //3ac
-                if($1->type=="boolean" && $3->type="boolean"){
-                backpatch($1->falselist,$3);
-                $$->truelist=mergelist($1->truelist,$4->truelist);
-                $$->falselist=$4->falselist;
-                }
             }
             else{
                 yyerror("Incompatible Types for |");
@@ -1128,11 +1127,11 @@ EqualityExpression:
                 $$->type=temp;
 
                 //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 $$->addr=tmp;
-                $$->truelist.push_back(code.size()); // check if -1 or not
-                $$->falselist.push_back(code.size()-1);
+                $$->truelist.push_back(nextinstr()); // check if -1 or not
+                $$->falselist.push_back(nextinstr()-1);
                 emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
                 emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
             }
@@ -1164,11 +1163,11 @@ RelationalExpression:
                 $$->type=temp;
 
                 //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 $$->addr=tmp;
-                $$->truelist.push_back(code.size()); // check if -1 or not
-                $$->falselist.push_back(code.size()-1);
+                $$->truelist.push_back(nextinstr()); // check if -1 or not
+                $$->falselist.push_back(nextinstr()-1);
                 emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
                 emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
             }
@@ -1194,15 +1193,16 @@ ShiftExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
+
         string temp=shiftExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
 
                 //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1226,15 +1226,24 @@ AdditiveExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
+        if(*$2=="+"){
+        $$->intVal=$1->intVal+$3->intVal;
+        $$->realVal=$1->realVal+$3->realVal;
+        }
+        else{
+            $$->intVal=$1->intVal-$3->intVal;
+            $$->realVal=$1->realVal-$3->realVal;
+        }
+
         string temp=addExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
 
                  //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1258,15 +1267,23 @@ MultiplicativeExpression:
         s.push_back($3);
         $$ = makeNode(*$2, s);
 
+        if(*$2=="/"){
+        $$->intVal=$1->intVal/$3->intVal;
+        $$->realVal=$1->realVal/$3->realVal;}
+        else{
+            $$->intVal=$1->intVal%$3->intVal;
+            $$->realVal=$1->realVal%$3->realVal;
+        }
+
         string temp=mulExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
 
                 //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
+                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1283,6 +1300,9 @@ MultiplicativeExpression:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode("*", s);
+        
+        $$->intVal=$1->intVal*$3->intVal;
+        $$->realVal=$1->realVal*$3->realVal;
 
         string temp=mulExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
@@ -1290,9 +1310,9 @@ MultiplicativeExpression:
                 $$->type=temp;
 
                 //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp);
+                emit(qid("*",NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror("Incompatible Types for *");
@@ -1319,17 +1339,17 @@ UnaryExpression:
                     $$->intVal = $2->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp);
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp);
+                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp,-1);
                 }
                 
 			}
@@ -1355,13 +1375,13 @@ UnaryExpression:
 			if(!temp.empty()){
 				$$->type = temp;
                 
-                if(*$2=="-"){ 
-                    $$->intval = - $2->intVal;
+                if(*$1=="-"){ 
+                    $$->intVal = - ($2->intVal);
 
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid(-,NULL),$2->addr,qid("",NULL),tmp);
+                    emit(qid("-",NULL),$2->addr,qid("",NULL),tmp,-1);
 
                 }
                 else{ 
@@ -1402,9 +1422,9 @@ UnaryExpressionNotPlusMinus:
 				$$->type = temp;
             
                 //3ac
-                qid tmp=newtemp(temp,curr_table);
+                qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                emit(qid(*$1,NULL),$2->addr,qid("",NULL),tmp);
+                emit(qid(*$1,NULL),$2->addr,qid("",NULL),tmp,-1);
 			}
 			else{
 				yyerror("Unary operator not defined for this type");
@@ -1530,21 +1550,21 @@ postfixExpression:
 			string temp = postfixExpression($1->type,2);
 			if(!temp.empty()){
 				$$->type = temp;
-                if(*$1 == "++"){
+                if(*$2 == "++"){
                     $$->intVal = $1->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp);
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
                 }
                 else{
                     $$->intVal = $1->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp);
+                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp,-1);
                 }
 			}
 			else{
@@ -1659,12 +1679,12 @@ Statement:
         $$ = makeNode("if", s);
 
         //3ac
-        backpath($3->truelist,$5);
-        $$->nextlist=mergelist($3->nextlist,$5->nextlist);
+        backpatch($3->truelist,$5);
+        $$->nextlist=mergelist($3->nextlist,$6->nextlist);
     }
     | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT Statement {
         vector<ASTNode*> s,s1;
-        s1.push_back($8);
+        s1.push_back($10);
         s.push_back($3);
         s.push_back($6);
         s.push_back(makeNode("else", s1));
@@ -1702,7 +1722,7 @@ Statement:
 
 MarkerNT2:
       {
-        $$=code.size(); //check if -1 or not
+        $$->nextlist.push_back(nextinstr()); //check if -1 or not
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
 ;
@@ -1721,7 +1741,7 @@ StatementNoShortIf:
     }
     | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT StatementNoShortIf {
         vector<ASTNode*> s,s1;
-        s1.push_back($8);
+        s1.push_back($10);
         s.push_back($3);
         s.push_back($6);
         s.push_back(makeNode("else", s1));
@@ -1785,8 +1805,8 @@ StatementWithoutTrailingSubstatement:		// left try statement
         type="";
 
         //3ac
-        backpatch($2->nextlist,code.size());
-        emit(qid("RETURN", NULL), $2->place, qid("", NULL), qid("", NULL), -1);
+        backpatch($2->nextlist,nextinstr());
+        emit(qid("RETURN", NULL), $2->addr, qid("", NULL), qid("", NULL), -1);
     }
     | KEY_yield Expression ';' {
         vector<ASTNode*> s;
@@ -1829,17 +1849,17 @@ StatementExpression:
                     $$->intVal = $2->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp);
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp);
+                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp,-1);
                 }
 			}
 			else{
@@ -1866,21 +1886,21 @@ StatementExpression:
 			if(!temp.empty()){
 				$$->type = temp;
 
-                if(*$1 == "++"){
+                if(*$2 == "++"){
                     $$->intVal = $1->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp);
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
                 }
                 else{
                     $$->intVal = $1->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp,curr_table);
+                    qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp);
+                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp,-1);
                 }
 			}
 			else{
@@ -2115,6 +2135,7 @@ ForInit:
         type="";
     }
     | LocalVariableDeclaration {
+        cout << "hha";
         $$ = $1;
         type="";
     }
@@ -2329,6 +2350,8 @@ VariableDeclarator1:
         else{
             // cout << *$1<<cur_table <<"\n";
             insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
+            $$->addr=qid(*$1,lookup(*$1));
+
         }
         delete $1;
     }
@@ -2354,6 +2377,9 @@ VariableDeclarator1:
             if($3==NULL) array_dims.push_back(0);
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
+            
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
     }
@@ -2379,6 +2405,9 @@ VariableDeclarator1:
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
     }
@@ -2407,6 +2436,9 @@ VariableDeclarator1:
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
     }
@@ -2430,6 +2462,13 @@ VariableDeclarator2:
         }
         else{
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            qid tmp=newtemp($3->type);
+            emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+            emit(qid("=",NULL),tmp,qid("",NULL),$$->addr,-1);
+
         }
         delete $1;
     }
@@ -2458,6 +2497,10 @@ VariableDeclarator2:
             if($3==NULL) array_dims.push_back(cnt1);
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            emit(qid("=",NULL),$6->addr,qid("",NULL),$$->addr,-1);
         }
         cnt1=0;
         delete $1;
@@ -2494,6 +2537,10 @@ VariableDeclarator2:
             if($6==NULL) array_dims.push_back(cnt2);
             else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            emit(qid("=",NULL),$9->addr,qid("",NULL),$$->addr,-1);
         }
         cnt1=0;
         cnt2=0;
@@ -2537,6 +2584,10 @@ VariableDeclarator2:
             if($9==NULL) array_dims.push_back(cnt3);
             else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            emit(qid("=",NULL),$12->addr,qid("",NULL),$$->addr,-1);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -2570,6 +2621,10 @@ VariableDeclarator2:
             if($3==NULL) array_dims.push_back(cnt1);
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            emit(qid("=",NULL),$11->addr,qid("",NULL),$$->addr,-1);
         }
         cnt1=0;
         delete $1;
@@ -2609,6 +2664,10 @@ VariableDeclarator2:
             if($6==NULL) array_dims.push_back(0);
             else array_dims.push_back($6->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            emit(qid("=",NULL),$17->addr,qid("",NULL),$$->addr,-1);
         }
         cnt1=0,cnt2=0;
         delete $1;
@@ -2655,6 +2714,10 @@ VariableDeclarator2:
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
+            emit(qid("=",NULL),$23->addr,qid("",NULL),$$->addr,-1);
         }
         cnt1=0,cnt2=0,cnt3=0;
         delete $1;
@@ -2682,6 +2745,9 @@ VariableDeclarator2:
             if($9==NULL) array_dims.push_back(0);
             else array_dims.push_back($9->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
     }
@@ -2713,6 +2779,9 @@ VariableDeclarator2:
             if($15==NULL) array_dims.push_back(0);
             else array_dims.push_back($15->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
     }
@@ -2748,6 +2817,9 @@ VariableDeclarator2:
             if($21==NULL) array_dims.push_back(0);
             else array_dims.push_back($21->intVal);
             insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
+
+            //3ac
+            $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
     }
@@ -2817,12 +2889,12 @@ ArrEle3:
 ;
 
 MethodDeclaration:
-    Methodbegin Modifiers MethodHeader MethodBody Methodend {
+    Modifiers MethodHeader MethodBody{
         // change in grammer
         vector<ASTNode*> s;
+        s.push_back($1);
         s.push_back($2);
         s.push_back($3);
-        s.push_back($4);
         $$ = makeNode("MethodDeclaration", s);
 
         string fName = funcName;
@@ -2833,17 +2905,6 @@ MethodDeclaration:
     }
 ;
 
-Methodbegin:
-     {
-        emit(qid("beginfunc",NULL),qid("",NULL),,qid("",NULL),,qid("",NULL),-1);
-    }
-;
-
-Methodend:
-     {
-        emit(qid("endfunc",NULL),qid("",NULL),,qid("",NULL),,qid("",NULL),-1);
-    }
-;
 
 MethodHeader:
     Type Methodeclarator {
@@ -3189,6 +3250,7 @@ int main(int argc, char* argv[]){
     if(yyparse()) return 0;
     endAST();
     printSymbolTable(cur_table, "Global.csv");
+    print3AC_code();
     /* cout<<"End "<<cur_table<<endl; */
     
     if(verbosemode){

@@ -107,9 +107,9 @@ void backpatch_rem(){
 
 void print3AC_code(){
     ofstream tac_file;
-    tac_file.open("intermediate_3ac.csv");
+    tac_file.open("intermediate_3ac.txt");
     for(int i=0;i<code.size(); i++){
-        tac_file<<code[i].op.first<<","<<code[i].arg1.first<<","<<code[i].arg2.first<<","<<code[i].res.first<<","<<code[i].idx<<","<<i<<endl;
+        tac_file<<code[i].op.first<<" "<<code[i].arg1.first<<" "<<code[i].arg2.first<<" "<<code[i].res.first<<endl;
     }
 }
 
@@ -123,4 +123,8 @@ vector<int> mergelist(vector <int> &list1, vector <int> &list2){
     for(auto i:list1) temp.push_back(i);
     for(auto i:list2) temp.push_back(i);
     return temp;
+}
+
+int nextinstr(){
+    return code.size();
 }

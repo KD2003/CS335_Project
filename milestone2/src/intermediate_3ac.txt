@@ -1,0 +1,38 @@
+= 10  #V0
+= #V0  n
+=   array
+= 0  #V1
+= #V1  c
+- n  #V2
+< c #V2 #V3
+if #V3  goto
+goto   
++ c 1 #V4
+= 0  #V5
+= #V5  d
+- n c #V6
+- #V6  #V7
+< d #V7 #V8
+if #V8  goto
+goto   
++ d 1 #V9
++ d  #V10
+>   #V11
+if #V11  goto
+goto   
+= 0  #V12
+= #V12  swap
++ d  #V13
+= 0  #V14
+= #V14  
++ d  #V15
+= 0  #V16
+= #V16  
+param   
+= 0  #V17
+= #V17  c
+< c n #V18
+if #V18  goto
+goto   
++ c 1 #V19
+param   

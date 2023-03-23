@@ -24,3 +24,4 @@ void print3AC_code();
 void backpatch_rem();
 string newLabel();
 vector<int> mergelist(vector <int>&, vector <int>&);
+int nextinstr();
