@@ -237,15 +237,6 @@ ArrayType:
         $$=$1;
         isArray =1;
         $$->expType = 2;
-        // if(idendotiden != "String"){
-        //     yyerror("Array of this type is not supported");
-        // }
-        // else{
-        //     $$->type = "String";
-        //     isArray =1;
-        //     type = "String";
-        //     $$->expType = 2;
-        // }
     }
 ;
 Dims:
@@ -1843,7 +1834,7 @@ ClassDeclaration:
     }
 ;
 NormalClassDeclaration:
-    Modifiers KEY_class IDENTIFIER{idendotiden=*$3;} ClassBody {
+    Modifiers KEY_class IDENTIFIER{idendotiden=*$3;modifier={1,0,0};} ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3+")" ));
@@ -2538,15 +2529,10 @@ MethodDeclaration:
         $$ = makeNode("MethodDeclaration", s);
 
         string fName = funcName;
-        // cout << funcName << cur_table <<"\n";
-        // for(auto it: *cur_table){
-        //     cout << it.first << " ";
-        // }
         printSymbolTable(cur_table ,fName + ".csv");
         endSymbolTable();
         func_flag=0;
         modifier={1,0,0};
-        // func_flag--;
     }
 ;
 
@@ -2559,11 +2545,13 @@ MethodHeader:
 
         $2->type=$1->type;
         $$->type=$1->type;
+        modifier={1,0,0};
     }
     | KEY_void {type = "void";} Methodeclarator {
         vector<ASTNode*> s;
         s.push_back($3);
         $$ = makeNode("void", s);
+        modifier={1,0,0};
     }
 ;
 
@@ -2783,6 +2771,7 @@ F:
         type = "";
         class_type = "";
         func_flag=0;
+        modifier={1,0,0};
     }
 ;
 
