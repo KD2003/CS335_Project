@@ -438,10 +438,10 @@ ArrayAccess:
                     //3ac
 
                     qid tmp=newtemp("int");
-                    if($3->type=="int")
-                        emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
-                    else 
+                    if($3->expType==4)
                         emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    else 
+                        emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
                     qid tmp2=newtemp(temp);
                     emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
                     $$->addr=tmp2;
