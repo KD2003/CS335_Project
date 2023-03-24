@@ -80,6 +80,9 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 		curClass = name;
 		classVariable.insert(make_pair(curClass, vector<pair<string, int>> ()));
 	}
+	else if(f_type == "Constructor"){
+        insertSymbol(*cur_table, name, f_type, f_type, lineno, new_table, modifiers, 0);
+    }
 	else if(f_type != ""){
 		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers, 0);
 	}

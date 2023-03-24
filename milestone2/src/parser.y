@@ -23,7 +23,7 @@ int for_flag=0;
 int arr_dm;
 
 string type="";
-string class_type="";
+string class_type="", cur_class="";
 string idendotiden ="";
 string funcName="", funcType ="";
 
@@ -56,9 +56,9 @@ stack <int> forstat_curr;
 %type<ptr> Start ImportList ClassDeclarationList Imports Type PrimitiveType IDENdotIDEN PublicPrivateStatic ClassType ArrayType Dims Literal F MethodIDEN C A
 %type<ptr> Primary PrimaryNoNewArray ClassInstanceCreationExpression Zeroorone_ArgumentList FieldAccess ArrayAccess MethodInvocation ArgumentList ArrayCreationExpression DimExpr Expression AssignmentExpression Assignment ConditionalExpression ConditionalAndExpression ConditionalOrExpression AndExpression ExclusiveOrExpression InclusiveOrExpression EqualityExpression RelationalExpression ShiftExpression MultiplicativeExpression AdditiveExpression UnaryExpression UnaryExpressionNotPlusMinus CastExpression postfixExpression
 %type<ptr> Block BlockStatement BlockStatements LocalVariableDeclaration LocalVariableType Statement StatementExpression StatementNoShortIf StatementWithoutTrailingSubstatement LeftHandSide AssertStatement BreakContinueStatement ForInit ForStatement ForStatementNoShortIf StatementExpressionList
-%type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator IdenPara formalparameter formalparameters Modifiers
+%type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator ConstructorDeclaration formalparameter formalparameters Modifiers
 %type<x> MarkerNT 
-%type<ptr> MarkerNT2 ForStatementExpressionList
+%type<ptr> MarkerNT2 ForStatementExpressionList ConstructorIDEN
 %left ADDOP MULTOP SHIFTOP EQALITYOP ADDOP2 '*'
 %right ASSIGNOP '='
 
@@ -2543,7 +2543,7 @@ ClassDeclaration:
     }
 ;
 NormalClassDeclaration:
-    Modifiers KEY_class IDENTIFIER{idendotiden=*$3;} ClassBody {
+    Modifiers KEY_class IDENTIFIER{cur_class=*$3;} ClassBody {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3+")" ));
@@ -2553,6 +2553,7 @@ NormalClassDeclaration:
         printSymbolTable(cur_table,filename + ".csv");
         endSymbolTable();
         func_flag=0;
+        cur_class="";
         modifier={1,0,0};
         delete $3;
     }
@@ -2668,16 +2669,47 @@ ClassBodyDeclaration:
     | Block {
         $$=$1;
     }
-    | Modifiers IdenPara Block {
-        vector<ASTNode*> s;
-        s.push_back($1);
-        s.push_back($2);
-        s.push_back($3);
-        $$ = makeNode("ClassBodyDeclaration", s);
-        modifier={1,0,0};
+    | ConstructorDeclaration {
+        $$=$1;
     }
     | MethodDeclaration {
         $$=$1;
+    }
+;
+
+ConstructorIDEN:
+    IDENTIFIER {
+        $$ = makeLeaf("ID (" + *$1 +")");
+        funcName =*$1;
+        funcType = "Constructor";
+        $$->temp_name = "Constructor" + *$1;
+
+        delete $1;
+    }
+;
+
+ConstructorDeclaration:
+    Modifiers ConstructorIDEN F '(' formalparameters ')' Block {
+        vector<ASTNode*> s;
+        s.push_back($1);
+        s.push_back($2);
+        s.push_back($5);
+        s.push_back($7);
+        $$ = makeNode("ConstructorDeclaration", s);
+
+        string str= $2->temp_name.substr(12);
+
+        if(str!=cur_class){
+            yyerror(("Constructor can only have the name "+cur_class).c_str());
+            $$->is_error = 1;
+        }
+        else{
+            printSymbolTable(cur_table ,$2->temp_name + ".csv");
+            print3AC_code($2->temp_name);
+            endSymbolTable();
+        }
+
+        modifier={1,0,0};
     }
 ;
 
@@ -3308,33 +3340,11 @@ MethodHeader:
 ;
 
 Methodeclarator:
-    IdenPara Dims {
-        $$=$1;
-    }
-    | IdenPara {
-        $$=$1;
-    }
-;
-
-MethodIDEN:
-    IDENTIFIER      {
-        $$ = makeLeaf("ID (" + *$1+")" );
-        $$->temp_name = *$1;
-        funcName = *$1;
-        funcType = type;
-        $$->type =type;
-        type ="";
-        class_type="";
-        delete $1;
-    }
-;
-
-IdenPara:
-    MethodIDEN F '(' formalparameters ')' {
+    MethodIDEN F '(' formalparameters ')' Dims {
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back($4);
-        $$ = makeNode("IdenPara", s);
+        $$ = makeNode("MethodDeclarator", s);
 
         if(!$4->is_error && !$2->is_error){
             $$->temp_name = $1->temp_name;
@@ -3351,10 +3361,55 @@ IdenPara:
             $$->is_error = 1;
         }
     }
+    | MethodIDEN F '(' formalparameters ')' {
+        vector<ASTNode*> s;
+        s.push_back($1);
+        s.push_back($4);
+        $$ = makeNode("MethodDeclarator", s);
+
+        if(!$4->is_error && !$2->is_error){
+            $$->temp_name = $1->temp_name;
+            $$->expType = 3;
+            $$->type = $1->type;
+
+            vector<string> temp = getFuncArgs($1->temp_name);
+            if(temp.size()==1 && temp[0] == "#NO_FUNC"){
+                insertFuncArg($$->temp_name, funcArgs, $$->type);
+                funcArgs.clear();
+            }
+        }
+        else{
+            $$->is_error = 1;
+        }
+    }
+    | MethodIDEN F '(' ')' Dims {
+        vector<ASTNode*> s;
+        s.push_back($1);
+        $$ = makeNode("MethodDeclarator", s);
+
+        if(!$2->is_error){
+            $$->temp_name = $1->temp_name;
+            $$->expType = 3;
+            $$->type = $1->type;
+
+            vector<string> temp = getFuncArgs($1->temp_name);
+            // if(lookup($1->temp_name)){
+            //     yyerror(("Redeclaration of Method "+ $1->temp_name).c_str());
+            //     $$->is_error = 1;
+            // }
+            if(temp.size()==1 && temp[0] == "#NO_FUNC"){
+                insertFuncArg($$->temp_name, funcArgs, $$->type);
+                funcArgs.clear();
+            }
+        }
+        else{
+            $$->is_error = 1;
+        }
+    }
     | MethodIDEN F '(' ')' {
         vector<ASTNode*> s;
         s.push_back($1);
-        $$ = makeNode("IdenPara", s);
+        $$ = makeNode("MethodDeclarator", s);
 
         if(!$2->is_error){
             $$->temp_name = $1->temp_name;
@@ -3376,6 +3431,20 @@ IdenPara:
         }
     }
 ;
+
+MethodIDEN:
+    IDENTIFIER      {
+        $$ = makeLeaf("ID (" + *$1+")" );
+        $$->temp_name = *$1;
+        funcName = *$1;
+        funcType = type;
+        $$->type =type;
+        type ="";
+        class_type="";
+        delete $1;
+    }
+;
+
 formalparameters:
     formalparameters ',' formalparameter {
         vector<ASTNode*> s;
@@ -3522,13 +3591,13 @@ F:
 C:
     {
         $$ = makeLeaf("C",1);
-        if(global_st.find(idendotiden) != global_st.end()){
-            yyerror(("Redefinition of class " + class_type).c_str());
+        if(global_st.find(cur_class) != global_st.end()){
+            yyerror(("Redefinition of class " + cur_class).c_str());
             $$->is_error = 1;
         }
         else{
-            makeSymbolTable(idendotiden, "CLASS", yylineno, modifier);
-            $$->node_name = idendotiden;
+            makeSymbolTable(cur_class, "CLASS", yylineno, modifier);
+            $$->node_name = cur_class;
         }
         type = "";
         class_type = "";
@@ -3615,6 +3684,7 @@ int main(int argc, char* argv[]){
     }
 
     system("rm *.csv");
+    system("rm *.txt");
 
     if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 
