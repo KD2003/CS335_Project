@@ -26,6 +26,7 @@ string type="";
 string class_type="", cur_class="";
 string idendotiden ="";
 string funcName="", funcType ="";
+string file_path="";
 
 vector<int> array_dims;
 vector<int> modifier ={1,0,0};
@@ -448,18 +449,25 @@ ArrayAccess:
                     $$->expType = 2;
                     temp = temp.substr(0,temp.size()-1);
                     if(isInt($3->type)){
-                        $$->type = temp;
-                        $$->temp_name = $1->temp_name;
-                        //3ac
+                        if($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)){
+                            yyerror("Array index out of bound");
+                            $$->is_error =1;
+                        }
+                        else{
+                            $$->type = temp;
+                            $$->temp_name = $1->temp_name;
+                            //3ac
 
-                        qid tmp=newtemp("int");
-                        if($3->expType==4)emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
-                        else emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
-                        qid tmp2=newtemp(temp);
-                        emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
-                        $$->addr=tmp2;
+                            qid tmp=newtemp("int");
+                            if($3->expType==4)emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                            else emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                            qid tmp2=newtemp(temp);
+                            emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                            $$->addr=tmp2;
+                        }
                     }
                     else{
+                        yyerror("Index not integer");
                         $$->is_error=1;
                     }
                 }
@@ -487,21 +495,28 @@ ArrayAccess:
                             if((*(it.second))[sub1]->isArray){
                                 $$->expType = 2; 
                                 if(!isInt($3->type)){
+                                    yyerror("Index not integer");
                                     $$->is_error=1;
                                 }
                                 else{
-                                    $$->type = tem;
-                                    $$->temp_name = idendotiden;
-                                    if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
-                                    tem=tem.substr(0,tem.size()-1);
-                                    
-                                    //3ac
-                                    qid tmp=newtemp("int");
-                                    if($3->expType == 4) emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
-                                    else emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
-                                    qid tmp2=newtemp(tem);
-                                    emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
-                                    $$->addr=tmp2;
+                                    if($3->expType ==4 && ($3->intVal >= (*(it.second))[sub1]->array_dims[0] || $3->intVal>=0)){
+                                        yyerror("Array index out of bound");
+                                        $$->is_error =1;
+                                    }
+                                    else{
+                                        $$->type = tem;
+                                        $$->temp_name = $1->temp_name;
+                                        if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
+                                        tem=tem.substr(0,tem.size()-1);
+                                        
+                                        //3ac
+                                        qid tmp=newtemp("int");
+                                        if($3->expType == 4) emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
+                                        else emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                                        qid tmp2=newtemp(tem);
+                                        emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                                        $$->addr=tmp2;
+                                    }
                                 }
                             }
                             else $$->is_error = 1;
@@ -527,34 +542,36 @@ ArrayAccess:
             else{
                 if(temp.back() == '*'){
                     $$->expType = 2;
+                    temp=temp.substr(0,temp.size()-1);
                     $$->type = temp;
                     $$->temp_name = $1->temp_name;
-                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
-                    temp=temp.substr(0,temp.size()-1);
-                    //3ac
-                    int c=($3->intVal)*lookup($1->temp_name)->array_dims[1]+$6->intVal;
-                    qid tmp=newtemp("int");
-                    if($3->expType!=4)
-                            emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
-                    else 
-                            emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c),NULL),tmp,-1);
-                    qid tmp2=newtemp("int");
-                    emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
-                    qid tmp3=newtemp("int");
-                    emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
-                    $$->addr=tmp3;
+
+                    if(!isInt(temp)){
+                        yyerror("Index not integer");
+                        $$->is_error=1;
+                    }
+                    else{
+                        if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))){
+                            yyerror("Array index out of bound");
+                            $$->is_error =1;
+                        }
+                        else{
+                            //3ac
+                            int c=($3->intVal)*lookup($1->temp_name)->array_dims[1]+$6->intVal;
+                            qid tmp=newtemp("int");
+                            if($3->expType!=4)
+                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                            else 
+                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c),NULL),tmp,-1);
+                            qid tmp2=newtemp("int");
+                            emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
+                            qid tmp3=newtemp("int");
+                            emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
+                            $$->addr=tmp3;
+                        }
+                    }
                 }
                 else $$->is_error = 1;
-
-                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
-                    temp.pop_back();
-                    $$->type = temp;
-                    $$->temp_name = $1->temp_name; 
-                    // $$->nextlist.clear();
-                }
-                else{
-                    
-                }
             }
         }
         else{
@@ -575,41 +592,38 @@ ArrayAccess:
                         }
                         else{
                             string tem = (*(it.second))[sub1]->type;
-                            if(tem.substr(0, 5) == "FUNC_"){
-                                $$->expType = 3;
-                            }
-                            else if((*(it.second))[sub1]->isArray){
+                            if((*(it.second))[sub1]->isArray){
                                 $$->expType = 2; 
-                                // if($3->intVal >= (*(it.second))[sub1]->array_dims[arr_dm]){
-                                //     yyerror("Index out of bounds");
-                                //     $$->is_error = 1;
-                                // }
+                                tem=tem.substr(0,tem.size()-1);
+                                $$->type = tem;
+                                $$->temp_name = $1->temp_name;
+
+                                if(!isInt(tem)){
+                                    yyerror("Index not integer");
+                                    $$->is_error=1;
+                                }
+                                else{
+                                    if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))){
+                                        yyerror("Array index out of bound");
+                                        $$->is_error =1;
+                                    }
+                                    else{
+                                        //3ac
+                                        int c=$3->intVal*(lookup($1->temp_name))->array_dims[1]+$6->intVal;
+                                        qid tmp=newtemp("int");
+                                        if($3->expType!=4)
+                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
+                                        else 
+                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string(c),NULL),tmp,-1);
+                                        qid tmp2=newtemp(tem);
+                                        emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
+                                        qid tmp3=newtemp(tem);
+                                        emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
+                                        $$->addr=tmp3;
+                                    }
+                                }
                             }
                             else $$->is_error = 1;
-
-                            if(tem.substr(0,5)=="FUNC_" ){
-                                $$->type = tem;
-                                $$->temp_name = idendotiden; 
-                                // $$->nextlist.clear();
-                            }
-                            else{
-                                $$->type = tem;
-                                $$->temp_name = idendotiden;
-                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
-                                tem=tem.substr(0,tem.size()-1);
-                                //3ac
-                                int c=$3->intVal*(lookup($1->temp_name))->array_dims[1]+$6->intVal;
-                                qid tmp=newtemp("int");
-                                if($3->expType!=4)
-                                        emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
-                                else 
-                                        emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string(c),NULL),tmp,-1);
-                                qid tmp2=newtemp(tem);
-                                emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
-                                qid tmp3=newtemp(tem);
-                                emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
-                                $$->addr=tmp3;
-                            }
                         }
                     }
                 }
@@ -631,44 +645,40 @@ ArrayAccess:
                 $$->is_error = 1;
             }
             else{
-                if(temp.substr(0, 5) == "FUNC_"){
-                    $$->is_error=1;
-                }
-                else if(temp.back() == '*'){
+                if(temp.back() == '*'){
                     $$->expType = 2;
-                    // if($3->intVal >= lookup($1->temp_name)->array_dims[arr_dm]){
-                    //     yyerror("Index out of bounds");
-                    //     $$->is_error = 1;
-                    // }
-                }
-                else $$->is_error = 1;
-
-                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
-                    temp.pop_back();
-                    $$->type = temp;
-                    $$->temp_name = $1->temp_name; 
-                    // $$->nextlist.clear();
-                }
-                else{
+                    temp=temp.substr(0,temp.size()-1);
                     $$->type = temp;
                     $$->temp_name = $1->temp_name;
-                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
-                    temp=temp.substr(0,temp.size()-1);
-                    //3ac
-                    int c=$3->intVal*lookup($1->temp_name)->array_dims[1]+$6->intVal*lookup($1->temp_name)->array_dims[2]+$9->intVal;
-                    qid tmp=newtemp("int");
-                    qid tmp2=newtemp("int");
-                    if($3->expType!=4)
-                            emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
-                    else 
-                            emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c),NULL),tmp,-1);
-                    emit(qid("*",NULL),tmp,$6->addr,tmp2,-1);
-                    qid tmp3=newtemp("int");
-                    emit(qid("+",NULL),tmp2,$9->addr,tmp3,-1);
-                    qid tmp4=newtemp("int");
-                    emit(qid("+",NULL),$1->addr,tmp3,tmp4,-1);
-                    $$->addr=tmp4;
+
+                    if(!isInt(temp)){
+                        yyerror("Index not integer");
+                        $$->is_error=1;
+                    }
+                    else{
+                        if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))||($9->expType==4 && ($9->intVal>=lookup($1->temp_name)->array_dims[2] || $9->intVal>=0))){
+                            yyerror("Array index out of bound");
+                            $$->is_error =1;
+                        }
+                        else{
+                            //3ac
+                            int c=$3->intVal*lookup($1->temp_name)->array_dims[1]+$6->intVal*lookup($1->temp_name)->array_dims[2]+$9->intVal;
+                            qid tmp=newtemp("int");
+                            qid tmp2=newtemp("int");
+                            if($3->expType!=4)
+                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                            else 
+                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c),NULL),tmp,-1);
+                            emit(qid("*",NULL),tmp,$6->addr,tmp2,-1);
+                            qid tmp3=newtemp("int");
+                            emit(qid("+",NULL),tmp2,$9->addr,tmp3,-1);
+                            qid tmp4=newtemp("int");
+                            emit(qid("+",NULL),$1->addr,tmp3,tmp4,-1);
+                            $$->addr=tmp4;
+                        }
+                    }
                 }
+                else $$->is_error = 1;
             }
         }
         else{
@@ -689,50 +699,46 @@ ArrayAccess:
                         }
                         else{
                             string tem = (*(it.second))[sub1]->type;
-                            if(tem.substr(0, 5) == "FUNC_"){
-                                $$->expType = 3;
-                            }
-                            else if((*(it.second))[sub1]->isArray){
+                            if((*(it.second))[sub1]->isArray){
                                 $$->expType = 2; 
-                                // if($3->intVal >= (*(it.second))[sub1]->array_dims[arr_dm]){
-                                //     yyerror("Index out of bounds");
-                                //     $$->is_error = 1;
-                                // }
-                            }
-                            else $$->expType = 1;
-
-                            if(tem.substr(0,5)=="FUNC_" ){
-                                $$->type = tem;
-                                $$->temp_name = idendotiden; 
-                                // $$->nextlist.clear();
-                            }
-                            else{
-                                $$->type = tem;
-                                $$->temp_name = idendotiden;
-                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
                                 tem=tem.substr(0,tem.size()-1);
-                                //3ac
-                                int c=($3->intVal)*(lookup($1->temp_name)->array_dims[1])+($6->intVal)*(lookup($1->temp_name)->array_dims[2])+$9->intVal;
-                                qid tmp=newtemp("int");
-                                qid tmp2=newtemp("int");
-                                if($3->expType!=4)
-                                        emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
-                                else 
-                                        emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string(c),NULL),tmp,-1);
-                                emit(qid("*",NULL),tmp,$6->addr,tmp2,-1);
-                                qid tmp3=newtemp("int");
-                                emit(qid("+",NULL),tmp2,$9->addr,tmp3,-1);
-                                qid tmp4=newtemp("int");
-                                emit(qid("+",NULL),$1->addr,tmp3,tmp4,-1);
-                                $$->addr=tmp4;
+                                $$->type = tem;
+                                $$->temp_name = $1->temp_name;
+
+                                if(!isInt(tem)){
+                                    yyerror("Index not integer");
+                                    $$->is_error=1;
+                                }
+                                else{
+                                    if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))||($9->expType==4 && ($9->intVal>=lookup($1->temp_name)->array_dims[2] || $9->intVal>=0))){
+                                        yyerror("Array index out of bound");
+                                        $$->is_error =1;
+                                    }
+                                    else{
+                                        //3ac
+                                        int c=($3->intVal)*(lookup($1->temp_name)->array_dims[1])+($6->intVal)*(lookup($1->temp_name)->array_dims[2])+$9->intVal;
+                                        qid tmp=newtemp("int");
+                                        qid tmp2=newtemp("int");
+                                        if($3->expType!=4)
+                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
+                                        else 
+                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string(c),NULL),tmp,-1);
+                                        emit(qid("*",NULL),tmp,$6->addr,tmp2,-1);
+                                        qid tmp3=newtemp("int");
+                                        emit(qid("+",NULL),tmp2,$9->addr,tmp3,-1);
+                                        qid tmp4=newtemp("int");
+                                        emit(qid("+",NULL),$1->addr,tmp3,tmp4,-1);
+                                        $$->addr=tmp4;
+                                    }
+                                }
                             }
+                            else $$->is_error = 1;
                         }
                     }
                 }
             }
         }
     }
-;
 ;
 
 MethodInvocation:
@@ -1852,10 +1858,10 @@ postfixExpression:
     }
     | IDENdotIDEN      {
         $$ = $1;
-        if(idendotiden.find('.') == string::npos){
-            string temp = primaryExpression(idendotiden);
+        if($1->temp_name.find('.') == string::npos){
+            string temp = primaryExpression($1->temp_name);
             if(temp == ""){
-                yyerror(("Undeclared Identifier " + idendotiden).c_str());
+                yyerror(("Undeclared Identifier " + $1->temp_name).c_str());
                 $$->is_error = 1;
             }
             else{
@@ -1870,12 +1876,12 @@ postfixExpression:
                 if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
                     temp.pop_back();
                     $$->type = temp;
-                    $$->temp_name = idendotiden; 
+                    $$->temp_name = $1->temp_name; 
                     // $$->nextlist.clear();
                 }
                 else{
                     $$->type = temp;
-                    $$->temp_name = idendotiden;
+                    $$->temp_name = $1->temp_name;
                     if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
                     
                     //3ac
@@ -1922,12 +1928,12 @@ postfixExpression:
 
                             if(tem.substr(0,5)=="FUNC_" ){
                                 $$->type = tem;
-                                $$->temp_name = idendotiden; 
+                                $$->temp_name = $1->temp_name; 
                                 // $$->nextlist.clear();
                             }
                             else{
                                 $$->type = tem;
-                                $$->temp_name = idendotiden;
+                                $$->temp_name = $1->temp_name;
                                 if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
                                 
                                 //3ac
@@ -2407,12 +2413,12 @@ LeftHandSide:
 
                             if(tem.substr(0,5)=="FUNC_" ){
                                 $$->type = tem;
-                                $$->temp_name = idendotiden; 
+                                $$->temp_name = $1->temp_name; 
                                 // $$->nextlist.clear();
                             }
                             else{
                                 $$->type = tem;
-                                $$->temp_name = idendotiden;
+                                $$->temp_name = $1->temp_name;
                                 if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
                                 //--3AC
                                 // $$->place = qid(string($1), lookup(string($1)));
@@ -3758,7 +3764,10 @@ int main(int argc, char* argv[]){
             }
             else{
                 yyin = fopen(argv[i+1],"r");
-                /* printf("%s\n", argv[i+1]); */
+                file_path = argv[i+1];
+                file_path = file_path.substr(0,file_path.size()-5);
+                system(("mkdir "+file_path).c_str());
+                file_path+="/";
                 if(yyin==NULL){
                     printf("%s can not be opened as an input file.\n", argv[i+1]);
                     return 0;
@@ -3807,8 +3816,8 @@ int main(int argc, char* argv[]){
         printf("Starting the parser...\n");
     }
 
-    system("rm *.csv");
-    system("rm *.txt");
+    system(("rm "+file_path+"*.csv").c_str());
+    system(("rm "+file_path+"*.txt").c_str());
 
     if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 

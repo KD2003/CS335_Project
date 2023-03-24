@@ -5,6 +5,7 @@ using namespace std;
 
 vector<quad> code; 
 extern int yylineno;
+extern string file_path;
 long long cnt = 0;
 long long lcnt = 0;
 
@@ -160,7 +161,7 @@ bool isop(string s){
 
 void print3AC_code(string filename){
     ofstream tac_file;
-    tac_file.open(filename+".txt");
+    tac_file.open(file_path+filename+".txt");
     tac_file << filename << ":" << '\n';
     tac_file << "beginfunc_" << '\n';
     for(int i=0;i<code.size(); i++){
