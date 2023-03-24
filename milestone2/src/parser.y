@@ -606,7 +606,6 @@ ArrayAccess:
                                 //3ac
                                 int c=$3->intVal*(lookup($1->temp_name))->array_dims[1]+$6->intVal;
                                 qid tmp=newtemp("int");
-                                cout << "in";
                                 if($3->expType!=4)
                                         emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
                                 else 
@@ -794,7 +793,13 @@ MethodInvocation:
                         else{
                             $$->type = t;
                             //3ac
-                            emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
+                            if(t=="void")
+                                emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
+                            else{
+                                qid tmp=newtemp(t);
+                                emit(qid("=",NULL),qid("call",NULL),qid($1->temp_name,NULL),tmp,-1);
+                                $$->addr=tmp;
+                            }
                         }
                     }
                 }
@@ -916,6 +921,11 @@ ArgumentList:
 
             $3->addr=tmp;
         }
+        else if($3->expType==5){
+            qid tmp=newtemp($3->type);
+            emit(qid("=",NULL),qid($3->strVal,NULL),qid("",NULL),tmp,-1);
+            $3->addr=tmp;
+        }
         emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
     }
     | Expression        {
@@ -1026,7 +1036,6 @@ Assignment:
                 $$->type=t;
 
                 if(*$2=="="){
-                    cout << "assignop" ;
                     $$->addr=$1->addr;
                     qid tmp=newtemp($1->type);
                     if($3->expType==4)
@@ -1741,6 +1750,14 @@ CastExpression:
 postfixExpression:
     Primary {
         $$ = $1;
+
+        if($1->expType==5){
+            qid tmp=newtemp("string");
+            emit(qid("=",NULL),qid($1->strVal,NULL),qid("",NULL),tmp,-1);
+            $$->addr=tmp;
+
+        }
+
     }
     | IDENdotIDEN      {
         $$ = $1;
@@ -1775,6 +1792,12 @@ postfixExpression:
                         qid tmp=newtemp("int");
                         emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),tmp,-1);
                         $$->addr=tmp;
+                    }
+                    else if($1->expType==5){
+                        qid tmp=newtemp("string");
+                        emit(qid("=",NULL),qid($1->strVal,NULL),qid("",NULL),tmp,-1);
+                        $$->addr=tmp;
+
                     }
 
                 }
@@ -2000,7 +2023,7 @@ Statement:
         backpatch($7->nextlist, $2) ;
         backpatch($4->truelist, $6) ;
         $$->nextlist = $4->falselist;
-        emit(qid("goto",NULL),qid(to_string($2),NULL),qid("",NULL),qid("",NULL),-1);
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$2);
     }
     | ForStatement {
         $$=$1;
@@ -2017,7 +2040,7 @@ Statement:
 MarkerNT2:
       {
         $$=makeLeaf("MarkerNT2",1);
-        $$->nextlist.push_back(nextinstr()+1); //check if -1 or not
+        $$->nextlist.push_back(nextinstr()); //check if -1 or not
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
 ;
@@ -2058,7 +2081,7 @@ StatementNoShortIf:
         backpatch($7->nextlist, $2) ;
         backpatch($4->truelist, $6) ;
         $$->nextlist = $4->falselist;
-        emit(qid("goto",NULL),qid(to_string($2),NULL),qid("",NULL),qid("",NULL),-1);
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$2);
     }
     | ForStatementNoShortIf {
         $$=$1;
@@ -2407,7 +2430,7 @@ ForStatement:
             quad q=forstat.top();
             emit(q);
             forstat.pop();
-            addline();
+            // addline();
         }
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
     }
@@ -2427,7 +2450,7 @@ ForStatement:
             quad q=forstat.top();
             emit(q);
             forstat.pop();
-            addline();
+            // addline();
         }
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
 
@@ -2454,7 +2477,7 @@ ForStatementNoShortIf:
             quad q=forstat.top();
             emit(q);
             forstat.pop();
-            addline();
+            // addline();
         }
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
     }
@@ -2474,7 +2497,7 @@ ForStatementNoShortIf:
             quad q=forstat.top();
             emit(q);
             forstat.pop();
-            addline();
+            // addline();
         }
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
 
@@ -3254,7 +3277,6 @@ MethodDeclaration:
 
         string fName = funcName;
         printSymbolTable(cur_table ,fName + ".csv");
-        cout << $2->temp_name << " ";
         print3AC_code($2->temp_name);
         endSymbolTable();
 

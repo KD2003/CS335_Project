@@ -139,6 +139,9 @@ void print3AC_code(string filename){
     for(int i=0;i<code.size(); i++){
 
         if(code[i].op.first=="="){
+            if(code[i].arg1.first=="call"){
+                tac_file << code[i].res.first << " " <<  code[i].op.first << " " << code[i].arg1.first << " " << code[i].arg2.first << "\n";continue;
+            }
             tac_file << code[i].res.first << " " <<  code[i].op.first << " " << code[i].arg1.first << "\n";continue;
         }
 

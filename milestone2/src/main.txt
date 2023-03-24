@@ -1,82 +1,30 @@
 main:
 beginfunc_
-#V0 = 10
-n = #V0
-#V1 = 0
-i = #V1
-#V2 = i < 5
-if #V2   goto 10
-goto 21
-#V4 = 4 * i
-#V5 = array + #V4
-#V6 = i
-#V5 = #V6
-#V7 = 4 * 1
-#V8 = array + #V7
-#V9 = i
-#V8 = #V9
-#V3 = i + 1
-i = #V3
-goto 7
-#V10 = 0
-c = #V10
-#V11 = n - 1
-#V12 = c < #V11
-if #V12   goto 27
-goto 64
-#V14 = 0
-d = #V14
-#V15 = n - c
-#V16 = #V15 - 1
-#V17 = d < #V16
-if #V17   goto 34
-goto 61
-#V19 = 4 * d
-#V20 = array + #V19
-#V21 = d * 1
-#V22 = 4 * #V21
-#V23 = array + #V22
-#V24 = #V20 > #V23
-if #V24   goto 42
-goto 58
-#V25 = 4 * d
-#V26 = array + #V25
-#V27 = #V26
-swap = #V27
-#V28 = 4 * d
-#V29 = array + #V28
-#V30 = d * 1
-#V31 = 4 * #V30
-#V32 = array + #V31
-#V33 = #V32
-#V29 = #V33
-#V34 = d + 1
-#V35 = 4 * #V34
-#V36 = array + #V35
-#V37 = swap
-#V36 = #V37
-#V18 = d + 1
-d = #V18
-goto 29
-#V13 = c + 1
-c = #V13
-goto 23
-param     
+arr = 
+#V76 = "Given Array"
+param #V76    
 stackpointer +xxx    
 call print 1    
 stackpointer -yyy    
-#V38 = 0
-c = #V38
-#V39 = c < n
-if #V39   goto 73
-goto 82
-#V41 = 4 * c
-#V42 = array + #V41
-param #V42    
+param arr    
+#V77 = 6
+param #V77    
+call printArray  , 2  
+#V78 = 0
+ob = #V78
+param arr    
+#V79 = 0
+param #V79    
+#V80 = 6
+param #V80    
+call ob.sort  , 3  
+#V81 = "\nSorted array"
+param #V81    
 stackpointer +xxx    
 call print 1    
 stackpointer -yyy    
-#V40 = c + 1
-c = #V40
-goto 70
+param arr    
+#V82 = 6
+param #V82    
+call printArray  , 2  
 endfunc_

@@ -1,0 +1,15 @@
+fib:
+beginfunc_
+#V0 = n <= 1
+if #V0   goto 6
+goto 7
+RETURN n    
+#V1 = n - 1
+param #V1    
+#V2 = call fib
+#V3 = n - 2
+param #V3    
+#V4 = call fib
+#V5 = #V2 + #V4
+RETURN #V5    
+endfunc_
