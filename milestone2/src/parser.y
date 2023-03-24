@@ -525,25 +525,8 @@ ArrayAccess:
                 $$->is_error = 1;
             }
             else{
-                if(temp.substr(0, 5) == "FUNC_"){
-                    $$->expType = 3;
-                }
-                else if(temp.back() == '*'){
+                if(temp.back() == '*'){
                     $$->expType = 2;
-                    // if($3->intVal >= lookup($1->temp_name)->array_dims[arr_dm]){
-                    //     yyerror("Index out of bounds");
-                    //     $$->is_error = 1;
-                    // }
-                }
-                else $$->expType = 1;
-
-                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
-                    temp.pop_back();
-                    $$->type = temp;
-                    $$->temp_name = $1->temp_name; 
-                    // $$->nextlist.clear();
-                }
-                else{
                     $$->type = temp;
                     $$->temp_name = $1->temp_name;
                     if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
@@ -560,6 +543,17 @@ ArrayAccess:
                     qid tmp3=newtemp("int");
                     emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
                     $$->addr=tmp3;
+                }
+                else $$->is_error = 1;
+
+                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
+                    temp.pop_back();
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name; 
+                    // $$->nextlist.clear();
+                }
+                else{
+                    
                 }
             }
         }
@@ -591,7 +585,7 @@ ArrayAccess:
                                 //     $$->is_error = 1;
                                 // }
                             }
-                            else $$->expType = 1;
+                            else $$->is_error = 1;
 
                             if(tem.substr(0,5)=="FUNC_" ){
                                 $$->type = tem;
@@ -638,7 +632,7 @@ ArrayAccess:
             }
             else{
                 if(temp.substr(0, 5) == "FUNC_"){
-                    $$->expType = 3;
+                    $$->is_error=1;
                 }
                 else if(temp.back() == '*'){
                     $$->expType = 2;
@@ -647,7 +641,7 @@ ArrayAccess:
                     //     $$->is_error = 1;
                     // }
                 }
-                else $$->expType = 1;
+                else $$->is_error = 1;
 
                 if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
                     temp.pop_back();
@@ -830,65 +824,6 @@ MethodInvocation:
         delete $3;
         s.push_back($5);
         $$ = makeNode("MethodInvocation", s);
-        
-        // lookup for functions
-
-		// if(!($3->is_error || $5->is_error) && $3->expType!=4){
-		// 	if(!t.empty()){
-		// 		if($3->expType ==3){
-		// 			vector<string> funcArgs = getFuncArgs($1->temp_name);
-		// 			vector<string> tempArgs =curArgs.back();
-		// 			for(int i=0;i<funcArgs.size();i++){
-		// 				if(funcArgs[i]=="...")break;
-		// 				if(tempArgs.size()==i){
-		// 					yyerror(("Too few Arguments to Function " + $1->temp_name).c_str());
-		// 					break;
-		// 				}
-		// 				string msg = checkType(funcArgs[i],tempArgs[i]);
-
-		// 				// if(msg =="warning"){
-		// 				// 	warning(("Incompatible conversion of " +  tempArgs[i] + " to parameter of type " + funcArgs[i]).c_str());
-		// 				// }
-		// 				else if(msg.empty()){
-		// 					yyerror(("Incompatible Argument to the function " + $1->temp_name).c_str());
-		// 					$$->is_error = 1;
-		// 					break;
-		// 				}
-		// 				if(i==funcArgs.size()-1 && i<tempArgs.size()-1){
-		// 					yyerror(("Too many Arguments to Function " + $3->temp_name).c_str());
-		// 					$$->is_error = 1;
-		// 					break;
-		// 				}
-
-		// 			}	
-
-		// 			//--3AC
-		// 			// if(!$$->is_error){
-		// 			// 	qid q = newtemp($$->type);
-		// 			// 	$$->place = q;
-		// 			// 	$$->nextlist.clear();
-
-		// 			// 	emit(qid("CALL", NULL), qid($1->temp_name,NULL), qid(to_string(curArgs.back().size()), NULL), q, -1);
-		// 			// 	curArgs.pop_back();
-
-		// 			// 	if(func_usage_map.find($1->temp_name) != func_usage_map.end()){
-		// 			// 		func_usage_map[$1->temp_name] = 1;
-		// 			// 	}
-		// 			// }
-
-		// 		}
-		// 	}
-		// 	else{
-		// 		yyerror("Invalid function call");
-		// 		$$->is_error=1;
-		// 	}
-		// }
-		// else{
-		// 	if($1->expType==4){
-		// 		yyerror("constant expression cannot be used as lvalue");
-		// 	}
-		// 	$$->is_error=1;
-		// }
     }
     | IDENdotIDEN '.' KEY_super '.' IDENTIFIER '(' Zeroorone_ArgumentList ')'      {
         vector<ASTNode*> s;
