@@ -6,5 +6,6 @@ milestone*/src/milestone2
 milestone*/src/*.dot
 milestone*/src/*.pdf
 milestone*/src/*.csv
-milestone*/src/symbol_table1.h
+milestone*/src/*.txt
+milestone*/tests/*/*
 *.pdf

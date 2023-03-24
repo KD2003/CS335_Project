@@ -10,6 +10,7 @@ map<string, vector<pair<string, int>>> classVariable;
 
 extern int isArray;
 extern vector<int> array_dims;
+extern string file_path;
 string curClass="";
 
 void symbolTableInit(){
@@ -80,6 +81,9 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 		curClass = name;
 		classVariable.insert(make_pair(curClass, vector<pair<string, int>> ()));
 	}
+	else if(f_type == "Constructor"){
+        insertSymbol(*cur_table, name, f_type, f_type, lineno, new_table, modifiers, 0);
+    }
 	else if(f_type != ""){
 		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers, 0);
 	}
@@ -128,12 +132,13 @@ void recurPrintST(FILE* file, sym_table* table){
 
 void printSymbolTable(sym_table* table, string file_name){
 	if((*table).empty()) return;
-	FILE* file = fopen(file_name.c_str(), "w");
+	FILE* file = fopen((file_path+file_name).c_str(), "w");
   	fprintf( file,"Token, Lexeme, Type, Lineno,PublicPrivate\n");
 	// recurPrintST(file, table);
   	for(auto it: (*table)){
 		string st = "Private";
 		if(it.second->modifiers[0]==2) st="Public";
+		if(it.second->token == "Temp_var") continue;
     	fprintf(file,"%s,%s,%s,%d,%s\n", it.second->token.c_str(), it.first.c_str() ,it.second->type.c_str(), it.second->lineno, st.c_str());
   	}
   	fclose(file);

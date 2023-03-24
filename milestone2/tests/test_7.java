@@ -13,6 +13,7 @@ class Main {
       if (array[mid] == element)
         return mid;
 
+
       // if element is less than mid element
       // search only the left side of mid
       if (array[mid] < element)
