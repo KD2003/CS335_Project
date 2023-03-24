@@ -22,6 +22,20 @@ void emit(qid op, qid arg1, qid arg2, qid res, int idx){
     nxt++;
 }
 
+void emit(quad q){
+    code.push_back(q);
+}
+
+quad make_quad(qid op, qid arg1, qid arg2, qid res, int idx){
+    quad tmp;
+    tmp.op = op;
+    tmp.arg1 = arg1;
+    tmp.arg2 = arg2;
+    tmp.res = res;
+    tmp.idx = idx;
+    return tmp;
+}
+
 void backpatch(vector<int>& bplist, int target){
     for(int i=0;i<bplist.size(); i++){
         code[bplist[i]].idx = target;
@@ -108,21 +122,49 @@ void backpatch_rem(){
     }
 }
 
-void print3AC_code(){
+bool isop(string s){
+    if(s=="+" || s=="="|| s=="*="|| s=="/="|| s=="%="|| s=="+="|| s=="-="|| s=="<<="|| s==">>="|| s==">>>="|| s=="&="|| s=="^="|| s=="|=")
+        return true;
+    if(s==">"||s=="="||s==">"||s=="<"||s=="!"||s=="~"||s=="?"||s==":"||s=="->"||s=="=="||s==">="||s=="<="||s=="!="||s=="&&"||s=="||"||s=="+"||s=="-"||s=="*"||s=="/"||s=="&"||s=="|"||s=="^"||s=="%"||s=="<<"||s==">>"||s==">>>")
+        return true;
+
+    return false;
+}
+
+void print3AC_code(string filename){
     ofstream tac_file;
-    tac_file.open("intermediate_3ac.txt");
+    tac_file.open(filename+".txt");
+    tac_file << filename << ":" << '\n';
+    tac_file << "beginfunc_" << '\n';
     for(int i=0;i<code.size(); i++){
-        tac_file<<code[i].op.first<<" "<<code[i].arg1.first<<" "<<code[i].arg2.first<<" "<<code[i].res.first << " ";
+
+        if(code[i].op.first=="="){
+            tac_file << code[i].res.first << " " <<  code[i].op.first << " " << code[i].arg1.first << "\n";continue;
+        }
+
+        if(isop(code[i].op.first)){
+            tac_file<<code[i].res.first << " = "<<code[i].arg1.first<<" "<<code[i].op.first<<" " <<code[i].arg2.first<<"\n";continue;
+        }
+
+        tac_file<<code[i].op.first<< " ";
+        if(code[i].op.first=="goto"){
+            tac_file << code[i].idx+2 << "\n";continue;
+        }
+        tac_file << code[i].arg1.first << " "; 
+        tac_file <<" "<<code[i].arg2.first<<" "<<code[i].res.first << " ";
         if(code[i].op.first=="goto"){
             if(code[i].arg1.first==""){
-                tac_file << code[i].idx ;
+                tac_file << code[i].idx+2 ;
             }
         }
         if(code[i].res.first=="goto"){
-            tac_file << code[i].idx ;
+            tac_file << code[i].idx+2 ;
         }
-        tac_file << endl;
+        tac_file << '\n';
     }
+    tac_file << "endfunc_" << '\n';
+    code.clear();
+    nxt=0;
 }
 
 string newlabel(){
@@ -139,4 +181,11 @@ vector<int> mergelist(vector <int> &list1, vector <int> &list2){
 
 int nextinstr(){
     return nxt;
+}
+
+void addline(){
+    nxt++;
+}
+void remline(){
+    nxt--;
 }

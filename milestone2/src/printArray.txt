@@ -1,0 +1,21 @@
+printArray:
+beginfunc_
+#V69 = 0
+i = #V69
+#V70 = i < n
+if #V70   goto 8
+goto 20
+#V72 = 4 * i
+#V73 = arr + #V72
+#V74 = #V73 + 
+param #V74    
+stackpointer +xxx    
+call print 1    
+stackpointer -yyy    
+i = #V71
+#V71 = i + 1
+goto 5
+stackpointer +xxx    
+call print 1    
+stackpointer -yyy    
+endfunc_
