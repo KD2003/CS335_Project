@@ -321,6 +321,7 @@ PrimaryNoNewArray:
     /* | ClassLiteral */
     | KEY_this      {
         $$ = makeLeaf("this");
+        $$->temp_name="this";
     }
     | IDENdotIDEN '.' KEY_this      {
         vector<ASTNode*> s;
@@ -379,8 +380,39 @@ FieldAccess:
         vector<ASTNode*> s;
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
-        delete $3;
         $$ = makeNode("FieldAccess", s);
+        if($$->temp_name == "this"){
+            string temp = primaryExpression(*$3);
+            if(temp == ""){
+                yyerror(("Undeclared Identifier " + *$3).c_str());
+                $$->is_error = 1;
+            }
+            else{
+                if(temp.substr(0, 5) == "FUNC_"){
+                    $$->expType = 3;
+                }
+                else if(temp.back() == '*'){
+                    $$->expType = 2; 
+                }
+                else $$->expType = 1;
+
+                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
+                    temp.pop_back();
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name; 
+                    // $$->nextlist.clear();
+                }
+                else{
+                    $$->type = temp;
+                    $$->temp_name = $1->temp_name;
+                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
+                    
+                    //3ac
+
+                }
+            }
+        }
+        delete $3;
     }
     | KEY_super '.' IDENTIFIER      {
         vector<ASTNode*> s;
@@ -412,41 +444,26 @@ ArrayAccess:
                 $$->is_error = 1;
             }
             else{
-                if(temp.substr(0, 5) == "FUNC_"){
-                    $$->expType = 3;
-                }
-                else if(temp.back() == '*'){
+                if(temp.back() == '*'){
                     $$->expType = 2;
-                    // if($3->intVal >= lookup($1->temp_name)->array_dims[arr_dm]){
-                    //     yyerror("Index out of bounds");
-                    //     $$->is_error = 1;
-                    // }
-                }
-                else $$->expType = 1;
+                    temp = temp.substr(0,temp.size()-1);
+                    if(isInt($3->type)){
+                        $$->type = temp;
+                        $$->temp_name = $1->temp_name;
+                        //3ac
 
-                if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
-                    temp.pop_back();
-                    $$->type = temp;
-                    $$->temp_name = $1->temp_name; 
-                    // $$->nextlist.clear();
+                        qid tmp=newtemp("int");
+                        if($3->expType==4)emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                        else emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                        qid tmp2=newtemp(temp);
+                        emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                        $$->addr=tmp2;
+                    }
+                    else{
+                        $$->is_error=1;
+                    }
                 }
-                else{
-                    $$->type = temp;
-                    $$->temp_name = $1->temp_name;
-                    if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
-                    temp=temp.substr(0,temp.size()-1);
-                    //3ac
-
-                    qid tmp=newtemp("int");
-                    if($3->expType==4)
-                        emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
-                    else 
-                        emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
-                    qid tmp2=newtemp(temp);
-                    emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
-                    $$->addr=tmp2;
-
-                }
+                else $$->is_error=1;
             }
         }
         else{
@@ -467,49 +484,32 @@ ArrayAccess:
                         }
                         else{
                             string tem = (*(it.second))[sub1]->type;
-                            if(tem.substr(0, 5) == "FUNC_"){
-                                $$->expType = 3;
-                            }
-                            else if((*(it.second))[sub1]->isArray){
+                            if((*(it.second))[sub1]->isArray){
                                 $$->expType = 2; 
-                                // if($3->intVal >= (*(it.second))[sub1]->array_dims[arr_dm]){
-                                //     yyerror("Index out of bounds");
-                                //     $$->is_error = 1;
-                                // }
+                                if(!isInt($3->type)){
+                                    $$->is_error=1;
+                                }
+                                else{
+                                    $$->type = tem;
+                                    $$->temp_name = idendotiden;
+                                    if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
+                                    tem=tem.substr(0,tem.size()-1);
+                                    
+                                    //3ac
+                                    qid tmp=newtemp("int");
+                                    if($3->expType == 4) emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
+                                    else emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                                    qid tmp2=newtemp(tem);
+                                    emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                                    $$->addr=tmp2;
+                                }
                             }
-                            else $$->expType = 1;
-
-                            if(tem.substr(0,5)=="FUNC_" ){
-                                $$->type = tem;
-                                $$->temp_name = idendotiden; 
-                                // $$->nextlist.clear();
-                            }
-                            else{
-                                $$->type = tem;
-                                $$->temp_name = idendotiden;
-                                if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
-                                
-                                tem=tem.substr(0,tem.size()-1);
-                                
-                                //3ac
-                                qid tmp=newtemp("int");
-                                if($3->type=="int")
-                                    emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
-                                else {
-                                    emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
-                                qid tmp2=newtemp(tem);
-                                emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
-                                $$->addr=tmp2;
-                            }
-
-
-                            }
+                            else $$->is_error = 1;
                         }
                     }
                 }
             }
         }
-
     }
     | IDENdotIDEN '[' Expression ']' '[' Expression ']' {
         vector<ASTNode*> s;
@@ -914,7 +914,7 @@ ArgumentList:
         //3ac
         if($3->expType==4){
             qid tmp=newtemp($3->type);
-            if($3->type=="int")
+            if(isInt($3->type))
                 emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
             else 
                 emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),tmp,-1);
@@ -1034,104 +1034,108 @@ Assignment:
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
                 $$->type=t;
-
+                string add="";
+                // cout<<$3->type<<" "<<t<<endl;
+                int flag=0;
+                if($3->type!=t){
+                    qid cast=newtemp(t);
+                    emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=t;
+                    flag=1;
+                }
+                qid temp=newtemp($1->type);
                 if(*$2=="="){
                     $$->addr=$1->addr;
                     qid tmp=newtemp($1->type);
                     if($3->expType==4)
-                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
-                    else
-                        emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                        emit(qid("=",NULL),qid(t+" "+to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                    else{
+                        qid change=$3->addr;
+                        string ans=add+" "+change.first;
+                        emit(qid("=",NULL),qid(ans,NULL),qid("",NULL),tmp,-1);
+                    }
                     emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1); 
                 }
                 else if(*$2=="*="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("*",NULL),qid(to_string($3->intVal),NULL),$1->addr,temp,-1);
                     else
                         emit(qid("*",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="/="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("/",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("/",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="%="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("%",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("%",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="+="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("+",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("+",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="-="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("-",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("-",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="<<="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("<<",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("<<",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2==">>="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid(">>",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid(">>",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2==">>>="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("+",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid(">>>",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="&="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("&",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("&",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="^="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("^",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("^",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
                 else if(*$2=="|="){
-                    qid temp=newtemp($1->type);
                     if($3->expType==4)
                         emit(qid("|",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
                         emit(qid("|",NULL),$1->addr,$3->addr,temp,-1);
-                    $$->addr=temp;
+                    $1->addr=temp;
                 }
+                qid tmp2=newtemp($1->type);
+                emit(qid("=",NULL),temp,qid("",NULL),temp,-1);
+                $$->addr=$1->addr;
             }
             else{
                 yyerror(("Incompatible Types for "+ *$2).c_str());
@@ -1156,12 +1160,28 @@ Assignment:
             if(!t.empty()){
                 $$->type=t;
                 //3ac
+                string add="";
+                // cout<<$3->type<<" "<<t<<endl;
+                qid cast=newtemp(t);
+                int flag=0;
+                if($3->type!=t){
+                    emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=t;
+                    flag=1;
+                }
                 $$->addr=$1->addr;
-                qid tmp=newtemp($3->type);
-                if($3->expType==4)
-                    emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
-                else
-                    emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                qid tmp=newtemp(t);
+                if($3->expType==4){
+                    if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                    else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),tmp,-1);
+                }
+                else{
+                    if(flag){
+
+                        emit(qid("=",NULL),cast,qid("",NULL),tmp,-1);
+                    }
+                    else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                }
                     
                 emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
             }
@@ -1209,7 +1229,19 @@ ConditionalOrExpression:
         if(!$1->is_error && !$4->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-
+                string add="";
+        // cout<<$3->type<<" "<<t<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($4->type!=temp){
+                    if($4->expType==4){
+                        if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
                 //3ac
                 backpatch($1->falselist,$3);
                 $$->truelist=mergelist($1->truelist,$4->truelist);
@@ -1244,7 +1276,19 @@ ConditionalAndExpression:
         if(!$1->is_error && !$4->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($4->type!=temp){
+                    if($4->expType==4){
+                        if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
                 //3ac
                 backpatch($1->truelist,$3);
                 $$->falselist=mergelist($1->falselist,$4->falselist);
@@ -1277,7 +1321,19 @@ AndExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($3->type!=temp){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
             }
             else{
                 yyerror("Incompatible Types for &");
@@ -1306,6 +1362,19 @@ ExclusiveOrExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($3->type!=temp){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
             }
             else{
                 yyerror("Incompatible Types for ^");
@@ -1334,6 +1403,19 @@ InclusiveOrExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+                 string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($3->type!=temp){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
 
             }
             else{
@@ -1368,14 +1450,14 @@ EqualityExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-
+                qid no=newtemp(temp);
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
+                    }
+                    else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),no,-1);
                 //3ac
                 qid tmp=newtemp(temp);
-                if($3->expType==4){
-                    emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
-                }
-                else
-                    emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 $$->addr=tmp;
                 
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
@@ -1407,6 +1489,7 @@ RelationalExpression:
         $$ = makeNode(*$2, s);
 
         if(*$2=="<"){
+            // cout<<$1->type<<" "<<$3->type<<endl;
             $$->intVal= $1->intVal<$3->intVal;
         }
         else if(*$2==">"){
@@ -1419,17 +1502,20 @@ RelationalExpression:
             $$->intVal= $1->intVal>=$1->intVal;
         }
         string temp=relExp($1->type,$3->type);
+        // cout<<temp<<endl;
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
 
                 //3ac
                 qid tmp=newtemp(temp);
-                if($3->expType==4){
-                    emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
-                }
-                else
-                    emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+
+                    if($3->expType==4){
+                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 $$->addr=tmp;
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
@@ -1470,6 +1556,14 @@ ShiftExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                qid no=newtemp(temp);
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
+                    }
+                    else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),no,-1);
 
                 //3ac
                 qid tmp=newtemp(temp);
@@ -1477,8 +1571,7 @@ ShiftExpression:
                 if($3->expType==4){
                     emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                 }
-                else
-                emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1515,16 +1608,33 @@ AdditiveExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($3->type!=temp){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
                  //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
 
-                if($3->expType==4){
-                    emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                if(flag){
+                    string add=temp;
+                        emit(qid(*$2+add,NULL),$1->addr,cast,tmp,-1);
+                    }
+                else{
+                    if($3->expType==4){
+                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 }
-                else
-                    emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1559,16 +1669,34 @@ MultiplicativeExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($3->type!=temp){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
 
                 //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
 
-                if($3->expType==4){
-                    emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                if(flag){
+                    string add=temp;
+                    emit(qid(*$2+add,NULL),$1->addr,cast,tmp,-1);
+                    }
+                else{
+                    if($3->expType==4){
+                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 }
-                else
-                    emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1593,16 +1721,34 @@ MultiplicativeExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
+                string add="";
+        // cout<<$3->type<<" "<<temp<<endl;
+                int flag=0;
+                qid cast=newtemp(temp);
+                if($3->type!=temp){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
 
                 //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
 
-                if($3->expType==4){
-                    emit(qid("*",NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                if(flag){
+                    string add=temp;
+                        emit(qid("*"+add,NULL),$1->addr,cast,tmp,-1);
+                    }
+                else{
+                    if($3->expType==4){
+                        emit(qid("*",NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else emit(qid("*",NULL),$1->addr,$3->addr,tmp,-1);
                 }
-                else
-                emit(qid("*",NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror("Incompatible Types for *");
@@ -1735,15 +1881,25 @@ CastExpression:
         s.push_back($4);
         $$ = makeNode("CastExpression", s);
         if(!($2->is_error || $4->is_error)){
-			//Semantic
-			$$->type = $2->type;
-			
+			//Semantic			
             //3ac
-            $$->addr=$4->addr;
+            // cout<<$4->type<<" "<<$4->temp_name<<endl;
+            qid cast=newtemp($2->type);
+            if($4->expType==4){
+                if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
+                else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
+            }
+            else if($4->expType==5){
+                emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+$4->strVal,NULL),qid("",NULL),cast,-1);
+            }
+            else emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+            $$->addr=cast;
 		}
 		else{
 			$$->is_error = 1;
 		}
+        	$$->type = $2->type;
+            $4->type=$2->type;
     }
 ;
 
@@ -2865,6 +3021,19 @@ VariableDeclarator2:
             yyerror("Type Clashing");
             $$->is_error=1;
         }
+        string add="";
+        // cout<<$3->type<<" "<<t<<endl;
+        int flag=0;
+        qid cast=newtemp(t);
+        if($3->type!=t){
+            if($3->expType==4){
+                if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+t+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+t+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+            }
+            else emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+            add=t;
+            flag=1;
+        }
         if(lookup(*$1)){
 				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
@@ -2875,9 +3044,29 @@ VariableDeclarator2:
 
             //3ac
             $$->addr=qid(*$1,lookup(*$1));
-            qid tmp=newtemp($3->type);
-            emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
-            emit(qid("=",NULL),tmp,qid("",NULL),$$->addr,-1);
+            
+            if($3->expType==4){
+                qid tmp=newtemp($3->type);
+                qid tmp1=qid(*$1,lookup(*$1));
+                if(flag){
+                    emit(qid("=",NULL),cast,qid("",NULL),tmp1,-1);
+                }
+                else{
+                    if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                    else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),tmp1,-1);
+                    $$->addr=tmp1;
+                }
+            }
+            else{
+                qid tmp1=qid(*$1,lookup(*$1));
+                if(flag){
+                    emit(qid("=",NULL),cast,qid("",NULL),tmp1,-1);
+                }
+                else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp1,-1);
+                $$->addr=tmp1;
+            }
+            
 
         }
         delete $1;

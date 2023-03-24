@@ -123,6 +123,33 @@ void backpatch_rem(){
 }
 
 bool isop(string s){
+    if(s.find("int")!=string::npos){
+        return true;
+    }
+    if(s.find("float")!=string::npos){
+        return true;
+    }
+    if(s.find("double")!=string::npos){
+        return true;
+    }
+    if(s.find("short")!=string::npos){
+        return true;
+    }
+    if(s.find("long")!=string::npos){
+        return true;
+    }
+    if(s.find("char")!=string::npos){
+        return true;
+    }
+    if(s.find("byte")!=string::npos){
+        return true;
+    }
+    if(s.find("boolean")!=string::npos){
+        return true;
+    }
+    if(s.find("long long")!=string::npos){
+        return true;
+    }
     if(s=="+" || s=="="|| s=="*="|| s=="/="|| s=="%="|| s=="+="|| s=="-="|| s=="<<="|| s==">>="|| s==">>>="|| s=="&="|| s=="^="|| s=="|=")
         return true;
     if(s==">"||s=="="||s==">"||s=="<"||s=="!"||s=="~"||s=="?"||s==":"||s=="->"||s=="=="||s==">="||s=="<="||s=="!="||s=="&&"||s=="||"||s=="+"||s=="-"||s=="*"||s=="/"||s=="&"||s=="|"||s=="^"||s=="%"||s=="<<"||s==">>"||s==">>>")
