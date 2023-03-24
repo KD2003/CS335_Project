@@ -355,6 +355,7 @@ ClassInstanceCreationExpression:
         s.push_back($6);
         $$ = makeNode("new", s);
         if(type=="")type=$2->type;
+        $$->temp_name=$2->temp_name;
         $$->type=type;
     }
     | KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'        {
@@ -363,6 +364,7 @@ ClassInstanceCreationExpression:
         s.push_back($4);
         $$ = makeNode("new", s);
         if(type=="")type=$2->type;
+        $$->temp_name=$2->temp_name;
         $$->type=type;
     }
 ;
@@ -1391,7 +1393,7 @@ EqualityExpression:
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-                qid no=newtemp(temp);
+                qid no=newtemp($3->type);
                     if($3->expType==4){
                         if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
                         else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
@@ -1399,10 +1401,13 @@ EqualityExpression:
                     else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),no,-1);
                 //3ac
                 qid tmp=newtemp(temp);
+                emit(qid("==",NULL),$1->addr,no,tmp,-1);
                 $$->addr=tmp;
                 
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
+
+                // for(int i:$$->truelist) cout << i << "hsa";
                 emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
                 emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
                 
@@ -2794,9 +2799,31 @@ ConstructorDeclaration:
         s.push_back($7);
         $$ = makeNode("ConstructorDeclaration", s);
 
-        string str= $2->temp_name.substr(12);
+        string str= $2->temp_name.substr(11);
 
         if(str!=cur_class){
+            yyerror(("Constructor can only have the name "+cur_class).c_str());
+            $$->is_error = 1;
+        }
+        else{
+            printSymbolTable(cur_table ,$2->temp_name + ".csv");
+            print3AC_code($2->temp_name);
+            endSymbolTable();
+        }
+
+        modifier={1,0,0};
+    }
+    | Modifiers ConstructorIDEN F '(' ')' Block {
+        vector<ASTNode*> s;
+        s.push_back($1);
+        s.push_back($2);
+        s.push_back($6);
+        $$ = makeNode("ConstructorDeclaration", s);
+
+        string str= $2->temp_name.substr(11);
+
+        if(str!=cur_class){
+            // cout<<str<<" "<<cur_class<<endl; 
             yyerror(("Constructor can only have the name "+cur_class).c_str());
             $$->is_error = 1;
         }
@@ -3004,7 +3031,8 @@ VariableDeclarator2:
                 if(flag){
                     emit(qid("=",NULL),cast,qid("",NULL),tmp1,-1);
                 }
-                else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp1,-1);
+                else if($3->addr.first!="") emit(qid("=",NULL),$3->addr,qid("",NULL),tmp1,-1);
+                else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),tmp1,-1);
                 $$->addr=tmp1;
             }
             
@@ -3766,7 +3794,7 @@ int main(int argc, char* argv[]){
                 yyin = fopen(argv[i+1],"r");
                 file_path = argv[i+1];
                 file_path = file_path.substr(0,file_path.size()-5);
-                system(("mkdir "+file_path).c_str());
+                system(("mkdir -p "+file_path).c_str());
                 file_path+="/";
                 if(yyin==NULL){
                     printf("%s can not be opened as an input file.\n", argv[i+1]);
@@ -3816,8 +3844,8 @@ int main(int argc, char* argv[]){
         printf("Starting the parser...\n");
     }
 
-    system(("rm "+file_path+"*.csv").c_str());
-    system(("rm "+file_path+"*.txt").c_str());
+    system(("rm -f "+file_path+"*.csv").c_str());
+    system(("rm -f "+file_path+"*.txt").c_str());
 
     if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 

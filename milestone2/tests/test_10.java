@@ -12,7 +12,7 @@ class Test {
 		System.out.println(s);
 
 		// Declare String using new operator
-		String s1 = new String("GeeksforGeeks");
+		String s1 = "TutorialPoint";
 
 		// Prints the String.
 		System.out.println(s1);
