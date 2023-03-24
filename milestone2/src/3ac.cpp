@@ -8,6 +8,8 @@ extern int yylineno;
 long long cnt = 0;
 long long lcnt = 0;
 
+int nxt=0;
+
 void emit(qid op, qid arg1, qid arg2, qid res, int idx){
     quad tmp;
     tmp.op = op;
@@ -17,6 +19,7 @@ void emit(qid op, qid arg1, qid arg2, qid res, int idx){
     tmp.idx = idx;
     if(idx == -1) tmp.idx = code.size();
     code.push_back(tmp);
+    nxt++;
 }
 
 void backpatch(vector<int>& bplist, int target){
@@ -109,7 +112,16 @@ void print3AC_code(){
     ofstream tac_file;
     tac_file.open("intermediate_3ac.txt");
     for(int i=0;i<code.size(); i++){
-        tac_file<<code[i].op.first<<" "<<code[i].arg1.first<<" "<<code[i].arg2.first<<" "<<code[i].res.first<<endl;
+        tac_file<<code[i].op.first<<" "<<code[i].arg1.first<<" "<<code[i].arg2.first<<" "<<code[i].res.first << " ";
+        if(code[i].op.first=="goto"){
+            if(code[i].arg1.first==""){
+                tac_file << code[i].idx ;
+            }
+        }
+        if(code[i].res.first=="goto"){
+            tac_file << code[i].idx ;
+        }
+        tac_file << endl;
     }
 }
 
@@ -126,5 +138,5 @@ vector<int> mergelist(vector <int> &list1, vector <int> &list2){
 }
 
 int nextinstr(){
-    return code.size();
+    return nxt;
 }

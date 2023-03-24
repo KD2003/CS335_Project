@@ -1,26 +1,144 @@
-= 100  #V0
-= #V0  intVar
-= 0  #V1
-= #V1  longVar
-= 0  #V2
-= #V2  floatVar
-= 0  #V3
-= #V3  doubleVar
-= 0  #V4
-= #V4  dVar
-= 0  #V5
-= #V5  lVar
-= 0  #V6
-= #V6  iVar
-+   #V7
-param #V7  
-+ intVar longVar #V8
-* dVar floatVar #V9
-+ #V8 #V9 #V10
-+ #V10 lVar #V11
-+ #V11 doubleVar #V12
-+ #V12 iVar #V13
-= 0  #V14
-= #V14  exp
-+  exp #V15
-param #V15  
+- m l #V0 
++ #V0 1 #V1 
+= 1  #V2 
+= #V2  n1 
+- r m #V3 
+= 0  #V4 
+= #V4  n2 
+= 0  #V5 
+= #V5  i 
+< i n1 #V6 
+if #V6  goto 13
+goto    22
++ i 1 #V7 
+* 4 i #V8 
++ L #V8 #V9 
++ l i #V10 
+* 4 #V10 #V11 
++ arr #V11 #V12 
+= 0  #V13 
+= #V13  #V9 
+goto 10   
+= 0  #V14 
+= #V14  j 
+< j n2 #V15 
+if #V15  goto 27
+goto    37
++ j 1 #V16 
+* 4 j #V17 
++ R #V17 #V18 
++ m 1 #V19 
++ #V19 j #V20 
+* 4 #V20 #V21 
++ arr #V21 #V22 
+= 0  #V23 
+= #V23  #V18 
+goto 24   
+= 0  #V24 
+= #V24  i 
+= 0  #V25 
+= #V25  j 
+= 0  #V26 
+= #V26  k 
+< i n1 #V27 
+if #V27  goto 46
+goto    73
+< j n2 #V28 
+if #V28  goto 49
+goto    73
+* 4 i #V29 
++ L #V29 #V30 
+* 4 j #V31 
++ R #V31 #V32 
+<= #V30 #V32 #V33 
+if #V33  goto 56
+goto    64
+* 4 k #V34 
++ arr #V34 #V35 
+* 4 i #V36 
++ L #V36 #V37 
+= 0  #V38 
+= #V38  #V35 
++ i 1 #V39 
+goto    0
+* 4 k #V40 
++ arr #V40 #V41 
+* 4 j #V42 
++ R #V42 #V43 
+= 0  #V44 
+= #V44  #V41 
++ j 1 #V45 
++ k 1 #V46 
+goto 43   
+< i n1 #V47 
+if #V47  goto 76
+goto    85
+* 4 k #V48 
++ arr #V48 #V49 
+* 4 i #V50 
++ L #V50 #V51 
+= 0  #V52 
+= #V52  #V49 
++ i 1 #V53 
++ k 1 #V54 
+goto 73   
+< j n2 #V55 
+if #V55  goto 88
+goto    97
+* 4 k #V56 
++ arr #V56 #V57 
+* 4 j #V58 
++ R #V58 #V59 
+= 0  #V60 
+= #V60  #V57 
++ j 1 #V61 
++ k 1 #V62 
+goto 85   
+< l r #V63 
+if #V63  goto 100
+goto    119
+- r l #V64 
+/ #V64 2 #V65 
++ l #V65 #V66 
+= 0  #V67 
+= #V67  m 
+param arr   
+param l   
+param m   
+call sort 3  
+param arr   
++ m 1 #V68 
+param #V68   
+param r   
+call sort 3  
+param arr   
+param l   
+param m   
+param r   
+call merge 4  
+= 0  #V69 
+= #V69  i 
+< i n #V70 
+if #V70  goto 124
+goto    130
++ i 1 #V71 
+* 4 i #V72 
++ arr #V72 #V73 
++ #V73  #V74 
+param #V74   
+goto 121   
+=   arr 
+param    
+param arr   
+param    
+call printArray 2  
+= 0  #V75 
+= #V75  ob 
+param arr   
+param    
+param    
+call  3  
+param    
+param arr   
+param    
+call printArray 2  
