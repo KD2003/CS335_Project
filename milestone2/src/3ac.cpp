@@ -43,15 +43,6 @@ void backpatch(vector<int>& bplist, int target){
     }
 }
 
-
-void casepatch(vector<int>& bplist, qid target){
-    //backpatch for case statement
-
-    for(int i=0;i<bplist.size(); i++){
-        code[bplist[i]].arg1 = target;
-    }
-}
-
 qid newtemp(string type){
     // creating temp variables
     string id = "#V"+to_string(cnt++);

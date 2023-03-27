@@ -47,7 +47,7 @@ class MergeSort {
 	static void printArray(int arr[], int n)
 	{
 		for (int i = 0; i < n; ++i)
-			System.out.println(arr[i] + " ");
+			System.out.println(arr[i]);
 		System.out.println();
 	}
 	public static void main(String args[])
