@@ -14,6 +14,7 @@ typedef struct{
 	string strVal;
 	int is_error = 0;
 	int size;
+	int intVal2;
 	
 	string temp_name;
 	qid addr;

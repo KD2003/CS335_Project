@@ -60,6 +60,7 @@ stack <int> forstat_curr;
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator ConstructorDeclaration formalparameter formalparameters Modifiers
 %type<x> MarkerNT 
 %type<ptr> MarkerNT2 ForStatementExpressionList ConstructorIDEN
+%type<ptr> jumpstat 
 %left ADDOP MULTOP SHIFTOP EQALITYOP ADDOP2 '*'
 %right ASSIGNOP '='
 
@@ -2000,9 +2001,13 @@ BlockStatements:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("BlockStatements", s);
+        $$->breaklist=mergelist($$->breaklist,$2->breaklist);
+        $$->continuelist=mergelist($$->continuelist,$2->continuelist);
     }
     |       {
         $$=NULL;
+        // $$ = makeLeaf("BlockStatements", 1);
+
     }
 ;
 
@@ -2013,10 +2018,10 @@ BlockStatement:
     }
     | Statement {
         $$=$1;
-
+        for( auto i:$1->breaklist){
+            // cout<<i<<endl;
+        }
         //3ac
-        backpatch($1->nextlist,nextinstr()+1);
-        $$->nextlist.clear();
     }
 ;
 
@@ -2057,28 +2062,21 @@ LocalVariableType:
     }
 ;
 
-Statement:
-    StatementWithoutTrailingSubstatement {
-        $$=$1;
-    }
-    | IDENTIFIER ':' Statement {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("ID (" + *$1+")" ));
-        s.push_back(makeLeaf(":"));
-        s.push_back($3);
-        $$ = makeNode("Statement", s);
-        delete $1;
-    }
-    | KEY_if '(' Expression ')' MarkerNT Statement {
+jumpstat:
+    KEY_if '(' Expression ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("if", s);
+        for(auto i:$6->breaklist)
+            cout<<i<<endl;
 
         //3ac
         backpatch($3->truelist,$5);
         $$->nextlist=mergelist($3->falselist,$6->nextlist);
-
+        $$->breaklist=$6->breaklist;
+        $$->continuelist=$6->continuelist;
+        
         
     }
     | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT Statement {
@@ -2094,6 +2092,8 @@ Statement:
         backpatch($3->falselist, $9);
         auto tmp = mergelist($6->nextlist, $7->nextlist) ;
         $$->nextlist = mergelist(tmp, $10->nextlist);
+        $$->continuelist=mergelist($6->continuelist,$10->continuelist);
+        $$->breaklist=mergelist($6->breaklist,$10->breaklist);
         // $$->nextlist.clear();
     }
     | KEY_while MarkerNT '(' Expression ')' MarkerNT Statement {
@@ -2103,9 +2103,10 @@ Statement:
         $$ = makeNode("while", s);
 
         //3ac
+        $7->nextlist=mergelist($7->nextlist,$7->continuelist);
         backpatch($7->nextlist, $2) ;
         backpatch($4->truelist, $6) ;
-        $$->nextlist = $4->falselist;
+        $$->nextlist = mergelist($4->falselist,$7->breaklist);
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$2);
     }
     | ForStatement {
@@ -2117,6 +2118,32 @@ Statement:
         printSymbolTable(cur_table, name);
         endSymbolTable();
         for_flag=0;
+        backpatch($$->nextlist,nextinstr()+1);
+        $$->nextlist.clear();
+    }
+;
+
+Statement:
+    StatementWithoutTrailingSubstatement {
+        $$=$1;
+        for(int i:$$->breaklist){
+            cout <<i << endl;
+        }
+    }
+    | IDENTIFIER ':' Statement {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
+        s.push_back(makeLeaf(":"));
+        s.push_back($3);
+        $$ = makeNode("Statement", s);
+        delete $1;
+    }
+    | jumpstat {
+        backpatch($1->nextlist,nextinstr()+1);
+        $1->nextlist.clear();
+        $$=$1;
+        for(auto i:$$->breaklist)
+        cout<<i<<endl;
     }
 ;
 
@@ -2255,11 +2282,10 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-                    addline();addline();
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1));
+
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
                     
-                    forstat_curr.push(2);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
@@ -2267,11 +2293,9 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-                    addline();addline();
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1));
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
                     
-                    forstat_curr.push(2);
                 }
 			}
 			else{
@@ -2304,10 +2328,10 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1));
                     
-                    forstat_curr.push(2);
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
+                    
                 }
                 else{
                     $$->intVal = $1->intVal -1;
@@ -2315,10 +2339,9 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1));
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                     
-                    forstat_curr.push(2);
                 }
 			}
 			else{
@@ -2460,6 +2483,10 @@ BreakContinueStatement:
     | KEY_break ';' {
         $$ = makeLeaf("break");
         type="";
+
+        //3ac
+        $$->breaklist.push_back(nextinstr());
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
     | KEY_continue IDENTIFIER ';' {
         vector<ASTNode*> s;
@@ -2471,6 +2498,10 @@ BreakContinueStatement:
     | KEY_continue ';' {
         $$ = makeLeaf("continue");
         type="";
+
+        //3ac
+        $$->continuelist.push_back(nextinstr());
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
 ;
 A:
@@ -2484,104 +2515,91 @@ A:
 ;
 
 ForStatementExpressionList:
-    MarkerNT StatementExpressionList    {
+    MarkerNT StatementExpressionList{
         $$ = $2;
         $$->intVal = $1;
     }
     | MarkerNT  {
         $$ = makeLeaf("ForExpressionlist",1);
         $$->intVal = $1;
+        $$->intVal2=$1;
     }
 ;
 
 ForStatement:
-    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList ')'  Statement {
+    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList MarkerNT2 ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($4);
         s.push_back($6);
+        s.push_back($12);
+        $$ = makeNode("for", s);
+
+        //3ac
+        for(int i:$12->nextlist){
+            cout << i << "brb222";
+        }
+        cout << '\n';
+        $12->nextlist=mergelist($12->nextlist,$12->continuelist);
+        backpatch($12->nextlist, $8->intVal);
+        backpatch($6->truelist, $11);
+        $$->nextlist = mergelist($6->falselist,$12->breaklist); 
+        backpatch($9->nextlist,$4->intVal);
+
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+    }
+    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' MarkerNT Statement {
+        vector<ASTNode*> s;
+        s.push_back($4);
+        s.push_back($7);
         s.push_back($10);
         $$ = makeNode("for", s);
 
         //3ac
-        backpatch($10->nextlist, $4->intVal);
-        backpatch($6->truelist, $8->intVal);
-        $$->nextlist = $6->falselist;  
-        int i=forstat_curr.top();
-        forstat_curr.pop();
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
-    }
-    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' Statement {
-        vector<ASTNode*> s;
-        s.push_back($4);
-        s.push_back($7);
-        s.push_back($9);
-        $$ = makeNode("for", s);
+        $10->nextlist=mergelist($10->nextlist,$10->continuelist);
+        backpatch($10->nextlist, $7->intVal);
 
-        //3ac
-        backpatch($9->nextlist, $4->intVal);
-        int i=forstat_curr.top();
-        forstat_curr.pop();
-
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$9);
 
     }
     /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement */
 ;
 
 ForStatementNoShortIf:
-    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList ')'  StatementNoShortIf {
+    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList MarkerNT2 ')' MarkerNT StatementNoShortIf {
         vector<ASTNode*> s;
         s.push_back($4);
         s.push_back($6);
+        s.push_back($12);
+        $$ = makeNode("for", s);
+
+        //3ac
+        for(int i:$12->breaklist){
+            cout << i << "brb222";
+        }
+        cout << '\n';
+
+        $12->nextlist=mergelist($12->nextlist,$12->continuelist);
+        backpatch($12->nextlist, $4->intVal);
+        backpatch($6->truelist, $11);
+        $$->nextlist = mergelist($6->falselist,$12->breaklist); 
+        $12->nextlist=mergelist($12->nextlist,$12->continuelist);
+        backpatch($12->nextlist,$8->intVal);
+        backpatch($9->nextlist,$4->intVal);
+
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+    }
+    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' MarkerNT StatementNoShortIf {
+        vector<ASTNode*> s;
+        s.push_back($4);
+        s.push_back($7);
         s.push_back($10);
         $$ = makeNode("for", s);
 
         //3ac
-        backpatch($10->nextlist, $4->intVal);
-        backpatch($6->truelist, $8->intVal);
-        $$->nextlist = $6->falselist;   
-        int i=forstat_curr.top();
-        forstat_curr.pop();
+        $10->nextlist=mergelist($10->nextlist,$10->continuelist);
+        backpatch($10->nextlist, $7->intVal);
 
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
-    }
-    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' StatementNoShortIf {
-        vector<ASTNode*> s;
-        s.push_back($4);
-        s.push_back($7);
-        s.push_back($9);
-        $$ = makeNode("for", s);
-
-        //3ac
-        backpatch($9->nextlist, $4->intVal);
-        int i=forstat_curr.top();
-        forstat_curr.pop();
-
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$9);
 
     }
 ;

@@ -9,6 +9,7 @@ public class BubbleSort {
                 if (array[d] > array[d + 1]) /* For descending order use < */
                 {
                     swap = array[d];
+                    break;
                     array[d] = array[d + 1];
                     array[d + 1] = swap;
                 }
