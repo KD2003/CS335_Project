@@ -25,6 +25,7 @@ void emit(qid op, qid arg1, qid arg2, qid res, int idx){
 
 void emit(quad q){
     code.push_back(q);
+    nxt++;
 }
 
 quad make_quad(qid op, qid arg1, qid arg2, qid res, int idx){
