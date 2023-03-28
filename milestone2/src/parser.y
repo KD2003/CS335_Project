@@ -5,6 +5,8 @@
 #include"typecheck.h"
 #include <fstream>
 
+int aaa=0;
+
 FILE* dotfile;
 extern FILE* yyin;
 extern int yyrestart(FILE*);
@@ -2001,8 +2003,18 @@ BlockStatements:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("BlockStatements", s);
-        $$->breaklist=mergelist($$->breaklist,$2->breaklist);
-        $$->continuelist=mergelist($$->continuelist,$2->continuelist);
+        
+        if($1==NULL){
+            $$->breaklist=$2->breaklist;
+        }
+        else
+        $$->breaklist=mergelist($1->breaklist,$2->breaklist);
+        if($1==NULL){
+            $$->continuelist=$2->continuelist;
+        }
+        else
+        $$->continuelist=mergelist($1->continuelist,$2->continuelist);
+
     }
     |       {
         $$=NULL;
@@ -2018,9 +2030,6 @@ BlockStatement:
     }
     | Statement {
         $$=$1;
-        for( auto i:$1->breaklist){
-            // cout<<i<<endl;
-        }
         //3ac
     }
 ;
@@ -2068,9 +2077,6 @@ jumpstat:
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("if", s);
-        for(auto i:$6->breaklist)
-            cout<<i<<endl;
-
         //3ac
         backpatch($3->truelist,$5);
         $$->nextlist=mergelist($3->falselist,$6->nextlist);
@@ -2126,9 +2132,6 @@ jumpstat:
 Statement:
     StatementWithoutTrailingSubstatement {
         $$=$1;
-        for(int i:$$->breaklist){
-            cout <<i << endl;
-        }
     }
     | IDENTIFIER ':' Statement {
         vector<ASTNode*> s;
@@ -2142,8 +2145,6 @@ Statement:
         backpatch($1->nextlist,nextinstr()+1);
         $1->nextlist.clear();
         $$=$1;
-        for(auto i:$$->breaklist)
-        cout<<i<<endl;
     }
 ;
 
@@ -2535,10 +2536,6 @@ ForStatement:
         $$ = makeNode("for", s);
 
         //3ac
-        for(int i:$12->nextlist){
-            cout << i << "brb222";
-        }
-        cout << '\n';
         $12->nextlist=mergelist($12->nextlist,$12->continuelist);
         backpatch($12->nextlist, $8->intVal);
         backpatch($6->truelist, $11);
@@ -2557,6 +2554,7 @@ ForStatement:
         //3ac
         $10->nextlist=mergelist($10->nextlist,$10->continuelist);
         backpatch($10->nextlist, $7->intVal);
+        $$->nextlist=$10->breaklist;
 
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$9);
 
@@ -2573,20 +2571,15 @@ ForStatementNoShortIf:
         $$ = makeNode("for", s);
 
         //3ac
-        for(int i:$12->breaklist){
-            cout << i << "brb222";
-        }
-        cout << '\n';
 
         $12->nextlist=mergelist($12->nextlist,$12->continuelist);
-        backpatch($12->nextlist, $4->intVal);
+        backpatch($12->nextlist, $8->intVal);
         backpatch($6->truelist, $11);
         $$->nextlist = mergelist($6->falselist,$12->breaklist); 
-        $12->nextlist=mergelist($12->nextlist,$12->continuelist);
-        backpatch($12->nextlist,$8->intVal);
         backpatch($9->nextlist,$4->intVal);
 
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+
     }
     | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' MarkerNT StatementNoShortIf {
         vector<ASTNode*> s;
@@ -2598,6 +2591,7 @@ ForStatementNoShortIf:
         //3ac
         $10->nextlist=mergelist($10->nextlist,$10->continuelist);
         backpatch($10->nextlist, $7->intVal);
+        $$->nextlist=$10->breaklist;
 
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$9);
 
