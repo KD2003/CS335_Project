@@ -5,6 +5,8 @@
 #include"typecheck.h"
 #include <fstream>
 
+int aaa=0;
+
 FILE* dotfile;
 extern FILE* yyin;
 extern int yyrestart(FILE*);
@@ -60,6 +62,7 @@ stack <int> forstat_curr;
 %type<ptr> ClassDeclaration NormalClassDeclaration ClassExtends ClassPermits cTypeName ClassBody ClassBodyDeclaration ClassBodyDeclarations VariableDeclarator VariableDeclaratorList zerooroneExpression VariableDeclarator1 VariableDeclarator2 List1 List2 List3 ArrEle1 ArrEle2 ArrEle3 MethodHeader MethodDeclaration MethodBody Methodeclarator ConstructorDeclaration formalparameter formalparameters Modifiers
 %type<x> MarkerNT 
 %type<ptr> MarkerNT2 ForStatementExpressionList ConstructorIDEN
+%type<ptr> jumpstat 
 %left ADDOP MULTOP SHIFTOP EQALITYOP ADDOP2 '*'
 %right ASSIGNOP '='
 
@@ -355,8 +358,8 @@ ClassInstanceCreationExpression:
         s.push_back($6);
         $$ = makeNode("new", s);
         if(type=="")type=$2->type;
-        $$->temp_name=$2->temp_name;
         $$->type=type;
+        $$->temp_name=$2->temp_name;
     }
     | KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'        {
         vector<ASTNode*> s;
@@ -364,8 +367,8 @@ ClassInstanceCreationExpression:
         s.push_back($4);
         $$ = makeNode("new", s);
         if(type=="")type=$2->type;
-        $$->temp_name=$2->temp_name;
         $$->type=type;
+        $$->temp_name=$2->temp_name;
     }
 ;
 
@@ -978,7 +981,6 @@ Assignment:
             if(!t.empty()){
                 $$->type=t;
                 string add="";
-                // cout<<$3->type<<" "<<t<<endl;
                 int flag=0;
                 if($3->type!=t){
                     qid cast=newtemp(t);
@@ -1104,7 +1106,6 @@ Assignment:
                 $$->type=t;
                 //3ac
                 string add="";
-                // cout<<$3->type<<" "<<t<<endl;
                 qid cast=newtemp(t);
                 int flag=0;
                 if($3->type!=t){
@@ -1173,7 +1174,6 @@ ConditionalOrExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<t<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($4->type!=temp){
@@ -1220,7 +1220,6 @@ ConditionalAndExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($4->type!=temp){
@@ -1265,7 +1264,6 @@ AndExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
@@ -1306,7 +1304,6 @@ ExclusiveOrExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
@@ -1347,7 +1344,6 @@ InclusiveOrExpression:
             if(!temp.empty()){
                 $$->type=temp;
                  string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
@@ -1388,12 +1384,11 @@ EqualityExpression:
         else{
             $$->intVal= $1->intVal!=$3->intVal;
         }
-        // cout<<$1->type<<" :1"<<$3->type<<"\n";
         string temp=eqExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
-                qid no=newtemp($3->type);
+                qid no=newtemp(temp);
                     if($3->expType==4){
                         if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
                         else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
@@ -1401,13 +1396,10 @@ EqualityExpression:
                     else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),no,-1);
                 //3ac
                 qid tmp=newtemp(temp);
-                emit(qid("==",NULL),$1->addr,no,tmp,-1);
                 $$->addr=tmp;
                 
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
-
-                // for(int i:$$->truelist) cout << i << "hsa";
                 emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
                 emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
                 
@@ -1435,7 +1427,6 @@ RelationalExpression:
         $$ = makeNode(*$2, s);
 
         if(*$2=="<"){
-            // cout<<$1->type<<" "<<$3->type<<endl;
             $$->intVal= $1->intVal<$3->intVal;
         }
         else if(*$2==">"){
@@ -1448,12 +1439,10 @@ RelationalExpression:
             $$->intVal= $1->intVal>=$1->intVal;
         }
         string temp=relExp($1->type,$3->type);
-        // cout<<temp<<endl;
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
 
                 //3ac
                 qid tmp=newtemp(temp);
@@ -1503,7 +1492,6 @@ ShiftExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 qid no=newtemp(temp);
                     if($3->expType==4){
                         if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
@@ -1555,7 +1543,6 @@ AdditiveExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
@@ -1616,7 +1603,6 @@ MultiplicativeExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
@@ -1668,7 +1654,6 @@ MultiplicativeExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-        // cout<<$3->type<<" "<<temp<<endl;
                 int flag=0;
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
@@ -1829,7 +1814,6 @@ CastExpression:
         if(!($2->is_error || $4->is_error)){
 			//Semantic			
             //3ac
-            // cout<<$4->type<<" "<<$4->temp_name<<endl;
             qid cast=newtemp($2->type);
             if($4->expType==4){
                 if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
@@ -2019,9 +2003,23 @@ BlockStatements:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("BlockStatements", s);
+        
+        if($1==NULL){
+            $$->breaklist=$2->breaklist;
+        }
+        else
+        $$->breaklist=mergelist($1->breaklist,$2->breaklist);
+        if($1==NULL){
+            $$->continuelist=$2->continuelist;
+        }
+        else
+        $$->continuelist=mergelist($1->continuelist,$2->continuelist);
+
     }
     |       {
         $$=NULL;
+        // $$ = makeLeaf("BlockStatements", 1);
+
     }
 ;
 
@@ -2032,10 +2030,7 @@ BlockStatement:
     }
     | Statement {
         $$=$1;
-
         //3ac
-        backpatch($1->nextlist,nextinstr()+1);
-        $$->nextlist.clear();
     }
 ;
 
@@ -2076,28 +2071,18 @@ LocalVariableType:
     }
 ;
 
-Statement:
-    StatementWithoutTrailingSubstatement {
-        $$=$1;
-    }
-    | IDENTIFIER ':' Statement {
-        vector<ASTNode*> s;
-        s.push_back(makeLeaf("ID (" + *$1+")" ));
-        s.push_back(makeLeaf(":"));
-        s.push_back($3);
-        $$ = makeNode("Statement", s);
-        delete $1;
-    }
-    | KEY_if '(' Expression ')' MarkerNT Statement {
+jumpstat:
+    KEY_if '(' Expression ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($3);
         s.push_back($6);
         $$ = makeNode("if", s);
-
         //3ac
         backpatch($3->truelist,$5);
         $$->nextlist=mergelist($3->falselist,$6->nextlist);
-
+        $$->breaklist=$6->breaklist;
+        $$->continuelist=$6->continuelist;
+        
         
     }
     | KEY_if '(' Expression ')' MarkerNT StatementNoShortIf MarkerNT2 KEY_else MarkerNT Statement {
@@ -2113,6 +2098,8 @@ Statement:
         backpatch($3->falselist, $9);
         auto tmp = mergelist($6->nextlist, $7->nextlist) ;
         $$->nextlist = mergelist(tmp, $10->nextlist);
+        $$->continuelist=mergelist($6->continuelist,$10->continuelist);
+        $$->breaklist=mergelist($6->breaklist,$10->breaklist);
         // $$->nextlist.clear();
     }
     | KEY_while MarkerNT '(' Expression ')' MarkerNT Statement {
@@ -2122,9 +2109,10 @@ Statement:
         $$ = makeNode("while", s);
 
         //3ac
+        $7->nextlist=mergelist($7->nextlist,$7->continuelist);
         backpatch($7->nextlist, $2) ;
         backpatch($4->truelist, $6) ;
-        $$->nextlist = $4->falselist;
+        $$->nextlist = mergelist($4->falselist,$7->breaklist);
         emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$2);
     }
     | ForStatement {
@@ -2136,6 +2124,27 @@ Statement:
         printSymbolTable(cur_table, name);
         endSymbolTable();
         for_flag=0;
+        backpatch($$->nextlist,nextinstr()+1);
+        $$->nextlist.clear();
+    }
+;
+
+Statement:
+    StatementWithoutTrailingSubstatement {
+        $$=$1;
+    }
+    | IDENTIFIER ':' Statement {
+        vector<ASTNode*> s;
+        s.push_back(makeLeaf("ID (" + *$1+")" ));
+        s.push_back(makeLeaf(":"));
+        s.push_back($3);
+        $$ = makeNode("Statement", s);
+        delete $1;
+    }
+    | jumpstat {
+        backpatch($1->nextlist,nextinstr()+1);
+        $1->nextlist.clear();
+        $$=$1;
     }
 ;
 
@@ -2274,11 +2283,10 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-                    addline();addline();
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1));
+
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
                     
-                    forstat_curr.push(2);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
@@ -2286,11 +2294,9 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-                    addline();addline();
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1));
+                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
                     
-                    forstat_curr.push(2);
                 }
 			}
 			else{
@@ -2323,10 +2329,10 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1));
                     
-                    forstat_curr.push(2);
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
+                    
                 }
                 else{
                     $$->intVal = $1->intVal -1;
@@ -2334,10 +2340,9 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    forstat.push(make_quad(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1));
-                    forstat.push(make_quad(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1));
+                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                     
-                    forstat_curr.push(2);
                 }
 			}
 			else{
@@ -2479,6 +2484,10 @@ BreakContinueStatement:
     | KEY_break ';' {
         $$ = makeLeaf("break");
         type="";
+
+        //3ac
+        $$->breaklist.push_back(nextinstr());
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
     | KEY_continue IDENTIFIER ';' {
         vector<ASTNode*> s;
@@ -2490,6 +2499,10 @@ BreakContinueStatement:
     | KEY_continue ';' {
         $$ = makeLeaf("continue");
         type="";
+
+        //3ac
+        $$->continuelist.push_back(nextinstr());
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),0);
     }
 ;
 A:
@@ -2503,105 +2516,84 @@ A:
 ;
 
 ForStatementExpressionList:
-    MarkerNT StatementExpressionList    {
+    MarkerNT StatementExpressionList{
         $$ = $2;
         $$->intVal = $1;
     }
     | MarkerNT  {
         $$ = makeLeaf("ForExpressionlist",1);
         $$->intVal = $1;
+        $$->intVal2=$1;
     }
 ;
 
 ForStatement:
-    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList ')'  Statement {
+    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList MarkerNT2 ')' MarkerNT Statement {
         vector<ASTNode*> s;
         s.push_back($4);
         s.push_back($6);
+        s.push_back($12);
+        $$ = makeNode("for", s);
+
+        //3ac
+        $12->nextlist=mergelist($12->nextlist,$12->continuelist);
+        backpatch($12->nextlist, $8->intVal);
+        backpatch($6->truelist, $11);
+        $$->nextlist = mergelist($6->falselist,$12->breaklist); 
+        backpatch($9->nextlist,$4->intVal);
+
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+    }
+    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' MarkerNT Statement {
+        vector<ASTNode*> s;
+        s.push_back($4);
+        s.push_back($7);
         s.push_back($10);
         $$ = makeNode("for", s);
 
         //3ac
-        backpatch($10->nextlist, $4->intVal);
-        backpatch($6->truelist, $8->intVal);
-        $$->nextlist = $6->falselist;  
-        int i=forstat_curr.top();
-        forstat_curr.pop();
+        $10->nextlist=mergelist($10->nextlist,$10->continuelist);
+        backpatch($10->nextlist, $7->intVal);
+        $$->nextlist=$10->breaklist;
 
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
-    }
-    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' Statement {
-        vector<ASTNode*> s;
-        s.push_back($4);
-        s.push_back($7);
-        s.push_back($9);
-        $$ = makeNode("for", s);
-
-        //3ac
-        backpatch($9->nextlist, $4->intVal);
-        int i=forstat_curr.top();
-        forstat_curr.pop();
-
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$9);
 
     }
     /* | KEY_for '(' LocalVariableDeclaration ':' Expression ')' Statement */
 ;
 
 ForStatementNoShortIf:
-    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList ')'  StatementNoShortIf {
+    KEY_for '(' A ForInit ';' Expression  ';' ForStatementExpressionList MarkerNT2 ')' MarkerNT StatementNoShortIf {
         vector<ASTNode*> s;
         s.push_back($4);
         s.push_back($6);
+        s.push_back($12);
+        $$ = makeNode("for", s);
+
+        //3ac
+
+        $12->nextlist=mergelist($12->nextlist,$12->continuelist);
+        backpatch($12->nextlist, $8->intVal);
+        backpatch($6->truelist, $11);
+        $$->nextlist = mergelist($6->falselist,$12->breaklist); 
+        backpatch($9->nextlist,$4->intVal);
+
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+
+    }
+    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' MarkerNT StatementNoShortIf {
+        vector<ASTNode*> s;
+        s.push_back($4);
+        s.push_back($7);
         s.push_back($10);
         $$ = makeNode("for", s);
 
         //3ac
-        backpatch($10->nextlist, $4->intVal);
-        backpatch($6->truelist, $8->intVal);
-        $$->nextlist = $6->falselist;   
-        int i=forstat_curr.top();
-        forstat_curr.pop();
+        $10->nextlist=mergelist($10->nextlist,$10->continuelist);
+        backpatch($10->nextlist, $7->intVal);
+        $$->nextlist=$10->breaklist;
 
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
-    }
-    | KEY_for '(' A ForInit ';' ';' ForStatementExpressionList ')' StatementNoShortIf {
-        vector<ASTNode*> s;
-        s.push_back($4);
-        s.push_back($7);
-        s.push_back($9);
-        $$ = makeNode("for", s);
-
-        //3ac
-        backpatch($9->nextlist, $4->intVal);
-        int i=forstat_curr.top();
-        forstat_curr.pop();
-
-        for(int j=0;j<i;j++){
-            quad q=forstat.top();
-            emit(q);
-            forstat.pop();
-            // addline();
-        }
-        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$4->intVal);
+        emit(qid("goto",NULL),qid("",NULL),qid("",NULL),qid("",NULL),$9);
 
     }
 ;
@@ -2799,31 +2791,9 @@ ConstructorDeclaration:
         s.push_back($7);
         $$ = makeNode("ConstructorDeclaration", s);
 
-        string str= $2->temp_name.substr(11);
+        string str= $2->temp_name.substr(12);
 
         if(str!=cur_class){
-            yyerror(("Constructor can only have the name "+cur_class).c_str());
-            $$->is_error = 1;
-        }
-        else{
-            printSymbolTable(cur_table ,$2->temp_name + ".csv");
-            print3AC_code($2->temp_name);
-            endSymbolTable();
-        }
-
-        modifier={1,0,0};
-    }
-    | Modifiers ConstructorIDEN F '(' ')' Block {
-        vector<ASTNode*> s;
-        s.push_back($1);
-        s.push_back($2);
-        s.push_back($6);
-        $$ = makeNode("ConstructorDeclaration", s);
-
-        string str= $2->temp_name.substr(11);
-
-        if(str!=cur_class){
-            // cout<<str<<" "<<cur_class<<endl; 
             yyerror(("Constructor can only have the name "+cur_class).c_str());
             $$->is_error = 1;
         }
@@ -2882,7 +2852,6 @@ VariableDeclarator1:
 				$$->is_error = 1;            
         }
         else{
-            // cout << *$1<<cur_table <<"\n";
             insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type));
             $$->addr=qid(*$1,lookup(*$1));
 
@@ -2990,7 +2959,6 @@ VariableDeclarator2:
             $$->is_error=1;
         }
         string add="";
-        // cout<<$3->type<<" "<<t<<endl;
         int flag=0;
         qid cast=newtemp(t);
         if($3->type!=t){
@@ -3732,7 +3700,6 @@ F:
             $$->is_error = 1;
         }
         else{
-            // cout << funcName<< cur_table<<"\n";
             makeSymbolTable(funcName, funcType, yylineno, modifier);
             $$->node_name = funcName;
             block_count = 1;
@@ -3794,7 +3761,7 @@ int main(int argc, char* argv[]){
                 yyin = fopen(argv[i+1],"r");
                 file_path = argv[i+1];
                 file_path = file_path.substr(0,file_path.size()-5);
-                system(("mkdir -p "+file_path).c_str());
+                system(("mkdir "+file_path).c_str());
                 file_path+="/";
                 if(yyin==NULL){
                     printf("%s can not be opened as an input file.\n", argv[i+1]);
@@ -3844,8 +3811,8 @@ int main(int argc, char* argv[]){
         printf("Starting the parser...\n");
     }
 
-    system(("rm -f "+file_path+"*.csv").c_str());
-    system(("rm -f "+file_path+"*.txt").c_str());
+    system(("rm "+file_path+"*.csv").c_str());
+    system(("rm "+file_path+"*.txt").c_str());
 
     if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 
@@ -3857,13 +3824,11 @@ int main(int argc, char* argv[]){
 
     symbolTableInit();
 
-    /* cout << "Start" << cur_table << "\n"; */
 
     beginAST();
     if(yyparse()) return 0;
     endAST();
     printSymbolTable(cur_table, "Global.csv");
-    /* cout<<"End "<<cur_table<<endl; */
     
     if(verbosemode){
         printf("Parser work completed..\n");
