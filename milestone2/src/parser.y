@@ -2523,7 +2523,6 @@ ForStatementExpressionList:
     | MarkerNT  {
         $$ = makeLeaf("ForExpressionlist",1);
         $$->intVal = $1;
-        $$->intVal2=$1;
     }
 ;
 
