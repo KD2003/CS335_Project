@@ -23,6 +23,7 @@ int block_count = 0;
 int func_flag=0;
 int for_flag=0;
 int arr_dm;
+int inPrint = 0;
 
 string type="";
 string class_type="", cur_class="";
@@ -747,10 +748,10 @@ ArrayAccess:
 ;
 
 MethodInvocation:
-    IDENdotIDEN '(' Zeroorone_ArgumentList ')'          {
+    IDENdotIDEN {if($1->temp_name == "System.out.println") inPrint = 1;}'(' Zeroorone_ArgumentList ')'          {
         vector<ASTNode*> s;
         s.push_back($1);
-        s.push_back($3);
+        s.push_back($4);
         $$ = makeNode("MethodInvocation", s);
 
         if($1->temp_name == "System.out.println"){
@@ -760,6 +761,7 @@ MethodInvocation:
             emit(qid("stackpointer",NULL),qid("+xxx",NULL),qid("",NULL),qid("",NULL),-1);
             emit(qid("call",NULL),qid("print 1",NULL),qid("",NULL),qid("",NULL),-1);
             emit(qid("stackpointer",NULL),qid("-yyy",NULL),qid("",NULL),qid("",NULL),-1);
+            inPrint = 0;
 
         }
         else{
