@@ -92,7 +92,7 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	}
 	parent_table.insert(make_pair(new_table, cur_table));
 	if(children_table.find(cur_table) == children_table.end()){
-		children_table.insert(make_pair(new_table, vector<pair<string, sym_table*>> ()));
+		children_table.insert(make_pair(cur_table, vector<pair<string, sym_table*>> ()));
 	}
 	children_table[cur_table].push_back(make_pair(name,new_table));
 	cur_table = new_table;
@@ -139,7 +139,7 @@ void printSymbolTable(sym_table* table, string file_name){
 		string st = "Private";
 		if(it.second->modifiers[0]==2) st="Public";
 		if(it.second->token == "Temp_var") continue;
-    	fprintf(file,"%s,%s,%s,%d,%s\n", it.second->token.c_str(), it.first.c_str() ,it.second->type.c_str(), it.second->lineno, st.c_str());
+    	fprintf(file,"%s,%s,%s,%d,%s,%d\n", it.second->token.c_str(), it.first.c_str() ,it.second->type.c_str(), it.second->lineno, st.c_str(), it.second->size);
   	}
   	fclose(file);
 }
@@ -150,7 +150,20 @@ string funcProtoLookup(string id){
 }
 
 void endSymbolTable(){
+	sym_table* temp_table = cur_table;
+	int sum=0;
+	string temp_name;
+	for(auto it: *temp_table){
+		sum+=it.second->size;
+	}
 	cur_table = parent_table[cur_table];
+	for(auto it: children_table[cur_table]){
+		if(it.second == temp_table){
+			temp_name = it.first;
+			break;
+		}
+	}
+	(*cur_table)[temp_name]->size = sum;
 }
 
 int classLookup(string id){
@@ -193,4 +206,16 @@ int getOffset(string class_name, string id){
 		curOff += it.second;
 	}
 	return -1;		// id not found
+}
+
+int getFuncSize(string name){
+	sym_table* temp_table = cur_table;
+	while(temp_table){
+		for(auto it: *temp_table){
+			if(it.second->token == "FUNC_" && it.first == name){
+				return it.second->size;
+			}
+		}
+	}
+	return -1;
 }
