@@ -465,10 +465,10 @@ ArrayAccess:
                             //3ac
 
                             qid tmp=newtemp("int");
-                            if($3->expType==4)emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
-                            else emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                            if($3->expType==4)emit(qid("*"+temp,NULL),qid(to_string(getSize(temp)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                            else emit(qid("*"+temp,NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
                             qid tmp2=newtemp(temp);
-                            emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                            emit(qid("+"+temp,NULL),$1->addr,tmp,tmp2,-1);
                             $$->addr=tmp2;
                         }
                     }
@@ -520,7 +520,7 @@ ArrayAccess:
                                         if($3->expType == 4) emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
                                         else emit(qid("",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
                                         qid tmp2=newtemp(tem);
-                                        emit(qid("+",NULL),$1->addr,tmp,tmp2,-1);
+                                        emit(qid("+"+tem,NULL),$1->addr,tmp,tmp2,-1);
                                         $$->addr=tmp2;
                                     }
                                 }
@@ -563,17 +563,23 @@ ArrayAccess:
                         }
                         else{
                             //3ac
-                            int c1=lookup($1->temp_name)->array_dims[1] * getSize(temp);     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
+                            int c1=lookup($1->temp_name)->array_dims[1] * getSize(temp);
+                            cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                             qid tmp=newtemp("int");
                             if($3->expType!=4)
-                                emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                                emit(qid("*"+temp,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
                             else 
-                                emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c1),NULL),tmp,-1);
+                                emit(qid("*"+temp,NULL),qid($3->temp_name,NULL),qid(to_string(c1),NULL),tmp,-1);
                             qid tmp2=newtemp("int");
-                            emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
+                            if($6->expType!=4)
+                                emit(qid("*"+temp,NULL),$6->addr,qid(to_string(getSize($6->type)),NULL),tmp2,-1);
+                            else 
+                                emit(qid("*"+temp,NULL),qid($6->temp_name,NULL),qid(to_string(getSize($6->type)),NULL),tmp2,-1);
                             qid tmp3=newtemp("int");
-                            emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
-                            $$->addr=tmp3;
+                            emit(qid("+"+temp,NULL),tmp,tmp2,tmp3,-1);
+                            qid tmp4=newtemp("int");
+                            emit(qid("+"+temp,NULL),$1->addr,tmp3,tmp4,-1);
+                            $$->addr=tmp4;
                         }
                     }
                 }
@@ -615,17 +621,23 @@ ArrayAccess:
                                     }
                                     else{
                                         //3ac
-                                        int c=$3->intVal*(lookup($1->temp_name))->array_dims[1]+$6->intVal;
+                                        int c1=lookup($1->temp_name)->array_dims[1] * getSize(tem);
+                                        cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                                         qid tmp=newtemp("int");
                                         if($3->expType!=4)
-                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
+                                            emit(qid("*"+tem,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
                                         else 
-                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string(c),NULL),tmp,-1);
-                                        qid tmp2=newtemp(tem);
-                                        emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
-                                        qid tmp3=newtemp(tem);
-                                        emit(qid("+",NULL),$1->addr,tmp2,tmp3,-1);
-                                        $$->addr=tmp3;
+                                            emit(qid("*"+tem,NULL),qid($3->temp_name,NULL),qid(to_string(c1),NULL),tmp,-1);
+                                        qid tmp2=newtemp("int");
+                                        if($6->expType!=4)
+                                            emit(qid("*"+tem,NULL),$6->addr,qid(to_string(getSize($6->type)),NULL),tmp2,-1);
+                                        else 
+                                            emit(qid("*"+tem,NULL),qid($6->temp_name,NULL),qid(to_string(getSize($6->type)),NULL),tmp2,-1);
+                                        qid tmp3=newtemp("int");
+                                        emit(qid("+"+tem,NULL),tmp,tmp2,tmp3,-1);
+                                        qid tmp4=newtemp("int");
+                                        emit(qid("+"+tem,NULL),$1->addr,tmp3,tmp4,-1);
+                                        $$->addr=tmp4;
                                     }
                                 }
                             }
@@ -668,19 +680,31 @@ ArrayAccess:
                         }
                         else{
                             //3ac
-                            int c=$3->intVal*lookup($1->temp_name)->array_dims[1]+$6->intVal*lookup($1->temp_name)->array_dims[2]+$9->intVal;
+                            int c1=lookup($1->temp_name)->array_dims[1] * getSize(temp)*lookup($1->temp_name)->array_dims[2];
+                            // cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                             qid tmp=newtemp("int");
-                            qid tmp2=newtemp("int");
                             if($3->expType!=4)
-                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                                emit(qid("*"+temp,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
                             else 
-                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c),NULL),tmp,-1);
-                            emit(qid("*",NULL),tmp,$6->addr,tmp2,-1);
+                                emit(qid("*"+temp,NULL),qid($3->temp_name,NULL),qid(to_string(c1),NULL),tmp,-1);
+                            qid tmp2=newtemp("int");
+                            int c2=lookup($1->temp_name)->array_dims[2] * getSize(temp);
+                            if($6->expType!=4)
+                                emit(qid("*"+temp,NULL),$6->addr,qid(to_string(c2),NULL),tmp2,-1);
+                            else 
+                                emit(qid("*"+temp,NULL),qid($6->temp_name,NULL),qid(to_string(c2),NULL),tmp2,-1);
                             qid tmp3=newtemp("int");
-                            emit(qid("+",NULL),tmp2,$9->addr,tmp3,-1);
+                            if($9->expType!=4)
+                                emit(qid("*"+temp,NULL),$9->addr,qid(to_string(getSize($9->type)),NULL),tmp3,-1);
+                            else 
+                                emit(qid("*"+temp,NULL),qid($9->temp_name,NULL),qid(to_string(getSize($9->type)),NULL),tmp3,-1);
                             qid tmp4=newtemp("int");
-                            emit(qid("+",NULL),$1->addr,tmp3,tmp4,-1);
-                            $$->addr=tmp4;
+                            emit(qid("+"+temp,NULL),tmp,tmp2,tmp4,-1);
+                            qid tmp5=newtemp("int");
+                            emit(qid("+"+temp,NULL),tmp3,tmp4,tmp5,-1);
+                            qid tmp6=newtemp("int");
+                            emit(qid("+"+temp,NULL),$1->addr,tmp5,tmp6,-1);
+                            $$->addr=tmp6;
                         }
                     }
                 }
@@ -722,19 +746,31 @@ ArrayAccess:
                                     }
                                     else{
                                         //3ac
-                                        int c=($3->intVal)*(lookup($1->temp_name)->array_dims[1])+($6->intVal)*(lookup($1->temp_name)->array_dims[2])+$9->intVal;
-                                        qid tmp=newtemp("int");
-                                        qid tmp2=newtemp("int");
-                                        if($3->expType!=4)
-                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),$3->addr,tmp,-1);
-                                        else 
-                                                emit(qid("*",NULL),qid(to_string(getSize(tem)),NULL),qid(to_string(c),NULL),tmp,-1);
-                                        emit(qid("*",NULL),tmp,$6->addr,tmp2,-1);
-                                        qid tmp3=newtemp("int");
-                                        emit(qid("+",NULL),tmp2,$9->addr,tmp3,-1);
-                                        qid tmp4=newtemp("int");
-                                        emit(qid("+",NULL),$1->addr,tmp3,tmp4,-1);
-                                        $$->addr=tmp4;
+                                        int c1=lookup($1->temp_name)->array_dims[1] * getSize(tem)*lookup($1->temp_name)->array_dims[2];
+                                    // cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
+                                    qid tmp=newtemp("int");
+                                    if($3->expType!=4)
+                                        emit(qid("*"+tem,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
+                                    else 
+                                        emit(qid("*"+tem,NULL),qid($3->temp_name,NULL),qid(to_string(c1),NULL),tmp,-1);
+                                    qid tmp2=newtemp("int");
+                                    int c2=lookup($1->temp_name)->array_dims[2] * getSize(tem);
+                                    if($6->expType!=4)
+                                        emit(qid("*"+tem,NULL),$6->addr,qid(to_string(c2),NULL),tmp2,-1);
+                                    else 
+                                        emit(qid("*",NULL),qid($6->temp_name,NULL),qid(to_string(c2),NULL),tmp2,-1);
+                                    qid tmp3=newtemp("int");
+                                    if($9->expType!=4)
+                                        emit(qid("*"+tem,NULL),$9->addr,qid(to_string(getSize($9->type)),NULL),tmp3,-1);
+                                    else 
+                                        emit(qid("*"+tem,NULL),qid($9->temp_name,NULL),qid(to_string(getSize($9->type)),NULL),tmp3,-1);
+                                    qid tmp4=newtemp("int");
+                                    emit(qid("+"+tem,NULL),tmp,tmp2,tmp4,-1);
+                                    qid tmp5=newtemp("int");
+                                    emit(qid("+"+tem,NULL),tmp3,tmp4,tmp5,-1);
+                                    qid tmp6=newtemp("int");
+                                    emit(qid("+"+tem,NULL),$1->addr,tmp5,tmp6,-1);
+                                    $$->addr=tmp6;
                                     }
                                 }
                             }
@@ -1005,79 +1041,79 @@ Assignment:
                 }
                 else if(*$2=="*="){
                     if($3->expType==4)
-                        emit(qid("*",NULL),qid(to_string($3->intVal),NULL),$1->addr,temp,-1);
+                        emit(qid("*"+t,NULL),qid(to_string($3->intVal),NULL),$1->addr,temp,-1);
                     else
-                        emit(qid("*",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("*"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="/="){
                     if($3->expType==4)
-                        emit(qid("/",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("/"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("/",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("/"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="%="){
                     if($3->expType==4)
-                        emit(qid("%",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("%"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("%",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("%"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="+="){
                     if($3->expType==4)
-                        emit(qid("+",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("+"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("+",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("+"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="-="){
                     if($3->expType==4)
-                        emit(qid("-",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("-"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("-",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("-"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="<<="){
                     if($3->expType==4)
-                        emit(qid("<<",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("<<"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("<<",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("<<"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2==">>="){
                     if($3->expType==4)
-                        emit(qid(">>",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid(">>"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid(">>",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid(">>"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2==">>>="){
                     if($3->expType==4)
-                        emit(qid("+",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid(">>>"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid(">>>",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid(">>>"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="&="){
                     if($3->expType==4)
-                        emit(qid("&",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("&"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("&",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("&"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="^="){
                     if($3->expType==4)
-                        emit(qid("^",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("^"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("^",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("^"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 else if(*$2=="|="){
                     if($3->expType==4)
-                        emit(qid("|",NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        emit(qid("|"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
                     else
-                        emit(qid("|",NULL),$1->addr,$3->addr,temp,-1);
+                        emit(qid("|"+t,NULL),$1->addr,$3->addr,temp,-1);
                     $1->addr=temp;
                 }
                 qid tmp2=newtemp($1->type);
@@ -1187,6 +1223,15 @@ ConditionalOrExpression:
                     add=temp;
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
                 //3ac
                 backpatch($1->falselist,$3);
                 $$->truelist=mergelist($1->truelist,$4->truelist);
@@ -1230,6 +1275,15 @@ ConditionalAndExpression:
                         else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
                     }
                     else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -1277,6 +1331,15 @@ AndExpression:
                     add=temp;
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
             }
             else{
                 yyerror("Incompatible Types for &");
@@ -1317,6 +1380,15 @@ ExclusiveOrExpression:
                     add=temp;
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
             }
             else{
                 yyerror("Incompatible Types for ^");
@@ -1354,6 +1426,15 @@ InclusiveOrExpression:
                         else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
                     else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -1450,9 +1531,9 @@ RelationalExpression:
                 qid tmp=newtemp(temp);
 
                     if($3->expType==4){
-                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                     }
-                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                    else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 $$->addr=tmp;
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
@@ -1505,9 +1586,9 @@ ShiftExpression:
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
                 if($3->expType==4){
-                    emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                 }
-                else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1563,6 +1644,15 @@ AdditiveExpression:
                     else emit(qid("=",NULL),qid("cast_to_String "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
                  //3ac
                 qid tmp=newtemp("String");
                 $$->addr=tmp;
@@ -1572,9 +1662,9 @@ AdditiveExpression:
                 }
                 else{
                     if($3->expType==4){
-                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                     }
-                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                    else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
             }
             else if(!temp.empty()){
@@ -1591,6 +1681,15 @@ AdditiveExpression:
                     add=temp;
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
                  //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
@@ -1601,9 +1700,9 @@ AdditiveExpression:
                 }
                 else{
                     if($3->expType==4){
-                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                     }
-                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                    else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
             }
             else{
@@ -1651,6 +1750,15 @@ MultiplicativeExpression:
                     add=temp;
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
 
                 //3ac
                 qid tmp=newtemp(temp);
@@ -1662,9 +1770,9 @@ MultiplicativeExpression:
                     }
                 else{
                     if($3->expType==4){
-                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                     }
-                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                    else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
             }
             else{
@@ -1702,6 +1810,15 @@ MultiplicativeExpression:
                     add=temp;
                     flag=1;
                 }
+                if($1->type!=temp){
+                    if($1->expType==4){
+                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    add=temp;
+                    flag=1;
+                }
 
                 //3ac
                 qid tmp=newtemp(temp);
@@ -1713,9 +1830,9 @@ MultiplicativeExpression:
                     }
                 else{
                     if($3->expType==4){
-                        emit(qid("*",NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        emit(qid("*"+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                     }
-                    else emit(qid("*",NULL),$1->addr,$3->addr,tmp,-1);
+                    else emit(qid("*"+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
             }
             else{
@@ -1745,7 +1862,7 @@ UnaryExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("+"+temp,NULL),$2->addr,qid("1",NULL),tmp,-1);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
@@ -1753,7 +1870,7 @@ UnaryExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("-"+temp,NULL),$2->addr,qid("1",NULL),tmp,-1);
                 }
                 
 			}
@@ -1785,7 +1902,7 @@ UnaryExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$2->addr,qid("",NULL),tmp,-1);
+                    emit(qid("-"+temp,NULL),$2->addr,qid("",NULL),tmp,-1);
 
                 }
                 else{ 
@@ -1988,7 +2105,7 @@ postfixExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("+"+temp,NULL),$1->addr,qid("1",NULL),tmp,-1);
                 }
                 else{
                     $$->intVal = $1->intVal -1;
@@ -1996,7 +2113,7 @@ postfixExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("-"+temp,NULL),$1->addr,qid("1",NULL),tmp,-1);
                 }
 			}
 			else{
@@ -2321,7 +2438,7 @@ StatementExpression:
                     qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
 
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("+"+temp,NULL),$2->addr,qid("1",NULL),tmp,-1);
                     emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
                     
                 }
@@ -2331,7 +2448,7 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("+"+temp,NULL),$2->addr,qid("1",NULL),tmp,-1);
                     emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
                     
                 }
@@ -2367,7 +2484,7 @@ StatementExpression:
                     qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
                     
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("+"+temp,NULL),$1->addr,qid("1",NULL),tmp,-1);
                     emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                     
                 }
@@ -2377,7 +2494,7 @@ StatementExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    emit(qid("+"+temp,NULL),$1->addr,qid("1",NULL),tmp,-1);
                     emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                     
                 }
