@@ -7,7 +7,7 @@ class Test {
 		String s = "GeeksforGeeks";
 
 		// Prints the String.
-		System.out.println(s);
+		System.out.println("First String: " + s + 10);
 
 		// Declare String using new operator
 		String s1 = "TutorialPoint";

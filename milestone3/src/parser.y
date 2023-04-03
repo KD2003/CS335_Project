@@ -563,12 +563,12 @@ ArrayAccess:
                         }
                         else{
                             //3ac
-                            int c=($3->intVal)*lookup($1->temp_name)->array_dims[1]+$6->intVal;
+                            int c1=lookup($1->temp_name)->array_dims[1] * getSize(temp);     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                             qid tmp=newtemp("int");
                             if($3->expType!=4)
-                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
+                                emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),$3->addr,tmp,-1);
                             else 
-                                    emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c),NULL),tmp,-1);
+                                emit(qid("*",NULL),qid(to_string(getSize(temp)),NULL),qid(to_string(c1),NULL),tmp,-1);
                             qid tmp2=newtemp("int");
                             emit(qid("+",NULL),tmp,$6->addr,tmp2,-1);
                             qid tmp3=newtemp("int");
@@ -1542,7 +1542,42 @@ AdditiveExpression:
 
         string temp=addExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
-            if(!temp.empty()){
+            if(inPrint){
+                $$->type = "String";
+                string add="";
+                int flag=0;
+                qid cast=newtemp("String");
+                if($1->type!="String"){
+                    if($1->expType==4){
+                        if(isInt($1->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($1->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_String "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    flag=1;
+                }
+                if($3->type!="String"){
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                    }
+                    else emit(qid("=",NULL),qid("cast_to_String "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    flag=1;
+                }
+                 //3ac
+                qid tmp=newtemp("String");
+                $$->addr=tmp;
+
+                if(flag){
+                    emit(qid(*$2+"String",NULL),$1->addr,cast,tmp,-1);
+                }
+                else{
+                    if($3->expType==4){
+                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
+                }
+            }
+            else if(!temp.empty()){
                 $$->type=temp;
                 string add="";
                 int flag=0;
@@ -1562,8 +1597,8 @@ AdditiveExpression:
 
                 if(flag){
                     string add=temp;
-                        emit(qid(*$2+add,NULL),$1->addr,cast,tmp,-1);
-                    }
+                    emit(qid(*$2+add,NULL),$1->addr,cast,tmp,-1);
+                }
                 else{
                     if($3->expType==4){
                         emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);

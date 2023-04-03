@@ -48,10 +48,13 @@ string unaryExp(string type, string op){
 }
 
 string mulExp(string a, string b){
+    if(a=="String"||b=="String") return "";
     return promotedType(a, b);
 }
 
 string addExp(string a, string b){
+    if(a=="String"&&b=="String") return "String";
+    if(a=="String"||b=="String") return "";
     return promotedType(a,b);
 }
 
@@ -82,19 +85,19 @@ string assignExp(string a, string b, string op){
     }
     if(op == "*=" || op == "/=" || op == "%="){
         if(mulExp(a, b)=="") return "";
-        else return "ok";
+        else return a;
     }
     if(op == "+=" || op == "-="){
         if(addExp(a, b)=="") return "";
-        else return "ok";
+        else return a;
     }
     if(op == ">>=" || op == "<<=" || ">>>="){
         if(shiftExp(a, b)=="") return "";
-        else return "ok";
+        else return a;
     }
     if(op == "&=" || op == "|=" || op == "^="){
         if(bitExp(a, b)=="") return "";
-        else return "ok";
+        else return a;
     }
     return "";
 }

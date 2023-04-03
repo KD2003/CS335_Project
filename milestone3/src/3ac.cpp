@@ -116,6 +116,9 @@ void backpatch_rem(){
 }
 
 bool isop(string s){
+    if(s.find("String")!=string::npos){
+        return true;
+    }
     if(s.find("int")!=string::npos&& s!="stackpointer"){
         return true;
     }
