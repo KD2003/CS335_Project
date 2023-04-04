@@ -1,6 +1,5 @@
 #pragma once
-
-#include <bits/stdc++.h>
+#include<bits/stdc++.h>
 #include"3ac.h"
 using namespace std;
 

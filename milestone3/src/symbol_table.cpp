@@ -1,5 +1,6 @@
 #include "symbol_table.h"
 #include <algorithm>
+#include <iostream>
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
@@ -82,7 +83,7 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 		classVariable.insert(make_pair(curClass, vector<pair<string, int>> ()));
 	}
 	else if(f_type == "Constructor"){
-        insertSymbol(*cur_table, name, f_type, f_type, lineno, new_table, modifiers, 0);
+        insertSymbol(*cur_table, name, "FUNC_", "FUNC_", lineno, new_table, modifiers, 0);
     }
 	else if(f_type != ""){
 		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers, 0);
@@ -210,6 +211,9 @@ int getOffset(string class_name, string id){
 
 int getFuncSize(string name){
 	sym_table* temp_table = cur_table;
+	if(name.size()>11 && name.substr(0,11)=="Constructor"){
+		name=name.substr(11,name.size()-11);
+	}
 	while(temp_table){
 		for(auto it: *temp_table){
 			if(it.second->token == "FUNC_" && it.first == name){
@@ -219,4 +223,19 @@ int getFuncSize(string name){
 		temp_table=parent_table[temp_table];
 	}
 	return -1;
+}
+
+int getClassSize(string name){
+	int sum =0;
+	sym_table* temp_table;
+	for(auto it: children_table[&global_st]){
+		if(it.first == name) temp_table = it.second;
+	}
+	if(!temp_table) return -1;
+	for(auto it: *temp_table){
+		if(it.second->token == "IDENTIFIER" || it.second->token == "Temp_var" || it.second->token == "Block"){
+			sum+=it.second->size;
+		}
+	}
+	return sum;
 }

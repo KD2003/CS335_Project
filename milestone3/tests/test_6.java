@@ -1,13 +1,15 @@
-class GFG {
-	public static void main(String[] args)
-	{
+public class Example1 {
+	int x;
+    double y;
 
-		int arr[][][] = new int[2][2][2];
+    Example1(int z, double y) {
+    	this.x = z;
+        this.y = y;
+    }
 
-
-		for (int i = 0; i < 2; i++)
-			for (int j = 0; j < 2; j++)
-				for (int z = 0; z < 2; z++)
-					arr[i][j][z]=i+j+z;
-	}
+    public static void main(String[] args /*so that we can compile with javac*/) {
+    	Example1 a = new Example1(2,3.14);
+        System.out.println(a.x);
+        System.out.println(a.y);
+    }
 }

@@ -119,7 +119,7 @@ bool isop(string s){
     if(s.find("String")!=string::npos){
         return true;
     }
-    if(s.find("int")!=string::npos&& s!="stackpointer"){
+    if(s.find("int")!=string::npos&& s!="stackpointer--"){
         return true;
     }
     if(s.find("float")!=string::npos){
@@ -154,11 +154,11 @@ bool isop(string s){
     return false;
 }
 
-void print3AC_code(string filename){
+void print3AC_code(string filename, int paramsize){
     ofstream tac_file;
     tac_file.open(file_path+filename+".txt");
     tac_file << filename << ":" << '\n';
-    tac_file << "beginfunc_" << '\n';
+    tac_file << "beginfunc " + to_string(getFuncSize(filename)-paramsize)<< '\n';
     for(int i=0;i<code.size(); i++){
 
         if(code[i].op.first=="="){
