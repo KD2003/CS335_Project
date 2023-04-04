@@ -180,10 +180,7 @@ IDENdotIDEN:
         $$->type=type;
         $$->temp_name = $1->temp_name + "." + *$3;
         
-        //3ac
-        qid temp=newtemp($$->type);
-        emit(qid("+",NULL),qid("*("+($1->addr).first,NULL),qid(to_string(getOffset($1->temp_name,*$3))+")",NULL),temp,-1);
-        $$->addr=temp;
+        
         delete $3;
         
     }
@@ -227,8 +224,9 @@ PublicPrivateStatic:
 ClassType:
     IDENdotIDEN     {
         $$=$1;
-        int pos = class_type.find(".");
-        string sub = class_type.substr(0, pos);
+        int pos = $1->temp_name.find(".");
+        string sub = $1->temp_name.substr(0, pos);
+        string first=sub;
         if(pos != -1){
             sub = primaryExpression(sub);
         }
@@ -237,8 +235,9 @@ ClassType:
             $$->is_error = 1;
         }
         else{
-            if(class_type.find('.')!=string::npos){
-                string sub1 = class_type.substr(pos+1);
+            if($1->temp_name.find('.')!=string::npos){
+                string sub1 = $1->temp_name.substr(pos+1);
+                string second=sub1;
                 for(auto it: children_table[&global_st]){
                     if(it.first == sub){
                         if((*(it.second)).find(sub1) == (*(it.second)).end()){
@@ -248,6 +247,12 @@ ClassType:
                         else{
                             $$->type = class_type;
                             type = class_type;
+
+                            //3ac
+                            cout << $1->temp_name;
+                            qid temp=newtemp($$->type);
+                            emit(qid("+",NULL),qid("*("+first,NULL),qid(to_string(getOffset(first,second))+")",NULL),temp,-1);
+                            $$->addr=temp;
                         }
                     }
                 }
