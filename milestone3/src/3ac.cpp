@@ -119,7 +119,7 @@ bool isop(string s){
     if(s.find("String")!=string::npos){
         return true;
     }
-    if(s.find("int")!=string::npos&& s!="stackpointer"){
+    if(s.find("int")!=string::npos&& s!="stackpointer--"){
         return true;
     }
     if(s.find("float")!=string::npos){

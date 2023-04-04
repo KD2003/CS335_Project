@@ -835,7 +835,7 @@ MethodInvocation:
                 argsize=$4->size;
             }
             emit(qid("call",NULL),qid("print 1",NULL),qid("",NULL),qid("",NULL),-1);
-            emit(qid("popparam",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+            emit(qid("stackpointer--",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
             inPrint = 0;
 
         }
@@ -881,13 +881,13 @@ MethodInvocation:
                             }
                             if(t=="void"){
                                 emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
-                                emit(qid("popparam",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+                                emit(qid("stackpointer--",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
                             }
                             else{
                                 emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
                                 qid tmp=newtemp(t);
                                 emit(qid("=",NULL),qid("popreturn",NULL),qid("",NULL),tmp,-1);
-                                emit(qid("popparam",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+                                emit(qid("stackpointer--",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
                                 
                                 
                                 $$->addr=tmp;

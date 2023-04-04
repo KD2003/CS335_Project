@@ -201,7 +201,6 @@ int getSize(string id){
 int getOffset(string class_name, string id){
 	int curOff=0;
 	for(auto it: classVariable[class_name]){
-		cout << it.first << endl;
 		if(it.first == id){
 			return curOff;
 		}
@@ -215,7 +214,6 @@ int getFuncSize(string name){
 	if(name.size()>11 && name.substr(0,11)=="Constructor"){
 		name=name.substr(11,name.size()-11);
 	}
-	cout << name;
 	while(temp_table){
 		for(auto it: *temp_table){
 			if(it.second->token == "FUNC_" && it.first == name){
