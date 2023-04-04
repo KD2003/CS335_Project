@@ -134,7 +134,7 @@ void recurPrintST(FILE* file, sym_table* table){
 void printSymbolTable(sym_table* table, string file_name){
 	if((*table).empty()) return;
 	FILE* file = fopen((file_path+file_name).c_str(), "w");
-  	fprintf( file,"Token, Lexeme, Type, Lineno,PublicPrivate\n");
+  	fprintf( file,"Token, Lexeme, Type, Lineno, PublicPrivate, Size\n");
 	// recurPrintST(file, table);
   	for(auto it: (*table)){
 		string st = "Private";
