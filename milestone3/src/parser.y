@@ -248,11 +248,7 @@ ClassType:
                             $$->type = class_type;
                             type = class_type;
 
-                            //3ac
-                            cout << $1->temp_name;
-                            qid temp=newtemp($$->type);
-                            emit(qid("+",NULL),qid("*("+first,NULL),qid(to_string(getOffset(first,second))+")",NULL),temp,-1);
-                            $$->addr=temp;
+                            
                         }
                     }
                 }
@@ -459,7 +455,6 @@ FieldAccess:
                 }
             }
         }
-        cout << $$->type << endl;
         delete $3;
     }
     | KEY_super '.' IDENTIFIER      {
@@ -605,7 +600,7 @@ ArrayAccess:
                         else{
                             //3ac
                             int c1=lookup($1->temp_name)->array_dims[1] * getSize(temp);
-                            cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
+                            // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                             qid tmp=newtemp("int");
                             if($3->expType!=4)
                                 emit(qid("*"+temp,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
@@ -663,7 +658,7 @@ ArrayAccess:
                                     else{
                                         //3ac
                                         int c1=lookup($1->temp_name)->array_dims[1] * getSize(tem);
-                                        cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
+                                           // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                                         qid tmp=newtemp("int");
                                         if($3->expType!=4)
                                             emit(qid("*"+tem,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
@@ -722,7 +717,7 @@ ArrayAccess:
                         else{
                             //3ac
                             int c1=lookup($1->temp_name)->array_dims[1] * getSize(temp)*lookup($1->temp_name)->array_dims[2];
-                            // cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
+                              // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                             qid tmp=newtemp("int");
                             if($3->expType!=4)
                                 emit(qid("*"+temp,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
@@ -788,7 +783,7 @@ ArrayAccess:
                                     else{
                                         //3ac
                                         int c1=lookup($1->temp_name)->array_dims[1] * getSize(tem)*lookup($1->temp_name)->array_dims[2];
-                                    // cout<<c1<<endl;     // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
+                             // a[i][j]   t1= i * (getsize()* dims[1])  t2 = j * getsize()  t3 = t1 + t2    t4 = a + t3
                                     qid tmp=newtemp("int");
                                     if($3->expType!=4)
                                         emit(qid("*"+tem,NULL),$3->addr,qid(to_string(c1),NULL),tmp,-1);
@@ -964,7 +959,6 @@ ArgumentList:
             emit(qid("=",NULL),qid($3->strVal,NULL),qid("",NULL),tmp,-1);
             $3->addr=tmp;
         }
-        cout << $3->type << $3->temp_name << endl;
         emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
         $$->size=$1->size+getSize($3->type);
         
@@ -984,7 +978,6 @@ ArgumentList:
 
             $1->addr=tmp;
         }
-        cout << $1->type << $1->temp_name<< endl;
         emit(qid("param",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
     }
 ;
@@ -2101,7 +2094,6 @@ postfixExpression:
                         qid tmp=newtemp("string");
                         emit(qid("=",NULL),qid($1->strVal,NULL),qid("",NULL),tmp,-1);
                         $$->addr=tmp;
-
                     }
 
                 }
@@ -2110,8 +2102,11 @@ postfixExpression:
         else{
             int pos = class_type.find(".");
             string sub = class_type.substr(0, pos);
+            string first=sub;
             sub = primaryExpression(sub);
+            
             string sub1 = class_type.substr(pos+1);
+            string second=sub1;
             if(global_st.find(sub) == global_st.end()){
                 yyerror(("Undefined class " + sub).c_str());
                 $$->is_error = 1;
@@ -2144,7 +2139,12 @@ postfixExpression:
                                 if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
                                 
                                 //3ac
-                                $$->addr = qid($1->temp_name, lookup($1->temp_name));
+                                //3ac
+
+                                cout << $1->temp_name;
+                                qid temp=newtemp($$->type);
+                                emit(qid("+",NULL),qid("*("+first,NULL),qid(to_string(getOffset(first,second))+")",NULL),temp,-1);
+                                $$->addr=temp;
                                 
 
                             }
