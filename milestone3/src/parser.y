@@ -442,12 +442,12 @@ FieldAccess:
                 if(temp.substr(0,5)=="FUNC_" && temp.back() == '#'){
                     temp.pop_back();
                     $$->type = temp;
-                    $$->temp_name = $1->temp_name; 
+                    $$->temp_name = $1->temp_name+"."+*$3; 
                     // $$->nextlist.clear();
                 }
                 else{
                     $$->type = temp;
-                    $$->temp_name = $1->temp_name;
+                    $$->temp_name = $1->temp_name+"."+*$3;
                     if(temp.back()=='*') $$->type = temp.substr(0,temp.size()-1);
                     
                     //3ac
@@ -835,7 +835,9 @@ MethodInvocation:
                 argsize=$4->size;
             }
             emit(qid("call",NULL),qid("print 1",NULL),qid("",NULL),qid("",NULL),-1);
-            emit(qid("stackpointer--",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+            qid rem=newtemp("int");
+            emit(qid("=",NULL),qid(to_string(argsize),NULL),qid("",NULL),rem,-1);
+            emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
             inPrint = 0;
 
         }
@@ -880,14 +882,24 @@ MethodInvocation:
                                 argsize=$4->size;
                             }
                             if(t=="void"){
+                                int minus=argsize;
                                 emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
-                                emit(qid("stackpointer--",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+                                qid rem=newtemp("int");
+                                emit(qid("=",NULL),qid(to_string(minus),NULL),qid("",NULL),rem,-1);
+                                emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
                             }
                             else{
+                                int minus=argsize;
+                                int plus=getSize(t)+4;
+                                qid ad=newtemp("int");
+                                emit(qid("=",NULL),qid(to_string(plus),NULL),qid("",NULL),ad,-1);
+                                emit(qid("stackpointer++",NULL),ad,qid("",NULL),qid("",NULL),-1);
                                 emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
                                 qid tmp=newtemp(t);
                                 emit(qid("=",NULL),qid("popreturn",NULL),qid("",NULL),tmp,-1);
-                                emit(qid("stackpointer--",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+                                qid rem=newtemp("int");
+                                emit(qid("=",NULL),qid(to_string(minus),NULL),qid("",NULL),rem,-1);
+                                emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
                                 
                                 
                                 $$->addr=tmp;
@@ -1065,7 +1077,7 @@ Assignment:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(*$2, s);
-
+        cout << $1->temp_name << endl;
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
@@ -1203,21 +1215,35 @@ Assignment:
                     add=t;
                     flag=1;
                 }
-                $$->addr=$1->addr;
-                qid tmp=newtemp(t);
-                if($3->expType==4){
-                    if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
-                    else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),tmp,-1);
+
+                if($1->temp_name.substr(0,5)=="this."){
+                    $$->addr=$1->addr;
+                    string second=$1->temp_name.substr(5,$1->temp_name.size()-5);
+                    qid offs=newtemp("int");
+                    emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                    if(mp_param.find($3->temp_name)==mp_param.end()){
+                        emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else
+                        emit(qid("=",NULL),qid(mp_param[$3->temp_name],NULL),qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
                 }
                 else{
-                    if(flag){
-
-                        emit(qid("=",NULL),cast,qid("",NULL),tmp,-1);
+                    $$->addr=$1->addr;
+                    qid tmp=newtemp(t);
+                    if($3->expType==4){
+                        if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                        else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),tmp,-1);
                     }
-                    else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                    else{
+                        if(flag){
+
+                            emit(qid("=",NULL),cast,qid("",NULL),tmp,-1);
+                        }
+                        else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                    }
+                        
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                 }
-                    
-                emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
             }
             else{
                 yyerror("Incompatible Types for =");
@@ -1701,15 +1727,7 @@ AdditiveExpression:
                     else emit(qid("=",NULL),qid("cast_to_String "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     flag=1;
                 }
-                if($1->type!=temp){
-                    if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
-                    }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
-                    add=temp;
-                    flag=1;
-                }
+                
                  //3ac
                 qid tmp=newtemp("String");
                 $$->addr=tmp;
