@@ -1,5 +1,6 @@
 #include "symbol_table.h"
 #include <algorithm>
+#include <iostream>
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
@@ -200,6 +201,7 @@ int getSize(string id){
 int getOffset(string class_name, string id){
 	int curOff=0;
 	for(auto it: classVariable[class_name]){
+		cout << it.first << endl;
 		if(it.first == id){
 			return curOff;
 		}
@@ -219,4 +221,19 @@ int getFuncSize(string name){
 		temp_table=parent_table[temp_table];
 	}
 	return -1;
+}
+
+int getClassSize(string name){
+	int sum =0;
+	sym_table* temp_table;
+	for(auto it: children_table[&global_st]){
+		if(it.first == name) temp_table = it.second;
+	}
+	if(!temp_table) return -1;
+	for(auto it: *temp_table){
+		if(it.second->token == "IDENTIFIER" || it.second->token == "Temp_var" || it.second->token == "Block"){
+			sum+=it.second->size;
+		}
+	}
+	return sum;
 }

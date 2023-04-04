@@ -44,6 +44,10 @@ int yyerror(const char *str);
 stack <quad> forstat;
 stack <int> forstat_curr;
 
+map<string,string> mp_param;
+
+bool inconst=false;
+
 %}
 
 %locations
@@ -175,6 +179,11 @@ IDENdotIDEN:
         idendotiden = idendotiden + "." +*$3;
         $$->type=type;
         $$->temp_name = $1->temp_name + "." + *$3;
+        
+        //3ac
+        qid temp=newtemp($$->type);
+        emit(qid("+",NULL),qid("*("+($1->addr).first,NULL),qid(to_string(getOffset($1->temp_name,*$3))+")",NULL),temp,-1);
+        $$->addr=temp;
         delete $3;
         
     }
@@ -186,8 +195,14 @@ IDENdotIDEN:
         $$->temp_name = *$1;
 
         //3ac
+        if(mp_param.find(*$1)!=mp_param.end()){
+            string tmp=mp_param[*$1];
+            $$->addr=qid(tmp,lookup(tmp));
+        }
+        else{
         qid tmp=qid(*$1,lookup(*$1));
         $$->addr=tmp;
+        }
 
 
         delete $1;
@@ -361,6 +376,15 @@ ClassInstanceCreationExpression:
         if(type=="")type=$2->type;
         $$->type=type;
         $$->temp_name=$2->temp_name;
+
+        //3ac
+        int sz=getClassSize($2->temp_name);
+        qid tmp=newtemp("int");
+        emit(qid("=",NULL),qid(to_string(sz),NULL),qid("",NULL),tmp,-1);
+        emit(qid("call_alloc",NULL),tmp,qid("",NULL),qid("",NULL),-1); // pushparam 
+        qid obj=newtemp($2->temp_name);
+        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),obj,-1);
+        $$->addr=obj;
     }
     | KEY_new IDENdotIDEN '(' Zeroorone_ArgumentList ')'        {
         vector<ASTNode*> s;
@@ -370,6 +394,17 @@ ClassInstanceCreationExpression:
         if(type=="")type=$2->type;
         $$->type=type;
         $$->temp_name=$2->temp_name;
+
+        //3ac
+        int sz=getClassSize($2->temp_name);
+        qid tmp=newtemp("int");
+        emit(qid("=",NULL),qid(to_string(sz),NULL),qid("",NULL),tmp,-1);
+        emit(qid("call_alloc",NULL),tmp,qid("",NULL),qid("",NULL),-1); // pushparam 
+        qid obj=newtemp($2->temp_name);
+        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),obj,-1);
+        $$->addr=obj;
+
+
     }
 ;
 
@@ -388,7 +423,7 @@ FieldAccess:
         s.push_back($1);
         s.push_back(makeLeaf("ID (" + *$3 + ")"));
         $$ = makeNode("FieldAccess", s);
-        if($$->temp_name == "this"){
+        if($1->temp_name == "this"){
             string temp = primaryExpression(*$3);
             if(temp == ""){
                 yyerror(("Undeclared Identifier " + *$3).c_str());
@@ -419,6 +454,7 @@ FieldAccess:
                 }
             }
         }
+        cout << $$->type << endl;
         delete $3;
     }
     | KEY_super '.' IDENTIFIER      {
@@ -794,9 +830,12 @@ MethodInvocation:
             $$->type = "";
 
             //3ac
-            emit(qid("stackpointer",NULL),qid("+xxx",NULL),qid("",NULL),qid("",NULL),-1);
+            int argsize=0;
+            if($4!=NULL){
+                argsize=$4->size;
+            }
             emit(qid("call",NULL),qid("print 1",NULL),qid("",NULL),qid("",NULL),-1);
-            emit(qid("stackpointer",NULL),qid("-yyy",NULL),qid("",NULL),qid("",NULL),-1);
+            emit(qid("popparam",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
             inPrint = 0;
 
         }
@@ -836,11 +875,21 @@ MethodInvocation:
                         else{
                             $$->type = t;
                             //3ac
-                            if(t=="void")
+                            int argsize=0;
+                            if($4!=NULL){
+                                argsize=$4->size;
+                            }
+                            if(t=="void"){
                                 emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
+                                emit(qid("popparam",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+                            }
                             else{
+                                emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
                                 qid tmp=newtemp(t);
-                                emit(qid("=",NULL),qid("call",NULL),qid($1->temp_name,NULL),tmp,-1);
+                                emit(qid("=",NULL),qid("popreturn",NULL),qid("",NULL),tmp,-1);
+                                emit(qid("popparam",NULL),qid(to_string(argsize),NULL),qid("",NULL),qid("",NULL),-1);
+                                
+                                
                                 $$->addr=tmp;
                             }
                         }
@@ -910,6 +959,7 @@ ArgumentList:
             emit(qid("=",NULL),qid($3->strVal,NULL),qid("",NULL),tmp,-1);
             $3->addr=tmp;
         }
+        cout << $3->type << $3->temp_name << endl;
         emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
         $$->size=$1->size+getSize($3->type);
         
@@ -929,6 +979,7 @@ ArgumentList:
 
             $1->addr=tmp;
         }
+        cout << $1->type << $1->temp_name<< endl;
         emit(qid("param",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
     }
 ;
@@ -1473,17 +1524,22 @@ EqualityExpression:
         string temp=eqExp($1->type,$3->type);
         if(!$1->is_error && !$3->is_error){
             if(!temp.empty()){
-                $$->type=temp;
-                qid no=newtemp(temp);
-                    if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
-                    }
-                    else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),no,-1);
+                if($3->expType==4){
+                    $$->type=temp;
+                    qid no=newtemp(temp);
+                    if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
+                    else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
+                    $3->addr=no;
+                }
                 //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                
+                if(*$2=="=="){
+                    emit(qid("==boolean",NULL),$1->addr,$3->addr,tmp,-1);
+                }
+                else{
+                    emit(qid("!=boolean",NULL),$1->addr,$3->addr,tmp,-1);
+                }
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
                 emit(qid("if",NULL),tmp,qid("",NULL),qid("goto",NULL),0);
@@ -2933,6 +2989,13 @@ ConstructorIDEN:
         funcName =*$1;
         funcType = "Constructor";
         $$->temp_name = "Constructor" + *$1;
+        inconst=true;
+
+        //3ac
+        qid tmp=newtemp(type);
+        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        $$->addr=tmp;
+        mp_param["this"]=tmp.first;
 
         delete $1;
     }
@@ -2947,7 +3010,7 @@ ConstructorDeclaration:
         s.push_back($7);
         $$ = makeNode("ConstructorDeclaration", s);
 
-        string str= $2->temp_name.substr(12);
+        string str= $2->temp_name.substr(11);
 
         if(str!=cur_class){
             yyerror(("Constructor can only have the name "+cur_class).c_str());
@@ -2955,11 +3018,13 @@ ConstructorDeclaration:
         }
         else{
             printSymbolTable(cur_table ,$2->temp_name + ".csv");
-            print3AC_code($2->temp_name, $5->size);
             endSymbolTable();
+            print3AC_code($2->temp_name, $5->size);
         }
 
         modifier={1,0,0};
+        inconst=false;
+        mp_param.clear();
     }
 ;
 
@@ -3002,7 +3067,7 @@ VariableDeclarator1:
             printf("Type is not defined at : %d\n",yylineno);
         }
 
-        if(lookup(*$1)){
+        if(lookup(*$1) && !(inconst)){
 				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -3025,7 +3090,7 @@ VariableDeclarator1:
             yyerror("Index of the array should be integer");
         }
         //
-        if(lookup(*$1)){
+        if(lookup(*$1) && !inconst){
 				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -3037,7 +3102,7 @@ VariableDeclarator1:
             else array_dims.push_back($3->intVal);
             insertSymbol(*cur_table, *$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]);
             
-            //3ac
+            //3ac!inconst
             $$->addr=qid(*$1,lookup(*$1));
         }
         delete $1;
@@ -3051,7 +3116,7 @@ VariableDeclarator1:
         $$->type=type;
         $$->temp_name = *$1;
 
-        if(lookup(*$1)){
+        if(lookup(*$1) && !inconst){
 				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -3080,7 +3145,7 @@ VariableDeclarator1:
         $$->type=type;
         $$->temp_name = *$1;
 
-        if(lookup(*$1)){
+        if(lookup(*$1) && !inconst){
 				string errstr = *$1 + " is already declared";
 				yyerror(errstr.c_str());
 				$$->is_error = 1;            
@@ -3591,12 +3656,11 @@ MethodDeclaration:
 
         string fName = funcName;
         printSymbolTable(cur_table ,fName + ".csv");
-        print3AC_code($2->temp_name, $2->size);
         endSymbolTable();
-        print3AC_code($2->temp_name);
-
+        print3AC_code($2->temp_name, $2->size);
         func_flag=0;
         modifier={1,0,0};
+        mp_param.clear();
     }
 ;
 
@@ -3732,6 +3796,12 @@ MethodIDEN:
         $$->type =type;
         type ="";
         class_type="";
+
+        //3ac
+        qid tmp=newtemp($$->type);
+        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        mp_param["this"]=tmp.first;
+        $$->addr=tmp;
         delete $1;
     }
 ;
@@ -3762,7 +3832,7 @@ formalparameter:
         s.push_back($2);
         $$ = makeNode("formalparameter", s);
 
-        $$->size=getSize($1->type);
+        $$->size=$2->size;
 
         if(type=="")type=$1->type;
         $$->type=type;
@@ -3772,6 +3842,13 @@ formalparameter:
         }
         else $$->is_error = 1;
         type ="";
+
+        //3ac
+        qid tmp=newtemp($$->type);
+        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        $$->addr=tmp;
+        mp_param[$2->temp_name]=tmp.first;
+
     }
     | KEY_final {modifier[2]=1;} Type VariableDeclarator1 {
         vector<ASTNode*> s;

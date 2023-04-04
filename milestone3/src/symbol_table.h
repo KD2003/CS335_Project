@@ -40,3 +40,4 @@ void endSymbolTable();
 int getSize(string);
 int getOffset(string, string);
 int getFuncSize(string);
+int getClassSize(string);
