@@ -83,7 +83,7 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 		classVariable.insert(make_pair(curClass, vector<pair<string, int>> ()));
 	}
 	else if(f_type == "Constructor"){
-        insertSymbol(*cur_table, name, f_type, f_type, lineno, new_table, modifiers, 0);
+        insertSymbol(*cur_table, name, "FUNC_", "FUNC_", lineno, new_table, modifiers, 0);
     }
 	else if(f_type != ""){
 		insertSymbol(*cur_table, name , "FUNC_", "FUNC_" + f_type, lineno, new_table, modifiers, 0);
@@ -212,6 +212,10 @@ int getOffset(string class_name, string id){
 
 int getFuncSize(string name){
 	sym_table* temp_table = cur_table;
+	if(name.size()>11 && name.substr(0,11)=="Constructor"){
+		name=name.substr(11,name.size()-11);
+	}
+	cout << name;
 	while(temp_table){
 		for(auto it: *temp_table){
 			if(it.second->token == "FUNC_" && it.first == name){

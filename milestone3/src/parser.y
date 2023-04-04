@@ -380,6 +380,7 @@ ClassInstanceCreationExpression:
 
         //3ac
         int sz=getClassSize($2->temp_name);
+        cout << sz << endl;
         qid tmp=newtemp("int");
         emit(qid("=",NULL),qid(to_string(sz),NULL),qid("",NULL),tmp,-1);
         emit(qid("call_alloc",NULL),tmp,qid("",NULL),qid("",NULL),-1); // pushparam 
@@ -398,6 +399,7 @@ ClassInstanceCreationExpression:
 
         //3ac
         int sz=getClassSize($2->temp_name);
+        cout << sz << endl;
         qid tmp=newtemp("int");
         emit(qid("=",NULL),qid(to_string(sz),NULL),qid("",NULL),tmp,-1);
         emit(qid("call_alloc",NULL),tmp,qid("",NULL),qid("",NULL),-1); // pushparam 
@@ -2139,11 +2141,10 @@ postfixExpression:
                                 if(tem.back()=='*') $$->type = tem.substr(0,tem.size()-1);
                                 
                                 //3ac
-                                //3ac
 
                                 cout << $1->temp_name;
                                 qid temp=newtemp($$->type);
-                                emit(qid("+",NULL),qid("*("+first,NULL),qid(to_string(getOffset(first,second))+")",NULL),temp,-1);
+                                emit(qid("+",NULL),qid("*("+first,NULL),qid(to_string(getOffset(sub,second))+")",NULL),temp,-1);
                                 $$->addr=temp;
                                 
 
