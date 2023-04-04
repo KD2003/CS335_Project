@@ -1090,99 +1090,298 @@ Assignment:
                     add=t;
                     flag=1;
                 }
-                qid temp=newtemp($1->type);
-                if(*$2=="="){
+                if($1->temp_name.substr(0,5)=="this."){
                     $$->addr=$1->addr;
-                    qid tmp=newtemp($1->type);
-                    if($3->expType==4)
-                        emit(qid("=",NULL),qid(t+" "+to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
-                    else{
-                        qid change=$3->addr;
-                        string ans=add+" "+change.first;
-                        emit(qid("=",NULL),qid(ans,NULL),qid("",NULL),tmp,-1);
+                    string second=$1->temp_name.substr(5,$1->temp_name.size()-5);
+                    if(*$2=="*="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("*",NULL),qid($3->temp_name,NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("*",NULL),qid(mp_param[$3->temp_name],NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
                     }
-                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1); 
+                    else if(*$2=="/="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("/",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("/",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    } 
+                    else if(*$2=="%="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("%",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("%",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2=="+="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("+",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("+",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2=="+="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("+",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("+",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2=="-="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("-",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("-",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    } 
+                    else if(*$2=="<<="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("<<",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("<<",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2==">>="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid(">>",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid(">>",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2==">>>="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid(">>>",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid(">>>",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2=="&="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("&",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("&",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2=="^="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("^",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("^",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
+                    else if(*$2=="|="){
+                        qid offs=newtemp("int");
+                        qid tmp=newtemp(t);
+                        emit(qid("=",NULL),qid(to_string(getOffset(cur_class,second)),NULL),qid("",NULL),offs,-1);
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("|",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid($3->temp_name,NULL),tmp,-1);
+                        }
+                        else
+                            emit(qid("|",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),qid(mp_param[$3->temp_name],NULL),tmp,-1);
+                        
+                        if(mp_param.find($3->temp_name)==mp_param.end()){
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                        }
+                        else
+                            emit(qid("=",NULL),tmp,qid("",NULL),qid("*("+mp_param["this"]+"+"+offs.first+")",NULL),-1);
+                    }
                 }
-                else if(*$2=="*="){
-                    if($3->expType==4)
-                        emit(qid("*"+t,NULL),qid(to_string($3->intVal),NULL),$1->addr,temp,-1);
-                    else
-                        emit(qid("*"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
+                else{
+
+                    qid temp=newtemp($1->type);
+                    if(*$2=="="){
+                        $$->addr=$1->addr;
+                        qid tmp=newtemp($1->type);
+                        if($3->expType==4)
+                            emit(qid("=",NULL),qid(t+" "+to_string($3->intVal),NULL),qid("",NULL),tmp,-1);
+                        else{
+                            qid change=$3->addr;
+                            string ans=add+" "+change.first;
+                            emit(qid("=",NULL),qid(ans,NULL),qid("",NULL),tmp,-1);
+                        }
+                        emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1); 
+                    }
+                    else if(*$2=="*="){
+                        if($3->expType==4)
+                            emit(qid("*"+t,NULL),qid(to_string($3->intVal),NULL),$1->addr,temp,-1);
+                        else
+                            emit(qid("*"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="/="){
+                        if($3->expType==4)
+                            emit(qid("/"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("/"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="%="){
+                        if($3->expType==4)
+                            emit(qid("%"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("%"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="+="){
+                        if($3->expType==4)
+                            emit(qid("+"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("+"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="-="){
+                        if($3->expType==4)
+                            emit(qid("-"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("-"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="<<="){
+                        if($3->expType==4)
+                            emit(qid("<<"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("<<"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2==">>="){
+                        if($3->expType==4)
+                            emit(qid(">>"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid(">>"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2==">>>="){
+                        if($3->expType==4)
+                            emit(qid(">>>"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid(">>>"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="&="){
+                        if($3->expType==4)
+                            emit(qid("&"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("&"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="^="){
+                        if($3->expType==4)
+                            emit(qid("^"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("^"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    else if(*$2=="|="){
+                        if($3->expType==4)
+                            emit(qid("|"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
+                        else
+                            emit(qid("|"+t,NULL),$1->addr,$3->addr,temp,-1);
+                        $1->addr=temp;
+                    }
+                    qid tmp2=newtemp($1->type);
+                    emit(qid("=",NULL),temp,qid("",NULL),temp,-1);
+                    $$->addr=$1->addr;
                 }
-                else if(*$2=="/="){
-                    if($3->expType==4)
-                        emit(qid("/"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("/"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="%="){
-                    if($3->expType==4)
-                        emit(qid("%"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("%"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="+="){
-                    if($3->expType==4)
-                        emit(qid("+"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("+"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="-="){
-                    if($3->expType==4)
-                        emit(qid("-"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("-"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="<<="){
-                    if($3->expType==4)
-                        emit(qid("<<"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("<<"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2==">>="){
-                    if($3->expType==4)
-                        emit(qid(">>"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid(">>"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2==">>>="){
-                    if($3->expType==4)
-                        emit(qid(">>>"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid(">>>"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="&="){
-                    if($3->expType==4)
-                        emit(qid("&"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("&"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="^="){
-                    if($3->expType==4)
-                        emit(qid("^"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("^"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                else if(*$2=="|="){
-                    if($3->expType==4)
-                        emit(qid("|"+t,NULL),$1->addr,qid(to_string($3->intVal),NULL),temp,-1);
-                    else
-                        emit(qid("|"+t,NULL),$1->addr,$3->addr,temp,-1);
-                    $1->addr=temp;
-                }
-                qid tmp2=newtemp($1->type);
-                emit(qid("=",NULL),temp,qid("",NULL),temp,-1);
-                $$->addr=$1->addr;
             }
             else{
                 yyerror(("Incompatible Types for "+ *$2).c_str());
