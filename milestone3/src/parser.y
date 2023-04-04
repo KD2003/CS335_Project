@@ -1867,8 +1867,14 @@ ShiftExpression:
                 //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
-                if($3->expType==4){
+                if($1->expType==4 && $3->expType==4){
+                        emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                }
+                else if($3->expType==4){
                     emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                }
+                else if($1->expType==4){
+                    emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
                 }
                 else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
             }
@@ -1967,14 +1973,19 @@ AdditiveExpression:
                  //3ac
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
-
                 if(flag){
                     string add=temp;
                     emit(qid(*$2+add,NULL),$1->addr,cast,tmp,-1);
                 }
                 else{
-                    if($3->expType==4){
+                    if($1->expType==4 && $3->expType==4){
+                         emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($3->expType==4){
                         emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($1->expType==4){
+                        emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
                     }
                     else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -2043,8 +2054,14 @@ MultiplicativeExpression:
                     emit(qid(*$2+add,NULL),$1->addr,cast,tmp,-1);
                     }
                 else{
-                    if($3->expType==4){
+                    if($1->expType==4 && $3->expType==4){
+                        emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($3->expType==4){
                         emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($1->expType==4){
+                        emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
                     }
                     else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -2103,8 +2120,14 @@ MultiplicativeExpression:
                         emit(qid("*"+add,NULL),$1->addr,cast,tmp,-1);
                     }
                 else{
-                    if($3->expType==4){
+                    if($1->expType==4 && $3->expType==4){
+                         emit(qid("*"+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($3->expType==4){
                         emit(qid("*"+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($1->expType==4){
+                        emit(qid("*"+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
                     }
                     else emit(qid("*"+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -4228,7 +4251,7 @@ int main(int argc, char* argv[]){
                 yyin = fopen(argv[i+1],"r");
                 file_path = argv[i+1];
                 file_path = file_path.substr(0,file_path.size()-5);
-                system(("mkdir "+file_path).c_str());
+                system(("mkdir -p "+file_path).c_str());
                 file_path+="/";
                 if(yyin==NULL){
                     printf("%s can not be opened as an input file.\n", argv[i+1]);
@@ -4278,8 +4301,8 @@ int main(int argc, char* argv[]){
         printf("Starting the parser...\n");
     }
 
-    system(("rm "+file_path+"*.csv").c_str());
-    system(("rm "+file_path+"*.txt").c_str());
+    system(("rm -f "+file_path+"*.csv").c_str());
+    system(("rm -f "+file_path+"*.txt").c_str());
 
     if(!gotoutputfile) dotfile = fopen("temp.dot", "w");
 
