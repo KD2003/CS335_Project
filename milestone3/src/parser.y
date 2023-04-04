@@ -3508,7 +3508,7 @@ VariableDeclarator2:
             else array_dims.push_back($18->intVal);
             if($21==NULL) array_dims.push_back(0);
             else array_dims.push_back($21->intVal);
-            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]);
+            insertSymbol(*cur_table,*$1, "IDENTIFIER", type, yylineno, NULL, modifier, getSize(type)*array_dims[0]*array_dims[1]*array_dims[2]);
 
             //3ac
             $$->addr=qid(*$1,lookup(*$1));
@@ -3593,6 +3593,7 @@ MethodDeclaration:
         printSymbolTable(cur_table ,fName + ".csv");
         print3AC_code($2->temp_name, $2->size);
         endSymbolTable();
+        print3AC_code($2->temp_name);
 
         func_flag=0;
         modifier={1,0,0};
