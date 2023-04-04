@@ -911,9 +911,12 @@ ArgumentList:
             $3->addr=tmp;
         }
         emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
+        $$->size=$1->size+getSize($3->type);
+        
     }
     | Expression        {
         $$ = $1;
+        $$->size=getSize($1->type);
         tempArgs1.push_back($$->type);
 
         //3ac
@@ -2952,7 +2955,7 @@ ConstructorDeclaration:
         }
         else{
             printSymbolTable(cur_table ,$2->temp_name + ".csv");
-            print3AC_code($2->temp_name);
+            print3AC_code($2->temp_name, $5->size);
             endSymbolTable();
         }
 
@@ -3588,7 +3591,7 @@ MethodDeclaration:
 
         string fName = funcName;
         printSymbolTable(cur_table ,fName + ".csv");
-        print3AC_code($2->temp_name);
+        print3AC_code($2->temp_name, $2->size);
         endSymbolTable();
 
         func_flag=0;
@@ -3608,6 +3611,8 @@ MethodHeader:
         $$->type=$1->type;
         $$->temp_name=$2->temp_name;
         modifier={1,0,0};
+
+        $$->size=$2->size;
     }
     | KEY_void {type = "void";} Methodeclarator {
         vector<ASTNode*> s;
@@ -3615,6 +3620,8 @@ MethodHeader:
         $$ = makeNode("void", s);
         modifier={1,0,0};
         $$->temp_name=$3->temp_name;
+
+        $$->size=0;
     }
 ;
 
@@ -3624,6 +3631,8 @@ Methodeclarator:
         s.push_back($1);
         s.push_back($4);
         $$ = makeNode("MethodDeclarator", s);
+
+        $$->size=$4->size;
 
         if(!$4->is_error && !$2->is_error){
             $$->temp_name = $1->temp_name;
@@ -3645,6 +3654,8 @@ Methodeclarator:
         s.push_back($1);
         s.push_back($4);
         $$ = makeNode("MethodDeclarator", s);
+
+        $$->size=$4->size;
 
         if(!$4->is_error && !$2->is_error){
             $$->temp_name = $1->temp_name;
@@ -3730,12 +3741,16 @@ formalparameters:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(",", s);
+
+        $$->size=$1->size+$3->size;
     }
     | formalparameter {
         $$=$1;
         type="";
         class_type="";
         modifier = {1,0,0};
+
+        $$->size=$1->size;
     }
 ;
 
@@ -3745,6 +3760,8 @@ formalparameter:
         s.push_back($1);
         s.push_back($2);
         $$ = makeNode("formalparameter", s);
+
+        $$->size=getSize($1->type);
 
         if(type=="")type=$1->type;
         $$->type=type;

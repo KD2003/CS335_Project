@@ -20,7 +20,7 @@ void emit(quad);
 void backpatch(vector<int>& , int);
 qid newtemp(string);
 int assign_exp(string op, string type, string type1,string type2, qid arg1, qid arg2);
-void print3AC_code(string );
+void print3AC_code(string , int);
 void backpatch_rem();
 string newLabel();
 vector<int> mergelist(vector <int>&, vector <int>&);
