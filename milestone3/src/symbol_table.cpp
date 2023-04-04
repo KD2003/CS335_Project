@@ -216,6 +216,7 @@ int getFuncSize(string name){
 				return it.second->size;
 			}
 		}
+		temp_table=parent_table[temp_table];
 	}
 	return -1;
 }
