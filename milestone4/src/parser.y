@@ -1438,13 +1438,13 @@ Assignment:
 
                             emit(qid("=",NULL),cast,qid("",NULL),tmp,-1);
                         }
-                        else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                        // else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
                     }
-                        
-                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
+                    emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr,-1);
                 }
             }
             else{
+                // cout<<$1->type<<" "<<$3->type<<endl;
                 yyerror("Incompatible Types for =");
                 $$->is_error=1;
             }
@@ -1647,25 +1647,18 @@ ExclusiveOrExpression:
                 $$->type=temp;
                 string add="";
                 int flag=0;
-                qid cast=newtemp(temp);
-                if($3->type!=temp){
-                    if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
-                    }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
-                    add=temp;
-                    flag=1;
+                qid tmp=newtemp(temp);
+                if($1->expType==4 && $3->expType==4){
+                    emit(qid("^"+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
                 }
-                if($1->type!=temp){
-                    if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
-                    }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
-                    add=temp;
-                    flag=1;
+                else if($3->expType==4){
+                    emit(qid("^"+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                 }
+                else if($1->expType==4){
+                    emit(qid("^"+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                }
+                else emit(qid("^"+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                $$->addr=tmp;
             }
             else{
                 yyerror("Incompatible Types for ^");
@@ -1715,6 +1708,18 @@ InclusiveOrExpression:
                     add=temp;
                     flag=1;
                 }
+                qid tmp=newtemp(temp);
+                if($1->expType==4 && $3->expType==4){
+                        emit(qid("|"+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                }
+                else if($3->expType==4){
+                    emit(qid("|"+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                }
+                else if($1->expType==4){
+                    emit(qid("|"+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                }
+                else emit(qid("|"+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                $$->addr=tmp;
 
             }
             else{
@@ -1758,10 +1763,33 @@ EqualityExpression:
                 qid tmp=newtemp(temp);
                 $$->addr=tmp;
                 if(*$2=="=="){
-                    emit(qid("==boolean",NULL),$1->addr,$3->addr,tmp,-1);
-                }
+                    // emit(qid("==boolean",NULL),$1->addr,$3->addr,tmp,-1);
+
+                    if($1->expType==4 && $3->expType==4){
+                        emit(qid("=="+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($3->expType==4){
+                        emit(qid("=="+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($1->expType==4){
+                        emit(qid("=="+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                    }
+                    else emit(qid("=="+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                    $$->addr=tmp;
+                    }
                 else{
-                    emit(qid("!=boolean",NULL),$1->addr,$3->addr,tmp,-1);
+                    // emit(qid("!=boolean",NULL),$1->addr,$3->addr,tmp,-1);
+                    if($1->expType==4 && $3->expType==4){
+                        emit(qid("!="+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($3->expType==4){
+                        emit(qid("!="+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($1->expType==4){
+                        emit(qid("!="+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                    }
+                    else emit(qid("!="+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                    $$->addr=tmp;
                 }
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
@@ -1812,10 +1840,16 @@ RelationalExpression:
                 //3ac
                 qid tmp=newtemp(temp);
 
-                    if($3->expType==4){
-                        emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
-                    }
-                    else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                if($1->expType==4 && $3->expType==4){
+                    emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                }
+                else if($3->expType==4){
+                    emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                }
+                else if($1->expType==4){
+                    emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                }
+                else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
                 $$->addr=tmp;
                 $$->truelist.push_back(nextinstr()); // check if -1 or not
                 $$->falselist.push_back(nextinstr()+1);
@@ -1857,16 +1891,8 @@ ShiftExpression:
             if(!temp.empty()){
                 $$->type=temp;
                 string add="";
-                qid no=newtemp(temp);
-                    if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),no,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid(to_string($3->realVal),NULL),qid("",NULL),no,-1);
-                    }
-                    else emit(qid("=",NULL),qid($3->temp_name,NULL),qid("",NULL),no,-1);
-
                 //3ac
                 qid tmp=newtemp(temp);
-                $$->addr=tmp;
                 if($1->expType==4 && $3->expType==4){
                         emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
                 }
@@ -1877,6 +1903,7 @@ ShiftExpression:
                     emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
                 }
                 else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                $$->addr=tmp;
             }
             else{
                 yyerror(("Incompatible Types for "+*$2).c_str());
@@ -1941,10 +1968,17 @@ AdditiveExpression:
                     emit(qid(*$2+"String",NULL),$1->addr,cast,tmp,-1);
                 }
                 else{
-                    if($3->expType==4){
+                    if($1->expType==4 && $3->expType==4){
+                            emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                    }
+                    else if($3->expType==4){
                         emit(qid(*$2+temp,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
                     }
+                    else if($1->expType==4){
+                        emit(qid(*$2+temp,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                    }
                     else emit(qid(*$2+temp,NULL),$1->addr,$3->addr,tmp,-1);
+                    $$->addr=tmp;
                 }
             }
             else if(!temp.empty()){
