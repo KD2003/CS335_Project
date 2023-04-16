@@ -1,6 +1,4 @@
-#include <fstream>
 #include "3ac.h"
-
 using namespace std;
 
 vector<quad> code; 

@@ -1,6 +1,4 @@
 #include "symbol_table.h"
-#include <algorithm>
-#include <iostream>
 
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
