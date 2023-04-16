@@ -4,7 +4,7 @@
 using namespace std;
 
 
-
+int is_integer(string sym);
 void add_op(quad* instr);
 void sub_op(quad* instr);
 void mul_op(quad* instr);

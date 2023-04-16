@@ -2,10 +2,8 @@
 #include <stdio.h>
 #include <iostream>
 #include"AST.h"
-#include"typecheck.h"
+#include"codegen.h"
 #include <fstream>
-
-int aaa=0;
 
 FILE* dotfile;
 extern FILE* yyin;
@@ -30,11 +28,14 @@ string class_type="", cur_class="";
 string idendotiden ="";
 string funcName="", funcType ="";
 string file_path="";
+string code_file_name="";
 
 vector<int> array_dims;
 vector<int> modifier ={1,0,0};
 vector<string> funcArgs, tempArgs1;
 vector<vector<string> > curArgs(1,vector<string>() );
+
+ofstream code_file;
 
 stack<int> block_stack;
 
@@ -1077,7 +1078,6 @@ Assignment:
         s.push_back($1);
         s.push_back($3);
         $$ = makeNode(*$2, s);
-        cout << $1->temp_name << endl;
         string t=assignExp($1->type,$3->type,*$2);
         if(!$1->is_error && !$3->is_error && $1->expType!=4){
             if(!t.empty()){
@@ -1444,7 +1444,6 @@ Assignment:
                 }
             }
             else{
-                // cout<<$1->type<<" "<<$3->type<<endl;
                 yyerror("Incompatible Types for =");
                 $$->is_error=1;
             }
@@ -4285,6 +4284,13 @@ int main(int argc, char* argv[]){
                 yyin = fopen(argv[i+1],"r");
                 file_path = argv[i+1];
                 file_path = file_path.substr(0,file_path.size()-5);
+                size_t found = file_path.find_last_of('/');
+                if (found == string::npos){
+                    code_file_name = file_path;
+                }
+                else {
+                    code_file_name = file_path.substr((int)found + 1);
+                }
                 system(("mkdir -p "+file_path).c_str());
                 file_path+="/";
                 if(yyin==NULL){
@@ -4351,6 +4357,7 @@ int main(int argc, char* argv[]){
 
     beginAST();
     if(yyparse()) return 0;
+    code_file.open(file_path+code_file_name+".s");
     endAST();
     printSymbolTable(cur_table, "Global.csv");
     
