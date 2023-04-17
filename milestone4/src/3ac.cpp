@@ -5,8 +5,6 @@ vector<quad> code;
 extern int yylineno;
 extern string file_path;
 long long cnt = 0;
-long long lcnt = 0;
-
 int nxt=0;
 
 void emit(qid op, qid arg1, qid arg2, qid res, int idx){
@@ -18,11 +16,6 @@ void emit(qid op, qid arg1, qid arg2, qid res, int idx){
     tmp.idx = idx;
     if(idx == -1) tmp.idx = code.size();
     code.push_back(tmp);
-    nxt++;
-}
-
-void emit(quad q){
-    code.push_back(q);
     nxt++;
 }
 
@@ -48,69 +41,6 @@ qid newtemp(string type){
     vector<int> def={1,0,0};
     insertSymbol(*cur_table, id, "Temp_var", type, yylineno, NULL, def, getSize(type));
     return qid(id, lookup(id));
-}
-
-int assign_exp(string op, string type, string type1,string type2, qid arg1, qid arg2){
-    // emitting code for all type of assignment expressions
-    string temp_op = "";
-    qid sym_typ ;  
-    qid sym_typ1;
-    int flag1 = 0;
-    int a;
-    string str = op;
-    str.pop_back();
-    if(op != "="){
-        temp_op = "" + op.substr(0, 1);    
-        sym_typ = newtemp(type);    
-    }
-    else{
-        sym_typ = arg2;
-    }
-    if(op == "<<=" ||op == ">>=")temp_op += temp_op;
-    
-
-    if(isInt(type1) && isInt(type2) ){
-        temp_op += "int" ;
-        if(op != "=")a = code.size(), emit(qid( temp_op ,lookup(str)),arg1 ,arg2, sym_typ, -1);
-    }
-    else if( isFloat(type1) && isInt(type2)){
-        flag1 = 1;
-        sym_typ1 = newtemp(type);
-        temp_op += "real" ;
-        a = code.size();
-        emit(qid("inttoreal",NULL), arg2, qid("" , NULL) , sym_typ1, -1);
-        if(op != "=")emit(qid( temp_op ,lookup(str)),arg1 ,sym_typ1 , sym_typ, -1);
-    }
-    else if( isFloat(type2) && isInt(type1)){
-        flag1 = 1;
-        sym_typ1 = newtemp(type);
-        temp_op += "int" ;
-        a = code.size();
-        emit(qid("realtoint",NULL), arg2, qid("" , NULL) , sym_typ1, -1);
-        if(op != "=")emit(qid( temp_op ,lookup(str)),arg1 ,sym_typ1 , sym_typ, -1);
-    }
-    else if(isFloat(type1) && isFloat( type2) ){
-        temp_op += "real" ;
-        if(op != "=")a = code.size(), emit(qid( temp_op ,lookup(str)),arg1 ,arg2, sym_typ, -1);
-    }
-
-
-    if(!(op == "=" && flag1 )){ a = code.size(); emit( qid ("=", lookup("=")), sym_typ, qid("", NULL), arg1, -1);}
-    else emit( qid ("=", lookup("=")), sym_typ1, qid("", NULL), arg1, -1);
-
-    return a;
-}
-
-void backpatch_rem(){
-    // backpatching all the remaining goto to Function end
-    int i,j;
-    i = j = code.size()-1;
-    i--;
-    while(code[i].op.first.substr(0,5)!="FUNC_"){
-        if(code[i].op.first =="GOTO" && code[i].idx==0)code[i].idx = j;
-        i--;
-        
-    }
 }
 
 bool isop(string s){
@@ -191,11 +121,6 @@ void print3AC_code(string filename, int paramsize){
     nxt=0;
 }
 
-string newlabel(){
-    string tmp="#L"+to_string(lcnt++);
-    return tmp;
-}
-
 vector<int> mergelist(vector <int> &list1, vector <int> &list2){
     vector<int> temp;
     for(auto i:list1) temp.push_back(i);
@@ -205,11 +130,4 @@ vector<int> mergelist(vector <int> &list1, vector <int> &list2){
 
 int nextinstr(){
     return nxt;
-}
-
-void addline(){
-    nxt++;
-}
-void remline(){
-    nxt--;
 }
