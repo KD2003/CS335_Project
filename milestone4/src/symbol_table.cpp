@@ -1,5 +1,8 @@
 #include "symbol_table.h"
 
+int param_offset = -4;
+stack <int> blockSz, Global_offset;
+
 sym_table global_st;
 map<sym_table*, sym_table*> parent_table;
 map<sym_table*, vector<pair<string, sym_table*>>> children_table;
@@ -13,6 +16,8 @@ extern string file_path;
 string curClass="";
 
 void symbolTableInit(){
+	blockSz.push(0);
+	Global_offset.push(0);
 	parent_table.insert(make_pair(&global_st, nullptr));
 	children_table.insert(make_pair(&global_st, vector<pair<string, sym_table*>> ()));
 	cur_table = &global_st;
@@ -21,7 +26,7 @@ void symbolTableInit(){
 	// insert keywords?
 }
 
-sym_entry* createEntry(string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size){
+sym_entry* createEntry(string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size, int offset){
 	sym_entry* new_symEnt = new sym_entry;
 	new_symEnt->token = token;
 	new_symEnt->type = type;
@@ -31,7 +36,7 @@ sym_entry* createEntry(string token, string type, int lineno, sym_table* ptr, ve
 	new_symEnt->modifiers[1] = modifiers[1];
 	new_symEnt->modifiers[2] = modifiers[2];
 	new_symEnt->size = size;
-	// new_symEnt->offset = offset;
+	new_symEnt->offset = offset;
 	return new_symEnt;
 }
 
@@ -50,7 +55,7 @@ sym_entry* curLookup(string id){
 }
 
 void insertSymbol(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size){
-	table.insert(make_pair(id, createEntry(token, type, lineno, ptr, modifiers, size)));
+	table.insert(make_pair(id, createEntry(token, type, lineno, ptr, modifiers, size, blockSz.top())));
 	if(!array_dims.empty()){
 		// vector<int> temp;
 		// int cur = 1;
@@ -70,9 +75,11 @@ void insertSymbol(sym_table& table, string id, string token, string type, int li
 	if(parent_table[&table] == &global_st){
 		classVariable[curClass].push_back(make_pair(id, size));
 	}
+	blockSz.top()+=size;
+	Global_offset.top()+=size;
 }
 
-void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifiers){
+void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifiers, int flag){
 	sym_table* new_table = new sym_table;
 	
 	if(f_type == "CLASS"){
@@ -89,6 +96,9 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 	else{
 		insertSymbol(*cur_table, name , "Block", "", lineno, new_table, modifiers, 0);
 	}
+
+	Global_offset.push(0);
+	if(flag) blockSz.push(0);
 	parent_table.insert(make_pair(new_table, cur_table));
 	if(children_table.find(cur_table) == children_table.end()){
 		children_table.insert(make_pair(cur_table, vector<pair<string, sym_table*>> ()));
@@ -98,7 +108,21 @@ void makeSymbolTable(string name, string f_type, int lineno, vector<int> &modifi
 }
 
 void paramInsert(sym_table& table, string id, string token, string type, int lineno, sym_table* ptr, vector<int> &modifiers, int size){
-	table.insert(make_pair(id, createEntry(token, type, lineno, ptr, modifiers, size)));
+	table.insert(make_pair(id, createEntry(token, type, lineno, ptr, modifiers, size, param_offset-size)));
+	if(!array_dims.empty()){
+		table[id]->array_dims = array_dims;
+		if(isArray){
+			table[id]->isArray = 1;
+			table[id]->offset = param_offset - size;
+			isArray = 0;
+		}
+		array_dims.clear();
+	}
+	param_offset-=size;
+}
+
+void clear_paramoffset(){
+	param_offset = -4;
 }
 
 vector<string> getFuncArgs(string id){
@@ -117,23 +141,10 @@ void insertFuncArg(string &func, vector<string> &arg, string &tp){
 	func_arg.insert(make_pair(func, make_pair(string("FUNC_" +tp),arg)));
 }
 
-void recurPrintST(FILE* file, sym_table* table){
-	for(auto it: (*table)){
-		string st = "Private";
-		if(it.second->modifiers[0]==2) st="Public";
-    	fprintf(file,"%s,%s,%s,%d,%s\n", it.second->token.c_str(), it.first.c_str() ,it.second->type.c_str(), it.second->lineno, st.c_str());
-  	}
-	for(auto it: children_table[table]){
-		recurPrintST(file, it.second);
-	}
-	return;
-}
-
 void printSymbolTable(sym_table* table, string file_name){
 	if((*table).empty()) return;
 	FILE* file = fopen((file_path+file_name).c_str(), "w");
   	fprintf( file,"Token, Lexeme, Type, Lineno, PublicPrivate, Size\n");
-	// recurPrintST(file, table);
   	for(auto it: (*table)){
 		string st = "Private";
 		if(it.second->modifiers[0]==2) st="Public";
@@ -148,7 +159,10 @@ string funcProtoLookup(string id){
 	else return "";
 }
 
-void endSymbolTable(){
+void endSymbolTable(int flag){
+	int temp = Global_offset.top();
+	Global_offset.pop();
+	Global_offset.top()+=temp;
 	sym_table* temp_table = cur_table;
 	int sum=0;
 	string temp_name;
@@ -163,6 +177,11 @@ void endSymbolTable(){
 		}
 	}
 	(*cur_table)[temp_name]->size = sum;
+	if(flag){
+		temp = blockSz.top();
+		blockSz.pop();
+		blockSz.top()+=temp;
+	}
 }
 
 int classLookup(string id){

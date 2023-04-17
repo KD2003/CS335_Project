@@ -8,7 +8,7 @@ typedef struct sym_entry{
 	string type;
     int lineno;
 	int size;
-	// int offset;
+	int offset;
 	map<string, sym_entry* > * entry;
 
 	struct desc { 
@@ -31,18 +31,19 @@ extern map<sym_table*, sym_table*> parent_table;
 extern map<string, pair<string,vector<string> > > func_arg;
 
 void symbolTableInit();
-sym_entry* createEntry(string, string, int, sym_table*, vector<int>&, int, int);
+sym_entry* createEntry(string, string, int, sym_table*, vector<int>&, int, int, int);
 sym_entry* lookup(string id);
 sym_entry* curLookup(string id);
 void insertSymbol(sym_table&, string, string, string, int, sym_table*, vector<int>&, int);
-void makeSymbolTable(string, string, int, vector<int>&);
+void makeSymbolTable(string, string, int, vector<int>&,int);
 void paramInsert(sym_table&, string, string, string, int, sym_table*, vector<int>&, int);
+void clear_paramoffset();
 vector<string> getFuncArgs(string);
 string getFuncType(string);
 void insertFuncArg(string &, vector<string> &, string &);
 void printSymbolTable(sym_table*, string);
 string funcProtoLookup(string);
-void endSymbolTable();
+void endSymbolTable(int);
 int getSize(string);
 int getOffset(string, string);
 int getFuncSize(string);

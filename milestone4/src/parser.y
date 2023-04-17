@@ -2479,7 +2479,7 @@ Block:
             string str = "Block" + to_string(bc);
             string name = funcName+str+".csv";
             printSymbolTable(cur_table, name);
-            endSymbolTable();
+            endSymbolTable(0);
             func_flag--;
         }
     }
@@ -2610,7 +2610,7 @@ jumpstat:
         string str = "Block" + to_string(bc);
         string name = funcName+str+".csv";
         printSymbolTable(cur_table, name);
-        endSymbolTable();
+        endSymbolTable(0);
         for_flag=0;
         backpatch($$->nextlist,nextinstr()+1);
         $$->nextlist.clear();
@@ -2999,7 +2999,7 @@ A:
         string str = "Block" +to_string(block_count);
         block_stack.push(block_count);
         block_count++;
-        makeSymbolTable(str, "", yylineno, modifier);
+        makeSymbolTable(str, "", yylineno, modifier,0);
     }    
 ;
 
@@ -3132,7 +3132,7 @@ NormalClassDeclaration:
         $$ = makeNode("class", s);
         string filename=*$3;
         printSymbolTable(cur_table,filename + ".csv");
-        endSymbolTable();
+        endSymbolTable(1);
         func_flag=0;
         cur_class="";
         modifier={1,0,0};
@@ -3213,7 +3213,7 @@ CHANGE_TABLE:
                 block_stack.push(block_count);
                 block_count++;
                 func_flag++;
-                makeSymbolTable(str, "", yylineno, modifier);
+                makeSymbolTable(str, "", yylineno, modifier,0);
             }
             else func_flag++;
         }
@@ -3293,7 +3293,7 @@ ConstructorDeclaration:
         }
         else{
             printSymbolTable(cur_table ,$2->temp_name + ".csv");
-            endSymbolTable();
+            endSymbolTable(1);
             print3AC_code($2->temp_name, $5->size);
         }
 
@@ -3931,7 +3931,7 @@ MethodDeclaration:
 
         string fName = funcName;
         printSymbolTable(cur_table ,fName + ".csv");
-        endSymbolTable();
+        endSymbolTable(1);
         print3AC_code($2->temp_name, $2->size);
         func_flag=0;
         modifier={1,0,0};
@@ -4218,12 +4218,13 @@ Modifiers:
 F:
      {
         $$ = makeLeaf("F",1);
+        clear_paramoffset();
         if((*cur_table).find(funcName) != (*cur_table).end()){
             yyerror(("Redefinition of method " + funcName).c_str());
             $$->is_error = 1;
         }
         else{
-            makeSymbolTable(funcName, funcType, yylineno, modifier);
+            makeSymbolTable(funcName, funcType, yylineno, modifier,1);
             $$->node_name = funcName;
             block_count = 1;
             
@@ -4244,7 +4245,7 @@ C:
             $$->is_error = 1;
         }
         else{
-            makeSymbolTable(cur_class, "CLASS", yylineno, modifier);
+            makeSymbolTable(cur_class, "CLASS", yylineno, modifier,1);
             $$->node_name = cur_class;
         }
         type = "";

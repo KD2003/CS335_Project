@@ -21,7 +21,6 @@ typedef struct{
 	vector<int> breaklist;
 	vector<int> continuelist;
 	vector<int> nextlist;
-	vector<int> caselist;
 }ASTNode;
 
 void beginAST();
