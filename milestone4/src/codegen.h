@@ -13,9 +13,9 @@ void initializeRegs();
 void findBasicBlocks();
 void end_basic_block();
 
-string get_mem_location(qid*, qid* sym2, int idx, int flag);
-string getTemporaryReg(qid*, int idx);
-string getReg(qid*, qid* result, qid* sym2, int idx);
+string get_mem_location(qid*, qid*, int, int);
+string getTemporaryReg(qid*, int);
+string getReg(qid*, qid*, qid*, int);
 
 int is_integer(string);
 int giveArraySize(sym_entry*);
@@ -42,5 +42,4 @@ void clear_regs();
 void call_func(quad&);
 void free_reg(string);
 string char_to_int(string);
-void print_global_data();
-string get_type_size(string);
+void print_string_labels();
