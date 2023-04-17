@@ -4358,8 +4358,14 @@ int main(int argc, char* argv[]){
 
 
     beginAST();
-    if(yyparse()) return 0;
+    
     code_file.open(file_path+code_file_name+".s");
+    initializeRegs();
+    gen_data_section();
+    starting_code();
+
+    if(yyparse()) return 0;
+    
     endAST();
     printSymbolTable(cur_table, "Global.csv");
     

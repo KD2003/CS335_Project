@@ -18,7 +18,7 @@ qid empty_var("",NULL);
 extern ofstream code_file;
 extern sym_table global_st;
 extern map<string, int> method_invoked;
-
+extern vector<quad> code;
 
 string get_label(){
     return "L" +to_string(label_cnt++);
@@ -872,86 +872,80 @@ int giveArraySize(sym_entry* entry){
 // //----------------------------------------------------- Main function and helper functions----------------------------------------------------//
 
 // // main function which calls other function
-// void genCode(){
-//     findBasicBlocks();
-//     initializeRegs();
-    
-//     gen_data_section();
-//     starting_code();
+void genCode(){
+    findBasicBlocks();
 
-//     int index = 0;
-//     for(auto it=leaders.begin(); it != leaders.end(); it++){
+    int index = 0;
+    for(auto it=leaders.begin(); it != leaders.end(); it++){
 
-//         code_file << it->second <<":\n";
-//         auto it1 = it;
-//         it1++;
-//         if(it1 == leaders.end()) break;
+        code_file << it->second <<":\n";
+        auto it1 = it;
+        it1++;
+        if(it1 == leaders.end()) break;
         
-//         int ended = 0;
-//         int start = it->first;
-//         int end = it1->first;
+        int ended = 0;
+        int start = it->first;
+        int end = it1->first;
         
-//         for(int idx=start; idx < end; idx++){
-//             quad instr = code[idx];
-//             if(instr.arg1.first != "") instr.arg1.first = char_to_int(instr.arg1.first);
-//             if(instr.arg2.first != "") instr.arg2.first = char_to_int(instr.arg2.first);
+    //     for(int idx=start; idx < end; idx++){
+    //         quad instr = code[idx];
+    //         if(instr.arg1.first != "") instr.arg1.first = char_to_int(instr.arg1.first);
+    //         if(instr.arg2.first != "") instr.arg2.first = char_to_int(instr.arg2.first);
             
-//             if(debug_mode) code_file<<"\t\t\t\t\t\t\t\t\t\t;"<<instr.arg1.first<<" "<<instr.op.first<<" "<<instr.arg2.first<<" "<<instr.res.first<<"\n";
-            
-//             if(instr.op.first.substr(0, 5) == "FUNC_" && instr.op.first[(instr.op.first.size() - 3)] == 't'){
-//                 in_func = 1;
-//                 gen_func_label(&instr);
-//             }
-//             else if(instr.op.first.substr(0,2) == "++"  
-//                     ||instr.op.first.substr(0,2) == "--" 
-//                     ||instr.op.first == "!" 
-//                     ||instr.op.first == "~" 
-//                     ||instr.op.first == "unary-" 
-//                     ||instr.op.first == "unary+") unary_op(&instr);
-//             else if(instr.op.first[0] == '+')    add_op(&instr);
-//             else if(instr.op.first == "=")   assign_op(&instr);
-//             else if(instr.op.first.substr(0, 5) == "FUNC_" && instr.op.first[(instr.op.first.size() - 3)] == 'd'){
-//                 end_basic_block();
-//                 code_file << "\txor eax, eax\n";
-//                 code_file << "\tleave\n";
-//                 code_file << "\tret\n";
-//                 clear_regs();
-//                 in_func = 0;
+    //         if(instr.op.first.substr(0, 5) == "FUNC_" && instr.op.first[(instr.op.first.size() - 3)] == 't'){
+    //             in_func = 1;
+    //             gen_func_label(&instr);
+    //         }
+    //         else if(instr.op.first.substr(0,2) == "++"  
+    //                 ||instr.op.first.substr(0,2) == "--" 
+    //                 ||instr.op.first == "!" 
+    //                 ||instr.op.first == "~" 
+    //                 ||instr.op.first == "unary-" 
+    //                 ||instr.op.first == "unary+") unary_op(&instr);
+    //         else if(instr.op.first[0] == '+')    add_op(&instr);
+    //         else if(instr.op.first == "=")   assign_op(&instr);
+    //         else if(instr.op.first.substr(0, 5) == "FUNC_" && instr.op.first[(instr.op.first.size() - 3)] == 'd'){
+    //             end_basic_block();
+    //             code_file << "\txor eax, eax\n";
+    //             code_file << "\tleave\n";
+    //             code_file << "\tret\n";
+    //             clear_regs();
+    //             in_func = 0;
                 
-//             }
-//             else if(instr.op.first[0] == '-') sub_op(&instr);
-//             else if(instr.op.first[0] == '*') mul_op(&instr);
-//             else if(instr.op.first[0] == '/') div_op(&instr);
-//             else if(instr.op.first[0] == '%') mod_op(&instr);
-//             else if(instr.op.first == "RETURN"){
-//                 return_op(&instr);
-//             }
-//             else if(instr.op.first == "param") params.push(instr.arg1);
-//             else if(instr.op.first == "CALL") call_func(&instr);
-//             else if(instr.op.first == "=="  
-//                     ||instr.op.first == "<" 
-//                     ||instr.op.first == "<=" 
-//                     ||instr.op.first == ">" 
-//                     ||instr.op.first == ">=" 
-//                     ||instr.op.first == "!=" ) comparison_op(&instr); 
+    //         }
+    //         else if(instr.op.first[0] == '-') sub_op(&instr);
+    //         else if(instr.op.first[0] == '*') mul_op(&instr);
+    //         else if(instr.op.first[0] == '/') div_op(&instr);
+    //         else if(instr.op.first[0] == '%') mod_op(&instr);
+    //         else if(instr.op.first == "RETURN"){
+    //             return_op(&instr);
+    //         }
+    //         else if(instr.op.first == "param") params.push(instr.arg1);
+    //         else if(instr.op.first == "CALL") call_func(&instr);
+    //         else if(instr.op.first == "=="  
+    //                 ||instr.op.first == "<" 
+    //                 ||instr.op.first == "<=" 
+    //                 ||instr.op.first == ">" 
+    //                 ||instr.op.first == ">=" 
+    //                 ||instr.op.first == "!=" ) comparison_op(&instr); 
 
-//             else if(instr.op.first == "&&") logic_and(&instr);
-//             else if(instr.op.first == "||") logic_or(&instr);
-//             else if(instr.op.first.substr(0,2) == "<<") lshift_op(&instr);
-//             else if(instr.op.first.substr(0,2) == ">>") rshift_op(&instr);
-//             else if(instr.op.first[0] == '^' ||  instr.op.first[0] == '&' || instr.op.first[0] == '|') bitwise_op(&instr);
-//             else if(instr.op.first == "GOTO") {    
-//                 goto_op(&instr);
-//             }
-//             else if(instr.op.first == "PTR_OP") ptr_op(&instr);
-//             else if(instr.op.first == "member_access") member_access(&instr);
-//             else if(instr.op.first == "[ ]") array_op(&instr);
-//         }
-//         end_basic_block();
-//     }
+    //         else if(instr.op.first == "&&") logic_and(&instr);
+    //         else if(instr.op.first == "||") logic_or(&instr);
+    //         else if(instr.op.first.substr(0,2) == "<<") lshift_op(&instr);
+    //         else if(instr.op.first.substr(0,2) == ">>") rshift_op(&instr);
+    //         else if(instr.op.first[0] == '^' ||  instr.op.first[0] == '&' || instr.op.first[0] == '|') bitwise_op(&instr);
+    //         else if(instr.op.first == "GOTO") {    
+    //             goto_op(&instr);
+    //         }
+    //         // else if(instr.op.first == "PTR_OP") ptr_op(&instr);
+    //         else if(instr.op.first == "member_access") member_access(&instr);
+    //         else if(instr.op.first == "[ ]") array_op(&instr);
+    //     }
+    //     end_basic_block();
+    }
 
-//     print_string_labels();
-// }
+    print_string_labels();
+}
 
 // print the data section for the asm file
 void print_string_labels(){
@@ -1145,22 +1139,18 @@ void free_reg(string reg){
 // }
 
 
-//  // Finds Basic block in 3AC code.
-// void findBasicBlocks(){
-//     for(int i=0;i< (int)code.size(); i++){
+ // Finds Basic block in 3AC code.
+void findBasicBlocks(){
+    for(int i=0;i< (int)code.size(); i++){
 
-//         if(i == 0){
-//             leaders.insert(make_pair(i, get_label()));
-//             continue;
-//         }
-//         if(code[i].op.first.substr(0, 5) == "FUNC_"){
-//                 if(code[i].op.first[code[i].op.first.length()-3] == 't') leaders.insert(make_pair(i, get_label()));
-//                 else if(i+1 != code.size()) leaders.insert(make_pair(i+1, get_label()));
-//         }
-//         else if(code[i].op.first == "GOTO"){
-//             leaders.insert(make_pair(code[i].idx, get_label()));
-//             leaders.insert(make_pair(i+1, get_label()));
-//         }   
-//     }
-//     leaders.insert(make_pair(code.size(), get_label()));
-// }
+        if(i == 0){
+            leaders.insert(make_pair(i, get_label()));
+            continue;
+        }
+        if(code[i].op.first == "GOTO"){
+            leaders.insert(make_pair(code[i].idx, get_label()));
+            leaders.insert(make_pair(i+1, get_label()));
+        }   
+    }
+    leaders.insert(make_pair(code.size(), get_label()));
+}

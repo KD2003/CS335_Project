@@ -1,5 +1,6 @@
 #include "3ac.h"
 using namespace std;
+#include"codegen.h"
 
 vector<quad> code; 
 extern int yylineno;
@@ -117,6 +118,7 @@ void print3AC_code(string filename, int paramsize){
         tac_file << '\n';
     }
     tac_file << "endfunc_" << '\n';
+    genCode();
     code.clear();
     nxt=0;
 }
