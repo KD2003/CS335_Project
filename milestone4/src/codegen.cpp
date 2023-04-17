@@ -366,186 +366,181 @@ int giveArraySize(sym_entry* entry){
 //     else return " dd "; 
 // }
 
-// // save the values of variables when going out of basic block
-// void end_basic_block(){
-//     for(auto reg = reg_desc.begin();reg!=reg_desc.end();reg++){
-//         for(auto sym =reg->second.begin() ;sym!=reg->second.end(); sym++){
-//             if( is_integer(sym->first)) continue;
-//             sym->second->addr_descriptor.reg = "";
-//             qid tem = *sym;
-//             string str = get_mem_location(&tem, &empty_var, -1, -1); 
-//             code_file<<"\tmov " << str <<", "<<reg->first<<"\n";
-//         }
-//         reg->second.clear();
-//     }
-// }
+// save the values of variables when going out of basic block
+void end_basic_block(){
+    for(auto reg = reg_desc.begin();reg!=reg_desc.end();reg++){
+        for(auto sym =reg->second.begin() ;sym!=reg->second.end(); sym++){
+            if(is_integer(sym->first)) continue;
+            sym->second->addr_descriptor.reg = "";
+            qid tem = *sym;
+            string str = get_mem_location(&tem, &empty_var, -1, -1); 
+            code_file<<"\tmov " << str <<", "<<reg->first<<"\n";
+        }
+        reg->second.clear();
+    }
+}
 
-// // add sym to variables stores in reg
-// void update_reg_desc(string reg, qid* sym){
-//     for(auto it = reg_desc[reg].begin();it != reg_desc[reg].end(); it++){
-//         it->second->addr_descriptor.reg = "";
-//         qid temp = *it;
-//     }
+// add sym to variables stores in reg
+void update_reg_desc(string reg, qid* sym){
+    for(auto it = reg_desc[reg].begin();it != reg_desc[reg].end(); it++){
+        it->second->addr_descriptor.reg = "";
+        qid temp = *it;
+    }
+    for(auto it = reg_desc.begin(); it != reg_desc.end(); it++){
+        it->second.erase(*sym);
+    }
     
-//     for(auto it = reg_desc.begin(); it != reg_desc.end(); it++){
-//         it->second.erase(*sym);
-//     }
+    reg_desc[reg].clear();
+    reg_desc[reg].insert(*sym);
+    sym->second->addr_descriptor.stack = false;
+    sym->second->addr_descriptor.reg = reg;
+}
+
+void initializeRegs(){
+    reg_desc.insert(make_pair("rax", set<qid> () ));
+    reg_desc.insert(make_pair("rcx", set<qid> () ));
+    reg_desc.insert(make_pair("rdx", set<qid> () ));
+    reg_desc.insert(make_pair("rbx", set<qid> () ));
+    reg_desc.insert(make_pair("rsi", set<qid> () ));
+    reg_desc.insert(make_pair("rdi", set<qid> () ));
+}
+
+// free registers allocated to Dead temporaries
+void freeDeadTemp(int idx){
+    for(auto it = reg_desc.begin(); it != reg_desc.end(); it++){
+        vector<qid> temp;
+        for(auto sym : it->second){
+            if(sym.second->next_use < idx && sym.second->next_use != -1){
+                temp.push_back(sym);
+                sym.second->addr_descriptor.reg = "";
+            }
+        }
+        for (auto v : temp){
+            it->second.erase(v);
+        }
+    }
+}
+
+// Get memmory location of a variable
+// It can return a register or stack memory location
+// -1: only stack mem location required!!
+// 0: otherwise
+// 1: for instructions which require size
+// 2: specifically requres address to be passed on further to some other variable
+string get_mem_location(qid* sym, qid* sym2, int idx, int flag){
+    // if(sym->second->is_global){
+    //     if(globaldecl[sym->first].second == 0) return string('['+sym->first+']');
+    //     else return sym->first;
+    // }
+    if(is_integer(sym->first)){
+        if(flag) return string("dword " + sym->first);
+        else return sym->first;
+    }
+
+    if(sym->second->addr_descriptor.reg != "" && flag!=-1){
+        if(!sym->second->is_derefer || flag == 2) return sym->second->addr_descriptor.reg;
+        return "[ " + sym->second->addr_descriptor.reg + " ]";
+    }
     
-//     reg_desc[reg].clear();
-//     reg_desc[reg].insert(*sym);
-//     sym->second->addr_descriptor.heap = false;
-//     sym->second->addr_descriptor.stack = false;
-//     sym->second->addr_descriptor.reg = reg;
-// }
+    //Symbol in stack
+    int offset = sym->second->offset;
+    int size = sym->second->size;
+    string str;
+    sym->second->addr_descriptor.stack = true;
+    if(offset >= 0) str = string("[ ebp - " + to_string(offset + size) + " ]");
+    else{
+        offset=-offset;
+        str = string("[ ebp + "+to_string(offset) +" ]");
+    }
+    if(sym->second->is_derefer && flag != -1){
+        string reg = getTemporaryReg(sym2, idx);
+        code_file<< "\tmov "<<reg<<", "<<str<<"\n";
+        update_reg_desc(reg, sym);
+        return "[ " + reg + " ]";
+    }
 
-// void initializeRegs(){
-//     // Add more registers later
-//     reg_desc.insert(make_pair("eax", set<qid> () ));
-//     reg_desc.insert(make_pair("ecx", set<qid> () ));
-//     reg_desc.insert(make_pair("edx", set<qid> () ));
-//     reg_desc.insert(make_pair("ebx", set<qid> () ));
-//     reg_desc.insert(make_pair("esi", set<qid> () ));
-//     reg_desc.insert(make_pair("edi", set<qid> () ));
-// }
+    return str;
+}
 
-// // free registers allocated to Dead temporaries
-// void freeDeadTemp(int idx){
-//     for(auto it = reg_desc.begin(); it != reg_desc.end(); it++){
-//         vector<qid> temp;
-//         for(auto sym : it->second){
-//             if(sym.second->next_use < idx && sym.second->next_use != -1){
-//                 temp.push_back(sym);
-//                 sym.second->addr_descriptor.reg = "";
-//             }
-//         }
-//         for (auto v : temp){
-//             it->second.erase(v);
-//         }
-//     }
-// }
+// Get a temporary register
+string getTemporaryReg(qid* exclude_symbol, int idx){
+    // freeDeadTemp(idx);
+    string reg = "";
+    int mn = 1000000;
+    for (auto it : reg_desc){
+        if( (exclude_symbol && it.second.find(*exclude_symbol) != it.second.end()) || exclude_this.find(it.first) != exclude_this.end()){
+            // skip the reg containing second argument for an instruction
+            continue;
+        }
+        if (it.second.size() < mn){
+            mn =  it.second.size();
+            reg = it.first; 
+        }
+    } 
+    assert(reg != "");
+    free_reg(reg);
+    return reg;
+}
 
-// // Get memmory location of a variable
-// // It can return a register or stack memory location
-// // -1: only stack mem location required!!
-// // 0: otherwise
-// // 1: for instructions which require size
-// // 2: specifically requres address to be passed on further to some other variable
-// string get_mem_location(qid* sym, qid* sym2, int idx, int flag){
-//     if(sym->second->is_global){
-//         if(globaldecl[sym->first].second == 0) return string('['+sym->first+']');
-//         else return sym->first;
-//     }
-//     if(is_integer(sym->first)){
-//         if(flag) return string("dword " + sym->first);
-//         else return sym->first;
-//     }
-
-//     if(sym->second->addr_descriptor.reg != "" && flag!=-1){
-//         if(!sym->second->is_derefer || flag == 2) return sym->second->addr_descriptor.reg;
-//         return "[ " + sym->second->addr_descriptor.reg + " ]";
-//     }
-    
-//     //Symbol in stack
-//     int offset = sym->second->offset;
-//     int size = sym->second->size;
-//     string str;
-//     sym->second->addr_descriptor.stack = true;
-//     if(offset >= 0) str = string("[ ebp - " + to_string(offset + size) + " ]");
-//     else{
-//         offset=-offset;
-//         str = string("[ ebp + "+to_string(offset) +" ]");
-//     }
-//     if(sym->second->is_derefer && flag != -1){
-//         string reg = getTemporaryReg(sym2, idx);
-//         code_file<< "\tmov "<<reg<<", "<<str<<"\n";
-//         update_reg_desc(reg, sym);
-//         return "[ " + reg + " ]";
-//     }
-
-//     return str;
-// }
-
-// // Get a temporary register
-// string getTemporaryReg(qid* exclude_symbol, int idx){
-//     // freeDeadTemp(idx);
-//     string reg = "";
-//     int mn = 1000000;
-//     for (auto it : reg_desc){
-//         if( (exclude_symbol && it.second.find(*exclude_symbol) != it.second.end()) || exclude_this.find(it.first) != exclude_this.end()){
-//             // skip the reg containing second argument for an instruction
-//             continue;
-//         }
-//         if (it.second.size() < mn){
-//             mn =  it.second.size();
-//             reg = it.first; 
-//         }
-//     } 
-//     assert(reg != "");
-//     free_reg(reg);
-//     return reg;
-// }
-
-// // allocates a register to a variable
-// // efficient allocation is done to minise load or store
-// string getReg(qid* sym, qid* result, qid* sym2, int idx){
-//     // Case 1
-//     string reg = "";
-//     if(sym->second->addr_descriptor.reg != "") {
-//         reg = sym->second->addr_descriptor.reg;
-//         vector<qid> temp;
-//         for(auto it: reg_desc[reg]){
-//             if(it.first[0]!='#' && !(it.second->addr_descriptor.stack || it.second->addr_descriptor.heap)){
-//                 it.second->addr_descriptor.reg = "";
-//                 string str = get_mem_location(&it, &empty_var, idx, -1); 
-//                 it.second->addr_descriptor.stack = 1;
-//                 code_file << "\tmov " << str << ", " << reg <<endl;
-//                 temp.push_back(it);
-//             }
-//         }
+// allocates a register to a variable
+// efficient allocation is done to minise load or store
+string getReg(qid* sym, qid* result, qid* sym2, int idx){
+    // Case 1
+    string reg = "";
+    if(sym->second->addr_descriptor.reg != "") {
+        reg = sym->second->addr_descriptor.reg;
+        vector<qid> temp;
+        for(auto it: reg_desc[reg]){
+            if(it.first[0]!='#' && !(it.second->addr_descriptor.stack)){
+                it.second->addr_descriptor.reg = "";
+                string str = get_mem_location(&it, &empty_var, idx, -1); 
+                it.second->addr_descriptor.stack = 1;
+                code_file << "\tmov " << str << ", " << reg <<endl;
+                temp.push_back(it);
+            }
+        }
         
-//         for(auto it: temp){
-//             reg_desc[reg].erase(it);
-//         }
+        for(auto it: temp){
+            reg_desc[reg].erase(it);
+        }
         
-//         return reg;
-//     }
+        return reg;
+    }
 
-//     reg = getTemporaryReg(sym2, idx);
+    reg = getTemporaryReg(sym2, idx);
     
-//     if(sym->first[0] == '\"'){
-//         stringlabels[string_counter] = sym->first;
-//         code_file<<"\tmov "<<reg<<", __str__"<<string_counter<<"\n";
-//         string_counter++;
-//     }
-//     else{
-//         string str = get_mem_location(sym, sym2, idx, -1);
-//         code_file << "\tmov " << reg << ", "<< str <<"\n";
-//         sym->second->addr_descriptor.reg = reg;
-//         reg_desc[reg].insert(*sym);
-//     }
-//     return reg;
-// }
+    if(sym->first[0] == '\"'){
+        stringlabels[string_counter] = sym->first;
+        code_file<<"\tmov "<<reg<<", __str__"<<string_counter<<"\n";
+        string_counter++;
+    }
+    else{
+        string str = get_mem_location(sym, sym2, idx, -1);
+        code_file << "\tmov " << reg << ", "<< str <<"\n";
+        sym->second->addr_descriptor.reg = reg;
+        reg_desc[reg].insert(*sym);
+    }
+    return reg;
+}
 
-// // Clear all the registers
-// void clear_regs(){
-//     for(auto reg = reg_desc.begin(); reg != reg_desc.end(); reg++){
-//         reg->second.clear();
-//     }
-// }
+// Clear all the registers
+void clear_regs(){
+    for(auto reg = reg_desc.begin(); reg != reg_desc.end(); reg++){
+        reg->second.clear();
+    }
+}
 
-
-// // free a specific register
-// void free_reg(string reg){
-//     for(auto sym: reg_desc[reg]){
-//         if(is_integer(sym.first)) continue;
+// free a specific register
+void free_reg(string reg){
+    for(auto sym: reg_desc[reg]){
+        if(is_integer(sym.first)) continue;
         
-//         sym.second->addr_descriptor.reg = "";
-//         string str = get_mem_location(&sym, &empty_var, -1, -1);
-//         code_file<<"\tmov "<< str <<", "<<reg<<"\n";
-//     }
-//     reg_desc[reg].clear();
-// }
-
+        sym.second->addr_descriptor.reg = "";
+        string str = get_mem_location(&sym, &empty_var, -1, -1);
+        code_file<<"\tmov "<< str <<", "<<reg<<"\n";
+    }
+    reg_desc[reg].clear();
+}
 
 // // function prologue
 // void gen_func_label(quad* instr){
