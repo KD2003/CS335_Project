@@ -16,7 +16,6 @@ typedef struct sym_entry{
 		bool stack;
 	} addr_descriptor;
 
-	int next_use = -1;
 	int isArray = 0;
 	int is_derefer = 0;
 	vector<int> array_dims;

@@ -10,7 +10,6 @@ void gen_func_label(quad*);
 void genCode();
 void update_reg_desc(string, qid*);
 void initializeRegs();
-void freeDeadTemp(int);
 void findBasicBlocks();
 void end_basic_block();
 
@@ -18,7 +17,6 @@ string get_mem_location(qid*, qid* sym2, int idx, int flag);
 string getTemporaryReg(qid*, int idx);
 string getReg(qid*, qid* result, qid* sym2, int idx);
 
-void nextUse();
 int is_integer(string);
 int giveArraySize(sym_entry*);
 void assign_op(quad*);
@@ -43,8 +41,6 @@ void return_op(quad*);
 void clear_regs();
 void call_func(quad&);
 void free_reg(string);
-vector<int> findDeadCode();
-void jumpOptimisation();
 string char_to_int(string);
 void print_global_data();
 string get_type_size(string);

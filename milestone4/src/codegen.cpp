@@ -233,18 +233,12 @@ int giveArraySize(sym_entry* entry){
 // void genCode(){
 //     findBasicBlocks();
 //     initializeRegs();
-//     nextUse();
-//     jumpOptimisation();
-//     vector<int> visited = findDeadCode();
     
 //     gen_data_section();
 //     starting_code();
 
 //     int index = 0;
 //     for (auto it=leaders.begin(); it != leaders.end(); it++){
-//         if(!visited[index++]){
-//             continue;
-//         }
 
 //         code_file << it->second <<":\n";
 //         auto it1 = it;
@@ -405,22 +399,6 @@ void initializeRegs(){
     reg_desc.insert(make_pair("rdi", set<qid> () ));
 }
 
-// free registers allocated to Dead temporaries
-void freeDeadTemp(int idx){
-    for(auto it = reg_desc.begin(); it != reg_desc.end(); it++){
-        vector<qid> temp;
-        for(auto sym : it->second){
-            if(sym.second->next_use < idx && sym.second->next_use != -1){
-                temp.push_back(sym);
-                sym.second->addr_descriptor.reg = "";
-            }
-        }
-        for (auto v : temp){
-            it->second.erase(v);
-        }
-    }
-}
-
 // Get memmory location of a variable
 // It can return a register or stack memory location
 // -1: only stack mem location required!!
@@ -464,7 +442,6 @@ string get_mem_location(qid* sym, qid* sym2, int idx, int flag){
 
 // Get a temporary register
 string getTemporaryReg(qid* exclude_symbol, int idx){
-    // freeDeadTemp(idx);
     string reg = "";
     int mn = 1000000;
     for (auto it : reg_desc){
@@ -569,27 +546,6 @@ void free_reg(string reg){
 // }
 
 
-// // Calculates the nextuse of temporary variables
-// void nextUse(){
-//     for(auto it=leaders.begin(); it != leaders.end(); it++){
-//         auto it1 = it;
-//         it1++;
-//         if(it1 == leaders.end()) break;
-
-//         for(int i= (it1->first)-1; i>= (it->first); i--){
-//             if(code[i].arg1.first != "" && code[i].arg1.first[0] == '#' && code[i].arg1.second && code[i].arg1.second->next_use == -1){
-//                 code[i].arg1.second->next_use = i;
-//             } 
-//             if(code[i].arg2.first != "" && code[i].arg2.first[0] == '#' && code[i].arg2.second && code[i].arg2.second->next_use == -1){
-//                 code[i].arg2.second->next_use = i;
-//             }
-//             if(code[i].res.first != "" && code[i].res.first[0] == '#' && code[i].res.second && code[i].res.second->next_use == -1){
-//                 code[i].res.second->next_use = i;
-//             } 
-//         }
-//     }
-// }
-
 //  // Finds Basic block in 3AC code.
 // void findBasicBlocks(){
 //     for (int i=0;i< (int)code.size(); i++){
@@ -608,62 +564,4 @@ void free_reg(string reg){
 //         }   
 //     }
 //     leaders.insert(make_pair(code.size(), get_label()));
-// }
-
-// //----------------------------------------------------- Dead Code Removal ----------------------------------------------------//
-// void dfs(int curr, vector<int>&visited, vector<vector<int> >&adj_list){
-//     visited[curr]=1;
-//     for(auto h:adj_list[curr]){
-//         if(!visited[h]) dfs(h, visited, adj_list);
-//     }
-// }
-
-// vector<int> findDeadCode(){
-
-//     int n = leaders.size()+1;
-//     vector<int> visited(n, 0);
-//     vector<vector<int > > adj_list(n, vector<int>());
-
-//     int id = 0;
-//     unordered_map<int , int> get_leader;
-//     for(auto it:leaders){
-//         get_leader.insert(make_pair(it.first, id++));
-//     }
-//     id=0;
-//     for(auto it = leaders.begin(); it!=leaders.end(); ++it){
-//         int start = it->first;
-//         auto it1 = it;
-//         ++it1;
-//         if(it1 == leaders.end()) break;
-//         int last = it1->first - 1;
-
-//         if(code[last].op.first == "GOTO"){
-//             adj_list[id].push_back(get_leader[code[last].idx]);
-//             if(code[last].arg1.first == "IF") adj_list[id].push_back(get_leader[last+1]);
-//         }
-//         else{
-//             adj_list[id].push_back(get_leader[last+1]);
-//         }
-//         id++;
-//     }
-
-//     dfs(0, visited, adj_list);
-//     return visited;
-// }
-
-// //----------------------------------------------------- Jump to Jump optimization ----------------------------------------------------//
-// int findDest(int j, int cnt){
-//     if(cnt>200) return j;
-//     if((code[j].op.first == "GOTO" && code[j].arg1.first != "IF") && !(j>0 && code[j-1].op.first == "GOTO" && code[j-1].arg1.first == "IF")){
-//         return (code[j].idx = findDest(code[j].idx, cnt+1));
-//     }
-//     return j;
-// }
-
-// void jumpOptimisation(){
-//     for(int i=0; i<(int)code.size(); ++i){
-//         if((code[i].op.first == "GOTO" && code[i].arg1.first != "IF") && !(i>0 && code[i-1].op.first == "GOTO" && code[i-1].arg1.first == "IF")){
-//             code[i].idx = findDest(code[i].idx, 0);
-//         }
-//     }
 // }
