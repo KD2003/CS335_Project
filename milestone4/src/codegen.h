@@ -20,8 +20,7 @@ string getReg(qid*, qid* result, qid* sym2, int idx);
 
 void nextUse();
 int is_integer(string);
-int is_pointerType(string);
-int give_size(sym_entry*);
+int giveArraySize(sym_entry*);
 void assign_op(quad*);
 void add_op(quad*);
 void sub_op(quad*);

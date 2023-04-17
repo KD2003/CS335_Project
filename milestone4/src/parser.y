@@ -46,6 +46,7 @@ stack <quad> forstat;
 stack <int> forstat_curr;
 
 map<string,string> mp_param;
+map<string, int> method_invoked;
 
 bool inconst=false;
 
@@ -902,7 +903,7 @@ MethodInvocation:
                                 emit(qid("=",NULL),qid(to_string(minus),NULL),qid("",NULL),rem,-1);
                                 emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
                                 
-                                
+                                method_invoked[$1->temp_name] = 1;
                                 $$->addr=tmp;
                             }
                         }

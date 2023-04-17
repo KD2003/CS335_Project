@@ -2,7 +2,7 @@
 
 map<string, set<qid> > reg_desc;
 map<int ,string> leaders;
-stack<qid>  params;
+stack<qid> params;
 map<int, string> stringlabels;
 map<int, int> pointed_by;
 map<qid, int> addr_pointed_to;
@@ -18,53 +18,47 @@ qid empty_var("",NULL);
 
 extern ofstream code_file;
 extern sym_table global_st;
+extern map<string, int> method_invoked;
 
 
 
 
-// string get_label(){
-//     return "L" +to_string(label_counter++);
-// }
+string get_label(){
+    return "L" +to_string(label_counter++);
+}
 
-// void gen_data_section(){
-//     for(auto it: func_usage_map){
-//         if(it.second) code_file << "extern "<<it.first<<"\n";
-//     }
-// }
+void gen_data_section(){
+    for(auto it: method_invoked){
+        if(it.second) code_file << "extern "<<it.first<<"\n";
+    }
+}
 
-// void starting_code(){
-//     code_file << "\nsection .text\n";
-//     code_file << "\tglobal main\n";
-// }
+void starting_code(){
+    code_file << "\nsection .text\n";
+    code_file << "\tglobal main\n";
+}
 
-// int is_integer(string sym){
-//     for(int i=0; i<sym.length(); i++){
-//         if(sym[i] >= '0' && sym[i]<='9'){
-//             continue;
-//         }
-//         else return 0;
-//     }
-//     return 1;
-// }
+int is_integer(string sym){
+    for(int i=0; i<sym.length(); i++){
+        if(sym[i] >= '0' && sym[i]<='9'){
+            continue;
+        }
+        else return 0;
+    }
+    return 1;
+}
 
-// int is_pointerType(string type){
-//     if(type[type.length() - 1] == '*'){
-//         return 1;
-//     }
-//     return 0;
-// }
-
-// int give_size(sym_entry* entry){
-//     vector<int> v = entry->array_dims;
-//     if(!v.empty()){
-//         int s=4;
-//         for(int i=0; i<v.size(); i++){
-//             s*=v[i];
-//         }
-//         return s;
-//     }
-//     return 4;
-// }
+int giveArraySize(sym_entry* entry){
+    vector<int> v = entry->array_dims;
+    if(!v.empty()){
+        int s=4;
+        for(int i=0; i<v.size(); i++){
+            s*=v[i];
+        }
+        return s;
+    }
+    return 4;
+}
 // comment below code to compile
 //----------------------------------------------------- Arithmetic Operators ----------------------------------------------------//
 
@@ -85,8 +79,8 @@ extern sym_table global_st;
 //             code_file<<"\tmov "<<reg1<<", [ "<<reg1<<" ]\n";
 //         }
         
-//         if(is_pointerType(instr->arg1.second->type) && !is_pointerType(instr->arg2.second->type)){
-//             int size = give_size(instr->arg1.second);
+//         if(instr->arg1.second->isArray && !instr->arg2.second->isArray){
+//             int size = giveArraySize(instr->arg1.second);
 //             exclude_this.insert(reg1);
 //             string temp_reg = getTemporaryReg(&instr->arg2, instr->idx);
 //             exclude_this.erase(reg1);
@@ -94,8 +88,8 @@ extern sym_table global_st;
 //             code_file << "\timul "<<temp_reg << ", "<< size<<"\n";
 //             mem2 = temp_reg;
 //         }
-//         else if(!is_pointerType(instr->arg1.second->type) && is_pointerType(instr->arg2.second->type) ){
-//             int size = give_size(instr->arg1.second);
+//         else if(instr->arg1.second->isArray && instr->arg2.second->isArray){
+//             int size = giveArraySize(instr->arg1.second);
 //             code_file << "\timul "<<reg1 << ", "<< size<<"\n";
 //         }
 
@@ -103,7 +97,7 @@ extern sym_table global_st;
 //         update_reg_desc(reg1, &instr->res);
 //     }
 // }
-// 
+
 // // subtraction operation
 // void sub_op(quad* instr){
 //     if(is_integer(instr->arg1.first) && is_integer(instr->arg2.first)){
