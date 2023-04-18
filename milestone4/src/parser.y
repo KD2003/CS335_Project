@@ -885,7 +885,7 @@ MethodInvocation:
                             }
                             if(t=="void"){
                                 int minus=argsize;
-                                emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
+                                emit(qid("call",NULL),qid($1->temp_name,NULL),qid(to_string(funcArg.size()),NULL),qid("",NULL),-1);
                                 qid rem=newtemp("int");
                                 emit(qid("=",NULL),qid(to_string(minus),NULL),qid("",NULL),rem,-1);
                                 emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
@@ -895,8 +895,7 @@ MethodInvocation:
                                 int plus=getSize(t)+4;
                                 qid ad=newtemp("int");
                                 emit(qid("=",NULL),qid(to_string(plus),NULL),qid("",NULL),ad,-1);
-                                emit(qid("stackpointer++",NULL),ad,qid("",NULL),qid("",NULL),-1);
-                                emit(qid("call",NULL),qid($1->temp_name,NULL),qid(", "+to_string(funcArg.size()),NULL),qid("",NULL),-1);
+                                emit(qid("call",NULL),qid($1->temp_name,NULL),qid(to_string(funcArg.size()),NULL),qid("",NULL),-1);
                                 qid tmp=newtemp(t);
                                 emit(qid("=",NULL),qid("popreturn",NULL),qid("",NULL),tmp,-1);
                                 qid rem=newtemp("int");
