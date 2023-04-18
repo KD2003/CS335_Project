@@ -915,42 +915,34 @@ void initializeRegs(){
 // 1: for instructions which require size
 // 2: specifically reqiures address to be passed on further to some other variable
 string get_mem_location(qid* sym, qid* sym2, int idx, int flag){
-    // if(sym->second->is_global){
-    //     if(globaldecl[sym->first].second == 0) return string('['+sym->first+']');
-    //     else return sym->first;
-    // }
     if(is_integer(sym->first)){
-        if(flag) return string("dword " + sym->first);
-        else return sym->first;
+        return string("$" + sym->first);
     }
 
     if(sym->second->addr_descriptor.reg != "" && flag!=-1){
         if(!sym->second->is_derefer || flag == 2) return sym->second->addr_descriptor.reg;
-        return "[ " + sym->second->addr_descriptor.reg + " ]";
+        return "( " + sym->second->addr_descriptor.reg + " )";
     }
     
-    //Symbol in stack
+    //in stack
     int offset = sym->second->offset;
-    int size = sym->second->size;
-    string str;
     sym->second->addr_descriptor.stack = true;
-    if(offset >= 0) str = string("[ ebp - " + to_string(offset + size) + " ]");
-    else{
-        offset=-offset;
-        str = string("[ ebp + "+to_string(offset) +" ]");
-    }
-    if(sym->second->is_derefer && flag != -1){
-        string reg = getTemporaryReg(sym2, idx);
-        code_file<< "\tmov "<<reg<<", "<<str<<"\n";
-        update_reg_desc(reg, sym);
-        return "[ " + reg + " ]";
-    }
+
+
+    string str = to_string(-offset-8)+"( rsp)";
+
+    // if(sym->second->is_derefer && flag != -1){
+    //     string reg = getTemporaryReg(sym2, idx);
+    //     code_file<< "\tmov "<<reg<<", "<<str<<"\n";
+    //     update_reg_desc(reg, sym);
+    //     return "[ " + reg + " ]";
+    // }
     return str;
 }
 
 string getTemporaryReg(qid* sym, int idx){
     string reg = "";
-    int lim = 999999;
+    int lim = INT_MAX;
     for(auto it : reg_desc){
         if((sym && it.second.find(*sym) != it.second.end()) || exclude_this.find(it.first) != exclude_this.end()){
             continue;
