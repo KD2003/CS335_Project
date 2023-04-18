@@ -2191,17 +2191,15 @@ UnaryExpression:
                     $$->intVal = $2->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp);
-                    $$->addr=tmp;
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    $$->addr=$2->addr;
+                    emit(qid("++P",NULL),$2->addr,qid("",NULL),qid("",NULL),-1);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp);
-                    $$->addr=tmp;
-                    emit(qid("-",NULL),$2->addr,qid("1",NULL),tmp,-1);
+                    $$->addr=$2->addr;
+                    emit(qid("--P",NULL),$2->addr,qid("",NULL),qid("",NULL),-1);
                 }
                 
 			}
@@ -2233,12 +2231,15 @@ UnaryExpression:
                     //3ac
                     qid tmp=newtemp(temp);
                     $$->addr=tmp;
-                    emit(qid("-",NULL),$2->addr,qid("",NULL),tmp,-1);
+                    emit(qid("-U",NULL),$2->addr,qid("",NULL),tmp,-1);
 
                 }
                 else{ 
                     $$->intVal = $2->intVal;
-                    $$->addr=$2->addr;
+                    //3ac
+                    qid tmp=newtemp(temp);
+                    $$->addr=tmp;
+                    emit(qid("+U",NULL),$2->addr,qid("",NULL),tmp,-1);
                 }
 			}
 			else{
@@ -2438,17 +2439,15 @@ postfixExpression:
                     $$->intVal = $1->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp);
-                    $$->addr=tmp;
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    $$->addr=$1->addr;
+                    emit(qid("P++",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
                 }
                 else{
                     $$->intVal = $1->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp);
-                    $$->addr=tmp;
-                    emit(qid("-",NULL),$1->addr,qid("1",NULL),tmp,-1);
+                    $$->addr=$1->addr;
+                    emit(qid("P--",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
                 }
 			}
 			else{
@@ -2770,22 +2769,15 @@ StatementExpression:
                     $$->intVal = $2->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
-                    emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
-                    
+                    emit(qid("++P",NULL),$2->addr,qid("",NULL),qid("",NULL),-1);
                 }
                 else{
                     $$->intVal = $2->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp);
                     $$->addr=$2->addr;
-                    emit(qid("+",NULL),$2->addr,qid("1",NULL),tmp,-1);
-                    emit(qid("=",NULL),tmp,qid("",NULL),$2->addr,-1);
-                    
+                    emit(qid("--P",NULL),$2->addr,qid("",NULL),qid("",NULL),-1);
                 }
 			}
 			else{
@@ -2816,22 +2808,15 @@ StatementExpression:
                     $$->intVal = $1->intVal + 1;
 
                     //3ac
-                    qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
-                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
-                    
+                    emit(qid("P++",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
                 }
                 else{
                     $$->intVal = $1->intVal -1;
                     
                     //3ac
-                    qid tmp=newtemp(temp);
                     $$->addr=$1->addr;
-                    emit(qid("+",NULL),$1->addr,qid("1",NULL),tmp,-1);
-                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
-                    
+                    emit(qid("P--",NULL),$1->addr,qid("",NULL),qid("",NULL),-1);
                 }
 			}
 			else{

@@ -350,113 +350,75 @@ void shift_op(quad* instr){
     update_reg_desc(reg1, &instr->res);
 }
 
-// void unary_op(quad* instr){
-//     string op = instr->op.first;
-//     string temp;
-   
-//     string reg = getReg(&instr->arg1, &instr->res, &instr->arg2, instr->idx);
-//     temp =reg;
-
-//     string instruction = "";
-//     if(op[2] == 'P'){
-//         // TODO
-//         if(op == "++P")      instruction = "inc";
-//         else if(op == "--P") instruction = "dec";
+void unary_op(quad* instr){
+    string op = instr->op.first, unary_ins = "";
+    string reg = getReg(&instr->arg1, &instr->res, &instr->arg2, instr->idx);
+    if(op[2] == 'P'){
+        if(op == "++P")      unary_ins = "inc";
+        else if(op == "--P") unary_ins = "dec";
         
-//         if(instr->arg1.second->is_derefer){
-//             string reg = getReg(&instr->arg1, &instr->res, &instr->arg2, instr->idx);
-//             string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
-
-//             reg = "[ " + reg + " ]";
-
-//             code_file<<"\tmov "<<reg1<<", "<<reg<<"\n";
-//             code_file<<"\t"<<instruction<<" "<<reg1<<"\n";
-//             code_file<<"\tmov "<<reg<<", "<<reg1<<"\n";
-//             update_reg_desc(reg1, &instr->res);
-//         }
-//         else{
-//             string reg = getReg(&instr->arg1, &instr->res, &instr->arg2, instr->idx);
-//             code_file<<"\t"<<instruction<<" "<<reg<<"\n";
-//             free_reg(reg);
-//             update_reg_desc(reg, &instr->res);
-//         }
+        if(instr->arg1.second->is_derefer){
+            string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
+            reg = "[ " + reg + " ]";
+            code_file<<"\tmov "<< reg <<", "<< reg1 <<"\n";
+            code_file<<"\t"<< unary_ins <<" "<< reg1 <<"\n";
+            code_file<<"\tmov "<< reg1 <<", "<< reg <<"\n";
+            update_reg_desc(reg1, &instr->res);
+        }
+        else{
+            code_file<<"\t"<< unary_ins <<" "<< reg <<"\n";
+            free_reg(reg);
+            update_reg_desc(reg, &instr->res);
+        }
         
-//     }
-//     else if(op[2] == 'S'){
-//         if(op == "++S")      instruction = "inc";
-//         else if(op == "--S") instruction = "dec";
-        
-//         if(instr->arg1.second->is_derefer){
-//             string reg = getReg(&instr->arg1, &instr->res, &instr->arg2, instr->idx);
-//             string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
-
-//             reg = "[ " + reg + " ]";
-//             code_file<<"\tmov "<<reg1<<", "<<reg<<"\n";
-//             update_reg_desc(reg1, &instr->res);
-
-//             code_file<<"\t"<<instruction<<" "<<reg1<<"\n";
-//             code_file<<"\tmov "<<reg<<", "<<reg1<<"\n";
-//         }
-//         else{
-//             string reg = getReg(&instr->arg1, &instr->res, &instr->arg2, instr->idx);
-//             string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
-//             code_file<<"\tmov "<<reg1<<", "<<reg<<"\n";
-//             update_reg_desc(reg1, &instr->res);
-
-//             code_file<<"\t"<<instruction<<" "<<reg<<"\n";
-//             string str = get_mem_location(&instr->arg1, &empty_var,instr->idx,-1);
-//             code_file<<"\tmov "<<str<<", "<<reg<<"\n";
-//         }
-//     }
-//     else if(op =="~" ) {
-//         instruction = "not";
-//         string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
-//         if(instr->arg1.second->is_derefer){
-//             reg = "[ " + reg + " ]";
-//         }
-
-//         code_file<<"\tmov "<<reg1<<", "<<reg<<"\n";
-//         code_file << "\t"<<instruction<< " "<<reg1<<"\n";        
-//         update_reg_desc(reg1, &instr->res);
-//     }
-//     else if(op == "unary-"){
-//         instruction = "neg";
-//         string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
-        
-//         if(instr->arg1.second->is_derefer){
-//             reg = "[ " + reg + " ]";
-//         }
-
-//         code_file<<"\tmov "<<reg1<<", "<<reg<<"\n";
-//         code_file << "\t"<<instruction<< " "<<reg1<<"\n";        
-//         update_reg_desc(reg1, &instr->res);
-//     }
-//     else if(op == "unary+"){
-//         reg_desc[reg].insert(instr->res);
-//         instr->res.second->addr_descriptor.reg = reg;
-//     }
-//     else if(op == "!"){
-//         string l1 = get_label();
-//         string l2 = get_label();
-//         string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
-        
-//         if(instr->arg1.second->is_derefer){
-//             reg = "[ " + reg + " ]";
-//         }
-
-//         code_file<<"\tmov "<<reg1<<", "<<reg<<"\n";
-//         code_file << "\tcmp "<<reg1<<", dword "<<0<<"\n";  //dword inserted
-//         code_file << "\tje "<<l1<<"\n";
-//         code_file << "\tmov "<<reg1<<", dword "<<0<<"\n";
-//         code_file << "\tjmp "<<l2<<"\n";
-//         code_file << l1 <<":\n";
-//         code_file << "\tmov "<<reg1<<", dword "<<1<<"\n";
-//         code_file << l2 <<":\n";
-//         update_reg_desc(reg1, &instr->res);
-//     }
-// }
-
-// //----------------------------------------------------- Assignment ----------------------------------------------------//
+    }
+    else if(op[0] == 'P'){
+        if(op == "P++")      unary_ins = "inc";
+        else if(op == "P--") unary_ins = "dec";
+        if(instr->arg1.second->is_derefer){
+            string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
+            reg = "[ " + reg + " ]";
+            code_file<<"\tmov "<< reg <<", "<< reg1 <<"\n";
+            update_reg_desc(reg1, &instr->res);
+            code_file<<"\t"<< unary_ins <<" "<< reg1 <<"\n";
+            code_file<<"\tmov "<< reg1 <<", "<< reg <<"\n";
+        }
+        else{
+            string reg1 = getTemporaryReg(&instr->arg1, instr->idx);
+            code_file<<"\tmov "<< reg <<", "<< reg1 <<"\n";
+            update_reg_desc(reg1, &instr->res);
+            code_file<<"\t"<< unary_ins <<" "<< reg <<"\n";
+            string str = get_mem_location(&instr->arg1, &empty_var,instr->idx,-1);
+            code_file<<"\tmov "<< reg <<", "<< str <<"\n";
+        }
+    }
+    else if(op == "~"){
+        if(instr->arg1.second->is_derefer){
+            reg = "[ " + reg + " ]";
+        }
+        code_file << "\tnot " << reg <<"\n";
+        update_reg_desc(reg, &instr->res);
+    }
+    else if(op == "-U"){
+        if(instr->arg1.second->is_derefer){
+            reg = "[ " + reg + " ]";
+        }
+        code_file << "\tneg " << reg <<"\n";       
+        update_reg_desc(reg, &instr->res);
+    }
+    else if(op == "+U"){
+        reg_desc[reg].insert(instr->res);
+        instr->res.second->addr_descriptor.reg = reg;
+    }
+    else if(op == "!"){
+        if(instr->arg1.second->is_derefer){
+            reg = "[ " + reg + " ]";
+        }
+        code_file << "\ttest "<< reg <<", "<< reg <<"\n";
+        code_file << "\tsete "<< reg <<"\n";
+        update_reg_desc(reg, &instr->res);
+    }
+}
 
 // void assign_op(quad* instr){
 //     // for global variables
