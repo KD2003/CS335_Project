@@ -2,7 +2,6 @@
 
 map<string, set<qid> > reg_desc;
 map<int ,string> leaders;
-stack<qid> params;
 map<int, string> stringlabels;
 map<int, int> pointed_by;
 map<qid, int> addr_pointed_to;
@@ -14,6 +13,8 @@ int in_func = 0;
 
 set<string> exclude_this;
 qid empty_var("",NULL);
+
+vector<qid> params;
 
 extern ofstream code_file;
 extern sym_table global_st;
@@ -585,54 +586,8 @@ void unary_op(quad* instr){
 
 // }
 
-// //----------------------------------------------------- Return and Goto ----------------------------------------------------//
+// //----------------------------------------------------- Goto ----------------------------------------------------//
 
-// // returning from a function
-// void return_op(quad* instr){
-//     if(instr->arg1.first != ""){
-//         if(typeLookup(instr->arg1.second->type)){
-//             for(auto it: reg_desc){
-//                 free_reg(it.first);
-//             }
-//             string reg1 = getTemporaryReg(&empty_var, instr->idx);
-            
-//             exclude_this.insert(reg1);
-            
-//             string reg2 = getTemporaryReg(&empty_var, instr->idx);
-//             exclude_this.clear();
-            
-//             code_file<<"\tmov "<<reg1<<", [ ebp + "<<arg_size<<" ]\n";
-            
-//             int struct_size = getStructsize(instr->arg1.second->type);
-//             int struct_offset = instr->arg1.second->offset;
-//             if(instr->arg1.second->offset < 0){
-//                 for(int i = 0; i<struct_size; i+=4){
-//                     code_file<<"\tmov "<<reg2<<", [ ebp + "<<abs(struct_offset) - i<<" ]\n";
-//                     code_file<<"\tmov [ "<<reg1<<" + "<<struct_size - i - 4<<" ], "<<reg2<<"\n";
-//                 }
-//             }
-//             else{
-//                 for(int i = 0; i<struct_size; i+=4){
-//                     code_file<<"\tmov "<<reg2<<", [ ebp - "<<struct_offset + 4 + i<<" ]\n";
-//                     code_file<<"\tmov [ "<<reg1<<" + "<<struct_size - i - 4<<" ], "<<reg2<<"\n";
-//                 }
-//             }
-//             code_file<<"\tleave\n";
-//             code_file<<"\tret\n";
-//         }
-//         else{
-//             string mem = get_mem_location(&instr->arg1, &empty_var, instr->idx, 1);
-//             if(mem != "eax") code_file<<"\tmov eax, "<<mem<<"\n";
-//             code_file<<"\tleave\n";
-//             code_file<<"\tret\n";
-//         }
-//     }
-//     else{
-//         code_file<<"\txor eax, eax\n";
-//         code_file<<"\tleave\n";
-//         code_file<<"\tret\n";
-//     }
-// }
 
 // // Goto operation
 // void goto_op(quad* instr){
@@ -650,88 +605,154 @@ void unary_op(quad* instr){
 // }
 
 
-// //----------------------------------------------------- Function Call ----------------------------------------------------//
+// //----------------------------------------------------- Function Call and return ----------------------------------------------------//
 
-// void call_func(quad *instr){
+void call_func(quad *instr){
 
-//     for(auto it: reg_desc){
-//         free_reg(it.first);
-//     }
+    for(auto it: reg_desc){
+        free_reg(it.first);
+    }
 
-//     int curr_reg = 0;
-//     int i = stoi(instr->arg2.first);
-//     int sz = i;
+    int npara = stoi(instr->arg2.first);
+    int addspace=0;
+    for(int i=0;i<npara;i++){
+        code_file << "push " <<  get_mem_location(&params[i], &empty_var, -1, -1) << '\n';
+        addspace+=params[i].second->size;
+    }
+    code_file << "sub " << "$"+to_string(addspace)+", " << "%rsp" << '\n';
 
-//     sym_entry* func_entry = lookup(instr->arg1.first);
-//     string ret_type = "";
-//     if(func_entry) ret_type = func_entry->type.substr(5, func_entry->type.length()-5);
+    code_file << "call " << instr->arg1.first << '\n';  
+    code_file << "add " << "$"+to_string(addspace)+", " << "%rsp" << '\n'; 
+    params.clear();
+
+
+    // sym_entry* func_entry = lookup(instr->arg1.first);
+    // string ret_type = "";
+    // if(func_entry) ret_type = func_entry->type.substr(5, func_entry->type.length()-5);
     
-//     if(typeLookup(ret_type)){
-//         code_file<<"\tlea eax, "<<get_mem_location(&instr->res, &empty_var, -1, -1)<<"\n";
-//         code_file<<"\tpush eax\n";
-//     }
+    // if(typeLookup(ret_type)){
+    //     code_file<<"\tlea eax, "<<get_mem_location(&instr->res, &empty_var, -1, -1)<<"\n";
+    //     code_file<<"\tpush eax\n";
+    // }
 
-//     while(i>0){
-//         if(params.top().first[0] == '\"'){            
-//             stringlabels.insert({string_cnt, params.top().first});
-//             code_file<<"\tpush __str__"<<string_cnt<<"\n";
-//             string_cnt++;
-//         }
-//         else if(typeLookup(params.top().second->type)){
-//             int type_size = getSize(params.top().second->type), type_offset = params.top().second->offset;
+    // while(i>0){
+    //     if(params.top().first[0] == '\"'){            
+    //         stringlabels.insert({string_cnt, params.top().first});
+    //         code_file<<"\tpush _str_"<<string_cnt<<"\n";
+    //         string_cnt++;
+    //     }
+    //     else if(typeLookup(params.top().second->type)){
+    //         int type_size = getSize(params.top().second->type), type_offset = params.top().second->offset;
             
-//             if(params.top().second->is_derefer) {
-//                 string reg = getReg(&params.top(), &empty_var, &empty_var, instr->idx);
+    //         if(params.top().second->is_derefer) {
+    //             string reg = getReg(&params.top(), &empty_var, &empty_var, instr->idx);
                 
-//                 for(int i = type_size - 4; i>=0; i-=4){
-//                     code_file<<"\tpush dword [ "<<reg<<" + "<<i<<" ]\n";
-//                 }
-//             }
-//             else {
-//                 if(type_offset > 0){
-//                     for(int i = type_offset; i<type_size + type_offset; i+=4){
-//                         code_file<<"\tpush dword [ ebp - "<<i+4<<" ]\n";
-//                     }
-//                 }
-//                 else{
-//                     for(int i = 0; i<type_size; i+=4){
-//                         code_file<<"\tpush dword [ ebp + "<<abs(type_offset+i)<<" ]\n";
-//                     }
-//                 }
-//             }
-//         }
-//         else if(params.top().second->is_derefer){
-//             string mem;
-//             mem = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
-//             code_file<<"\tpush dword "<<mem<<"\n";
-//         }
-//         else if(params.top().second->isArray){
-//             string str = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
-//             code_file<<"\tlea eax, "<< str <<"\n";
-//             code_file<<"\tpush eax\n";
-//         }
-//         else{
-//             string mem = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
+    //             for(int i = type_size - 4; i>=0; i-=4){
+    //                 code_file<<"\tpush dword [ "<<reg<<" + "<<i<<" ]\n";
+    //             }
+    //         }
+    //         else {
+    //             if(type_offset > 0){
+    //                 for(int i = type_offset; i<type_size + type_offset; i+=4){
+    //                     code_file<<"\tpush dword [ ebp - "<<i+4<<" ]\n";
+    //                 }
+    //             }
+    //             else{
+    //                 for(int i = 0; i<type_size; i+=4){
+    //                     code_file<<"\tpush dword [ ebp + "<<abs(type_offset+i)<<" ]\n";
+    //                 }
+    //             }
+    //         }
+    //     }
+    //     else if(params.top().second->is_derefer){
+    //         string mem;
+    //         mem = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
+    //         code_file<<"\tpush dword "<<mem<<"\n";
+    //     }
+    //     else if(params.top().second->isArray){
+    //         string str = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
+    //         code_file<<"\tlea eax, "<< str <<"\n";
+    //         code_file<<"\tpush eax\n";
+    //     }
+    //     else{
+    //         string mem = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
             
-//             if(reg_desc.find(mem) == reg_desc.end() && mem.substr(0,5) != "dword") mem = "dword "+mem;
-//             code_file<<"\tpush "<<mem<<"\n";
+    //         if(reg_desc.find(mem) == reg_desc.end() && mem.substr(0,5) != "dword") mem = "dword "+mem;
+    //         code_file<<"\tpush "<<mem<<"\n";
             
-//         }
-//         i--;
-//         params.pop();
-//     }
+    //     }
+    //     i--;
+    //     params.pop();
+    // }
     
-//     code_file<<"\tcall "<<instr->arg1.first<<"\n";
+    // code_file<<"\tcall "<<instr->arg1.first<<"\n";
     
-//     if(!typeLookup(ret_type)){
-//         reg_desc["eax"].insert(instr->res);
-//         instr->res.second->addr_descriptor.reg = "eax";
-//     }
-//     else sz++;
+    // if(!typeLookup(ret_type)){
+    //     reg_desc["eax"].insert(instr->res);
+    //     instr->res.second->addr_descriptor.reg = "eax";
+    // }
+    // else sz++;
 
-//     // Clear args from stack
-//     code_file<<"\tadd esp, "<<4*sz<<"\n";
-// }
+    // // Clear args from stack
+    // code_file<<"\tadd esp, "<<4*sz<<"\n";
+}
+
+
+// storing return value from a func
+void return_func(quad* instr){
+    
+    string dest =  get_mem_location(&instr->res, &empty_var, -1, -1);
+    code_file << "mov " << "%rax " << dest << '\n';
+
+
+
+
+
+
+    // if(instr->arg1.first != ""){
+    //     if(typeLookup(instr->arg1.second->type)){
+    //         for(auto it: reg_desc){
+    //             free_reg(it.first);
+    //         }
+    //         string reg1 = getTemporaryReg(&empty_var, instr->idx);
+            
+    //         exclude_this.insert(reg1);
+            
+    //         string reg2 = getTemporaryReg(&empty_var, instr->idx);
+    //         exclude_this.clear();
+            
+    //         code_file<<"\tmov "<<reg1<<", [ ebp + "<<arg_size<<" ]\n";
+            
+    //         int struct_size = getStructsize(instr->arg1.second->type);
+    //         int struct_offset = instr->arg1.second->offset;
+    //         if(instr->arg1.second->offset < 0){
+    //             for(int i = 0; i<struct_size; i+=4){
+    //                 code_file<<"\tmov "<<reg2<<", [ ebp + "<<abs(struct_offset) - i<<" ]\n";
+    //                 code_file<<"\tmov [ "<<reg1<<" + "<<struct_size - i - 4<<" ], "<<reg2<<"\n";
+    //             }
+    //         }
+    //         else{
+    //             for(int i = 0; i<struct_size; i+=4){
+    //                 code_file<<"\tmov "<<reg2<<", [ ebp - "<<struct_offset + 4 + i<<" ]\n";
+    //                 code_file<<"\tmov [ "<<reg1<<" + "<<struct_size - i - 4<<" ], "<<reg2<<"\n";
+    //             }
+    //         }
+    //         code_file<<"\tleave\n";
+    //         code_file<<"\tret\n";
+    //     }
+    //     else{
+    //         string mem = get_mem_location(&instr->arg1, &empty_var, instr->idx, 1);
+    //         if(mem != "eax") code_file<<"\tmov eax, "<<mem<<"\n";
+    //         code_file<<"\tleave\n";
+    //         code_file<<"\tret\n";
+    //     }
+    // }
+    // else{
+    //     code_file<<"\txor eax, eax\n";
+    //     code_file<<"\tleave\n";
+    //     code_file<<"\tret\n";
+    // }
+}
 
 // // convert char to its ASCII value
 // string char_to_int(string sym){
@@ -747,6 +768,10 @@ void unary_op(quad* instr){
 //     return sym;
 // }
 
+//returning from a func
+void return_instruct(){
+    code_file << "ret" << '\n';
+}
 
 // //----------------------------------------------------- Main function and helper functions----------------------------------------------------//
 
@@ -782,7 +807,6 @@ void genCode(){
     //                 ||instr.op.first == "unary-" 
     //                 ||instr.op.first == "unary+") unary_op(&instr);
     //         else if(instr.op.first[0] == '+')    add_op(&instr);
-    //         else if(instr.op.first == "=")   assign_op(&instr);
     //         else if(instr.op.first.substr(0, 5) == "FUNC_" && instr.op.first[(instr.op.first.size() - 3)] == 'd'){
     //             end_basic_block();
     //             code_file << "\txor eax, eax\n";
@@ -796,11 +820,12 @@ void genCode(){
     //         else if(instr.op.first[0] == '*') mul_op(&instr);
     //         else if(instr.op.first[0] == '/') div_op(&instr);
     //         else if(instr.op.first[0] == '%') mod_op(&instr);
-    //         else if(instr.op.first == "RETURN"){
-    //             return_op(&instr);
-    //         }
-    //         else if(instr.op.first == "param") params.push(instr.arg1);
     //         else if(instr.op.first == "CALL") call_func(&instr);
+    //         else if(instr.op.first == "param") params.push_back(instr.arg1);
+    //         else if(instr.arg1.first == "popreturn") return_func(&instr);
+    //         else if(instr.op.first == "stackpointer--") ;
+    //         else if(instr.op.first == "return") return_instruct();
+    //         else if(instr.op.first == "=")   assign_op(&instr);
     //         else if(instr.op.first == "=="  
     //                 ||instr.op.first == "<" 
     //                 ||instr.op.first == "<=" 
