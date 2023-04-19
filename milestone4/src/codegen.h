@@ -14,9 +14,9 @@ void end_basic_block();
 void return_instruct();
 void end_func();
 
-string get_mem_location(qid*, qid*, int, int);
-string getTemporaryReg(qid*, int);
-string getReg(qid*, qid*, qid*, int);
+string get_mem_location(qid*, qid*, int);
+string getTemporaryReg(qid*);
+string getReg(qid*, qid*);
 
 int is_integer(string);
 int giveArraySize(sym_entry*);
