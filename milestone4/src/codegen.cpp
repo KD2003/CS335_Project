@@ -698,12 +698,13 @@ void genCode(string func_name){
             else if(instr.op.first[0] == '*') mul_op(&instr);
             else if(instr.op.first[0] == '/') div_op(&instr);
             else if(instr.op.first[0] == '%') mod_op(&instr);
-            // else if(instr.op.first == "CALL") call_func(&instr);
-            // else if(instr.op.first == "param") params.push_back(instr.arg1);
-            // else if(instr.arg1.first == "popreturn") return_func(&instr);
-            // else if(instr.op.first == "stackpointer--") ;
-            // else if(instr.op.first == "endfunc_") end_func();
-            // else if(instr.op.first == "return") return_instruct();
+            else if(instr.op.first == "CALL") call_func(&instr);
+            else if(instr.op.first == "param") params.push_back(instr.arg1);
+            else if(instr.arg1.first == "popreturn") return_func(&instr);
+            else if(instr.op.first == "stackpointer--") ;
+            else if(instr.op.first == "endfunc_") end_func();
+            else if(instr.op.first == "return") return_instruct();
+            else if(instr.arg1.first == "popparam");
             // else if(instr.op.first == "=")   assign_op(&instr);
             else if(instr.op.first == "=="  
                     ||instr.op.first == "<" 
@@ -793,7 +794,7 @@ string get_mem_location(qid* sym, qid* sym2, int flag){
     sym->second->addr_descriptor.stack = true;
 
 
-    string str = to_string(-offset-8)+"( rsp)";
+    string str = "$"+to_string(-offset-8)+"(%rsp)";
 
     // if(sym->second->is_derefer && flag != -1){
     //     string reg = getTemporaryReg(sym2);
@@ -876,9 +877,9 @@ void free_reg(string reg){
 //function starting
 void gen_func_label(string func_name){
     code_file << func_name << ":\n";
-    code_file << "\tpush rbp\n";
-    code_file << "\tmov rsp, rbp\n"; 
-    code_file << "\tsub "<< getFuncSize(func_name) << ", rsp" <<"\n";
+    code_file << "\tpush %rbp\n";
+    code_file << "\tmov %rsp, %rbp\n"; 
+    code_file << "\tsub $"<< getFuncSize(func_name) << ", %rsp" <<"\n";
 
 }
 
