@@ -3,7 +3,6 @@
 #include "3ac.h"
 using namespace std;
 
-
 void gen_data_section();
 void starting_code();
 void gen_func_label(quad*);
@@ -31,7 +30,6 @@ void comparison_op(quad*);
 void shift_op(quad*);
 void unary_op(quad*);
 void assign_op(quad*);
-void pointer_op(quad*);
 void member_access(quad*);
 void array_op(quad*);
 void goto_op(quad*);

@@ -493,7 +493,7 @@ ArrayAccess:
                     $$->expType = 2;
                     temp = temp.substr(0,temp.size()-1);
                     if(isInt($3->type)){
-                        if($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)){
+                        if($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal<0)){
                             yyerror("Array index out of bound");
                             $$->is_error =1;
                         }
@@ -543,7 +543,7 @@ ArrayAccess:
                                     $$->is_error=1;
                                 }
                                 else{
-                                    if($3->expType ==4 && ($3->intVal >= (*(it.second))[sub1]->array_dims[0] || $3->intVal>=0)){
+                                    if($3->expType ==4 && ($3->intVal >= (*(it.second))[sub1]->array_dims[0] || $3->intVal<0)){
                                         yyerror("Array index out of bound");
                                         $$->is_error =1;
                                     }
@@ -595,7 +595,7 @@ ArrayAccess:
                         $$->is_error=1;
                     }
                     else{
-                        if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))){
+                        if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal<0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal<0))){
                             yyerror("Array index out of bound");
                             $$->is_error =1;
                         }
@@ -653,7 +653,7 @@ ArrayAccess:
                                     $$->is_error=1;
                                 }
                                 else{
-                                    if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))){
+                                    if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal<0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal<0))){
                                         yyerror("Array index out of bound");
                                         $$->is_error =1;
                                     }
@@ -712,7 +712,7 @@ ArrayAccess:
                         $$->is_error=1;
                     }
                     else{
-                        if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))||($9->expType==4 && ($9->intVal>=lookup($1->temp_name)->array_dims[2] || $9->intVal>=0))){
+                        if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal<0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal<0))||($9->expType==4 && ($9->intVal>=lookup($1->temp_name)->array_dims[2] || $9->intVal<0))){
                             yyerror("Array index out of bound");
                             $$->is_error =1;
                         }
@@ -778,7 +778,7 @@ ArrayAccess:
                                     $$->is_error=1;
                                 }
                                 else{
-                                    if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal>=0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal>=0))||($9->expType==4 && ($9->intVal>=lookup($1->temp_name)->array_dims[2] || $9->intVal>=0))){
+                                    if(($3->expType==4 && ($3->intVal>=lookup($1->temp_name)->array_dims[0] || $3->intVal<0)) ||($6->expType==4 && ($6->intVal>=lookup($1->temp_name)->array_dims[1] || $6->intVal<0))||($9->expType==4 && ($9->intVal>=lookup($1->temp_name)->array_dims[2] || $9->intVal<0))){
                                         yyerror("Array index out of bound");
                                         $$->is_error =1;
                                     }
