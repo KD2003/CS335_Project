@@ -87,7 +87,7 @@ void print3AC_code(string filename, int paramsize){
         tac_file << '\n';
     }
     tac_file << "endfunc_" << '\n';
-    genCode();
+    genCode(filename);
     code.clear();
     nxt=0;
 }

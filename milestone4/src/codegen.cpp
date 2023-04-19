@@ -520,20 +520,18 @@ void array_op(quad* instr){
 // //----------------------------------------------------- Goto ----------------------------------------------------//
 
 
-// // Goto operation
-// void goto_op(quad* instr){
-//     end_basic_block();
-//     int id = instr->idx;
-//     if(instr->arg1.first == "IF"){
-//         string reg = get_mem_location(&instr->arg2, &instr->arg1, id, 1);
-//         if(is_integer(instr->arg2.first)) reg = getReg(&instr->arg2, &empty_var, &empty_var, instr->idx);
-//         code_file << "\tcmp " << reg <<", " << "dword 0"<<"\n";
-//         code_file << "\tjne "<<leaders[id]<<"\n";
-//     }
-//     else{
-//         code_file << "\tjmp " << leaders[id] <<"\n";
-//     }
-// }
+// Goto operation
+void goto_op(quad* instr){
+    end_basic_block();
+    if(instr->arg1.first == "IF"){
+        string loc = get_mem_location(&instr->arg2, &instr->arg1, instr->idx, 1);
+        code_file << " cmp " << loc <<", " << " $0"<<"\n";
+        code_file << " jne " << leaders[instr->idx]<<"\n";
+    }
+    else{
+        code_file << " jmp " << leaders[instr->idx] <<"\n";
+    }
+}
 
 
 // //----------------------------------------------------- Function Call and return ----------------------------------------------------//
@@ -557,75 +555,6 @@ void call_func(quad *instr){
     params.clear();
 
 
-    // sym_entry* func_entry = lookup(instr->arg1.first);
-    // string ret_type = "";
-    // if(func_entry) ret_type = func_entry->type.substr(5, func_entry->type.length()-5);
-    
-    // if(typeLookup(ret_type)){
-    //     code_file<<"\tlea eax, "<<get_mem_location(&instr->res, &empty_var, -1, -1)<<"\n";
-    //     code_file<<"\tpush eax\n";
-    // }
-
-    // while(i>0){
-    //     if(params.top().first[0] == '\"'){            
-    //         stringlabels.insert({string_cnt, params.top().first});
-    //         code_file<<"\tpush _str_"<<string_cnt<<"\n";
-    //         string_cnt++;
-    //     }
-    //     else if(typeLookup(params.top().second->type)){
-    //         int type_size = getSize(params.top().second->type), type_offset = params.top().second->offset;
-            
-    //         if(params.top().second->is_derefer) {
-    //             string reg = getReg(&params.top(), &empty_var, &empty_var, instr->idx);
-                
-    //             for(int i = type_size - 4; i>=0; i-=4){
-    //                 code_file<<"\tpush dword [ "<<reg<<" + "<<i<<" ]\n";
-    //             }
-    //         }
-    //         else {
-    //             if(type_offset > 0){
-    //                 for(int i = type_offset; i<type_size + type_offset; i+=4){
-    //                     code_file<<"\tpush dword [ ebp - "<<i+4<<" ]\n";
-    //                 }
-    //             }
-    //             else{
-    //                 for(int i = 0; i<type_size; i+=4){
-    //                     code_file<<"\tpush dword [ ebp + "<<abs(type_offset+i)<<" ]\n";
-    //                 }
-    //             }
-    //         }
-    //     }
-    //     else if(params.top().second->is_derefer){
-    //         string mem;
-    //         mem = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
-    //         code_file<<"\tpush dword "<<mem<<"\n";
-    //     }
-    //     else if(params.top().second->isArray){
-    //         string str = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
-    //         code_file<<"\tlea eax, "<< str <<"\n";
-    //         code_file<<"\tpush eax\n";
-    //     }
-    //     else{
-    //         string mem = get_mem_location(&params.top(), &empty_var, instr->idx, 1);
-            
-    //         if(reg_desc.find(mem) == reg_desc.end() && mem.substr(0,5) != "dword") mem = "dword "+mem;
-    //         code_file<<"\tpush "<<mem<<"\n";
-            
-    //     }
-    //     i--;
-    //     params.pop();
-    // }
-    
-    // code_file<<"\tcall "<<instr->arg1.first<<"\n";
-    
-    // if(!typeLookup(ret_type)){
-    //     reg_desc["eax"].insert(instr->res);
-    //     instr->res.second->addr_descriptor.reg = "eax";
-    // }
-    // else sz++;
-
-    // // Clear args from stack
-    // code_file<<"\tadd esp, "<<4*sz<<"\n";
 }
 
 
@@ -635,77 +564,35 @@ void return_func(quad* instr){
     string dest =  get_mem_location(&instr->res, &empty_var, -1, -1);
     code_file << "mov " << "%rax " << dest << '\n';
 
-
-
-
-
-
-    // if(instr->arg1.first != ""){
-    //     if(typeLookup(instr->arg1.second->type)){
-    //         for(auto it: reg_desc){
-    //             free_reg(it.first);
-    //         }
-    //         string reg1 = getTemporaryReg(&empty_var, instr->idx);
-            
-    //         exclude_this.insert(reg1);
-            
-    //         string reg2 = getTemporaryReg(&empty_var, instr->idx);
-    //         exclude_this.clear();
-            
-    //         code_file<<"\tmov "<<reg1<<", [ ebp + "<<arg_size<<" ]\n";
-            
-    //         int struct_size = getStructsize(instr->arg1.second->type);
-    //         int struct_offset = instr->arg1.second->offset;
-    //         if(instr->arg1.second->offset < 0){
-    //             for(int i = 0; i<struct_size; i+=4){
-    //                 code_file<<"\tmov "<<reg2<<", [ ebp + "<<abs(struct_offset) - i<<" ]\n";
-    //                 code_file<<"\tmov [ "<<reg1<<" + "<<struct_size - i - 4<<" ], "<<reg2<<"\n";
-    //             }
-    //         }
-    //         else{
-    //             for(int i = 0; i<struct_size; i+=4){
-    //                 code_file<<"\tmov "<<reg2<<", [ ebp - "<<struct_offset + 4 + i<<" ]\n";
-    //                 code_file<<"\tmov [ "<<reg1<<" + "<<struct_size - i - 4<<" ], "<<reg2<<"\n";
-    //             }
-    //         }
-    //         code_file<<"\tleave\n";
-    //         code_file<<"\tret\n";
-    //     }
-    //     else{
-    //         string mem = get_mem_location(&instr->arg1, &empty_var, instr->idx, 1);
-    //         if(mem != "eax") code_file<<"\tmov eax, "<<mem<<"\n";
-    //         code_file<<"\tleave\n";
-    //         code_file<<"\tret\n";
-    //     }
-    // }
-    // else{
-    //     code_file<<"\txor eax, eax\n";
-    //     code_file<<"\tleave\n";
-    //     code_file<<"\tret\n";
-    // }
 }
 
-// // convert char to its ASCII value
-// string char_to_int(string sym){
-//     if(sym[0]!='\'')return sym;
-//     if(sym[1] == '\\'){
-//         string s = sym.substr(1,2);
-//         if(s == "\\0") return "0";
-//         if(s == "\\n") return "10";
-//         if(s == "\\t") return "9";
-//     } 
-//     int val = (int )sym[1];
-//     sym = to_string(val);
-//     return sym;
-// }
+// convert char to its ASCII value
+string char_to_int(string sym){
+    if(sym[0]!='\'')return sym;
+    if(sym[1] == '\\'){
+        string s = sym.substr(1,2);
+        if(s == "\\0") return "0";
+        if(s == "\\n") return "10";
+        if(s == "\\t") return "9";
+    } 
+    int val = (int )sym[1];
+    sym = to_string(val);
+    return sym;
+}
 
 //returning from a func
 void return_instruct(){
-    code_file << "ret" << '\n';
+    code_file << "ret\n";
 }
 
-void genCode(){
+//ending funciton
+void end_func(){
+    code_file << "leave\n"; 
+}
+
+void genCode(string func_name){
     findBasicBlocks();
+    gen_func_label(func_name);
 
     int index = 0;
     for(auto it=leaders.begin(); it != leaders.end(); it++){
@@ -723,11 +610,6 @@ void genCode(){
     //         quad instr = code[idx];
     //         if(instr.arg1.first != "") instr.arg1.first = char_to_int(instr.arg1.first);
     //         if(instr.arg2.first != "") instr.arg2.first = char_to_int(instr.arg2.first);
-            
-    //         if(instr.op.first.substr(0, 5) == "FUNC_" && instr.op.first[(instr.op.first.size() - 3)] == 't'){
-    //             in_func = 1;
-    //             gen_func_label(&instr);
-    //         }
     //         else if(instr.op.first.substr(0,2) == "++"  
     //                 ||instr.op.first.substr(0,2) == "--" 
     //                 ||instr.op.first == "!" 
@@ -752,6 +634,7 @@ void genCode(){
     //         else if(instr.op.first == "param") params.push_back(instr.arg1);
     //         else if(instr.arg1.first == "popreturn") return_func(&instr);
     //         else if(instr.op.first == "stackpointer--") ;
+    //         else if(instr.op.first == "endfunc_") end_func();
     //         else if(instr.op.first == "return") return_instruct();
     //         else if(instr.op.first == "=")   assign_op(&instr);
     //         else if(instr.op.first == "=="  
@@ -772,7 +655,7 @@ void genCode(){
     //         else if(instr.op.first == "member_access") member_access(&instr);
     //         else if(instr.op.first == "[ ]") array_op(&instr);
     //     }
-    //     end_basic_block();
+        end_basic_block();
     }
 
     print_string_labels();
@@ -923,31 +806,13 @@ void free_reg(string reg){
     reg_desc[reg].clear();
 }
 
-// // function prologue
-// void gen_func_label(quad* instr){
-//     string s = "";
-//     for(int i=5;i<instr->op.first.size(); i++){
-//         if(instr->op.first[i] == ' ')break;
-//         s += instr->op.first[i];
-//     }
+//function starting
+void gen_func_label(string func_name){
+    code_file << "push rbp\n";
+    code_file << "mov rsp, rbp\n"; 
+    code_file << "sub "<< getFuncSize(func_name) << ", rsp" <<"\n";
 
-//     arg_size = 0;
-//     sym_entry* func_entry = lookup(s);
-//     for(auto it: *(func_entry->entry)){
-//         if(it.second->offset < 0){
-//             arg_size = max(arg_size, abs(it.second->offset));
-//         }
-//     }
-//     if(arg_size) arg_size+=4;
-//     else arg_size = 8;
-
-//     code_file << s << " :\n";
-//     code_file << "\tpush ebp\n";
-//     code_file << "\tmov ebp, esp\n"; 
-//     code_file << "\tsub esp, "<<func_local_size(s)<<"\n";
-
-//     pointed_by.clear();
-// }
+}
 
 
 void findBasicBlocks(){
