@@ -4,7 +4,7 @@ map<string, set<qid> > reg_desc;
 map<int ,string> leaders;
 map<int, string> stringlabels;
 map<int, int> pointed_by;
-map<qid, int> addr_pointed_to;
+vector<qid> params;
 
 int string_cnt = 0;
 int label_cnt = 0;
@@ -14,10 +14,7 @@ int in_func = 0;
 set<string> exclude_this;
 qid empty_var("",NULL);
 
-vector<qid> params;
-
 extern ofstream code_file;
-extern sym_table global_st;
 extern map<string, int> method_invoked;
 extern vector<quad> code;
 
@@ -439,20 +436,6 @@ void assign_op(quad* instr){
         }
         code_file << "\tmov $"<< instr->arg1.first << ", "<< mem <<"\n";
     }
-    // // for user defined types 
-    // else if(typeLookup(instr->res.second->type)){
-    //     for(auto it: reg_desc){
-    //         free_reg(it.first);
-    //     }
-    //     string reg = getTemporaryReg(&empty_var, instr->idx);
-    //     int res_offset = instr->res.second->offset, temp_offset = instr->arg1.second->offset;
-    //     int struct_size = getStructsize(instr->res.second->type);
-        
-    //     for(int i = 0; i<struct_size; i+=4){
-    //         code_file<<"\tmov "<<reg<<", [ ebp - "<<temp_offset + 4 + i<<" ]\n";
-    //         code_file<<"\tmov [ ebp - "<<res_offset + 4 + i<<" ], "<<reg<<"\n";
-    //     }
-    // } 
     else{
         string reg = getReg(&instr->arg1, &instr->res, &empty_var, instr->idx);
         if(instr->arg1.second->is_derefer){
