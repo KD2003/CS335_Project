@@ -5,11 +5,11 @@ public class TypeCoercion {
         float floatVar = longVar;
         double doubleVar = longVar;
 
-        double dVar = 3.141596;
+        double dVar = 3;
         long lVar = (long) dVar;
         int iVar = (int) dVar;
 
-        System.out.println((short) 3.14F);
+        System.out.println((short) 3);
 
         double exp = intVar + longVar + dVar * floatVar + lVar + doubleVar + iVar;
         System.out.println(exp);
