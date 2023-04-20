@@ -4,11 +4,13 @@ map<string, set<qid> > reg_desc;
 map<int ,string> leaders;
 map<int, string> stringlabels;
 vector<qid> params;
+map<string,string> str_mp;
 
 int string_cnt = 0;
 int label_cnt = 0;
 int arg_size = 0;
 int in_func = 0;
+int str_label=0;
 
 set<string> exclude_this;
 qid empty_var("",NULL);
@@ -527,6 +529,7 @@ void assign_op(quad* instr){
         code_file << "\tmov $"<< instr->arg1.first << ", "<< mem <<"\n";
     }
     else{
+        // cout << instr->res.first << ":" << instr->arg1.second->type << endl;
         string reg = getReg(&instr->arg1,&empty_var);
         reg_desc[reg].insert(instr->res);
         string prev_reg = instr->res.second->addr_descriptor.reg;
@@ -657,22 +660,32 @@ void end_func(){
 }
 
 void genCode(string func_name){
+    leaders.insert(make_pair(0,func_name));
     findBasicBlocks();
     gen_func_label(func_name);
 
     int index = 0;
     for(auto it=leaders.begin(); it != leaders.end(); it++){
 
-        code_file << it->second <<":\n";
+        if(it->second!=func_name) code_file << it->second <<":\n";
         auto it1 = it;
         it1++;
         if(it1 == leaders.end()) break;
         
+        
         int ended = 0;
         int start = it->first;
         int end = it1->first;
-        
-        for(int idx=start; idx < end; idx++){
+        cout << it->second << ":" << start << " " << end << endl;
+        for(int idx=start; idx <= end; idx++){
+            if(idx==end && code[idx-1].op.first!="goto" && code[idx-1].res.first!="goto"){
+                end_basic_block();
+                jump_nxt(idx);break;
+            }
+            else if(idx==end){
+                end_basic_block();break;
+            }
+
             quad instr = code[idx];
             if(instr.arg1.first != "") instr.arg1.first = char_to_int(instr.arg1.first);
             if(instr.arg2.first != "") instr.arg2.first = char_to_int(instr.arg2.first);
@@ -705,7 +718,15 @@ void genCode(string func_name){
             else if(instr.op.first == "endfunc_") end_func();
             else if(instr.op.first == "return") return_instruct();
             else if(instr.arg1.first == "popparam");
-            // else if(instr.op.first == "=")   assign_op(&instr);
+            else if(instr.op.first == "=" && instr.res.second->type=="string"){
+                if(str_mp.find(instr.arg1.first)==str_mp.end()){
+                    str_mp[instr.arg1.first] = assign_str_label();
+                    cout << instr.arg1.first << endl;
+                }
+
+            }  
+            else if(instr.op.first == "=")   {
+                assign_op(&instr);}
             else if(instr.op.first == "=="  
                     ||instr.op.first == "<" 
                     ||instr.op.first == "<=" 
@@ -723,15 +744,39 @@ void genCode(string func_name){
             // else if(instr.op.first == "member_access") member_access(&instr);
             else if(instr.op.first == "[ ]") array_op(&instr);
         }
-        end_basic_block();
     }
 
-    print_string_labels();
+}
+
+void jump_nxt(int idx){
+    code_file << "\tjmp " << leaders[idx] << '\n'; 
+}
+
+int findDest(int j, int cnt){
+    if(cnt>200) return j;
+    if((code[j].op.first == "GOTO" && code[j].arg1.first != "IF") && !(j>0 && code[j-1].op.first == "GOTO" && code[j-1].arg1.first == "IF")){
+        return (code[j].idx = findDest(code[j].idx, cnt+1));
+    }
+    return j;
+}
+
+void jumpOptimisation(){
+    for(int i=0; i<(int)code.size(); ++i){
+        if((code[i].op.first == "GOTO" && code[i].arg1.first != "IF") && !(i>0 && code[i-1].op.first == "GOTO" && code[i-1].arg1.first == "IF")){
+            code[i].idx = findDest(code[i].idx, 0);
+        }
+    }
+}
+
+
+string assign_str_label(){
+    return "str"+to_string(str_label++);
 }
 
 void print_string_labels(){
-    for(auto it: stringlabels){
-        code_file<<"__str__"<<it.first<<": .asciz "<<it.second<<"\n";
+    for(auto it: str_mp){
+        code_file<<it.second + ":\n";
+        code_file << "\t" <<": .asciz " << it.first<<"\n";
     }
 }
 
@@ -885,11 +930,8 @@ void gen_func_label(string func_name){
 
 void findBasicBlocks(){
     for(int i=0;i< (int)code.size(); i++){
-        if(i == 0){
-            leaders.insert(make_pair(i, get_label()));
-            continue;
-        }
         if(code[i].op.first == "goto"){
+            cout << i << code[i].idx << endl;
             leaders.insert(make_pair(code[i].idx, get_label()));
             leaders.insert(make_pair(i+1, get_label()));
         }   

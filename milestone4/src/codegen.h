@@ -41,3 +41,8 @@ void call_func(quad&);
 void free_reg(string);
 string char_to_int(string);
 void print_string_labels();
+string assign_str_label();
+void jump_nxt(int );
+
+int findDest(int , int );
+void jumpOptimisation();

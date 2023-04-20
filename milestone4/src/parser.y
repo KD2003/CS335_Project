@@ -10,6 +10,7 @@ extern FILE* yyin;
 extern int yyrestart(FILE*);
 extern int yylineno;
 extern map<sym_table*, vector<pair<string,sym_table*>>> children_table;
+extern map<string,string> str_mp;
 
 bool gotinputfile, gotoutputfile, verbosemode;
 
@@ -830,13 +831,13 @@ MethodInvocation:
 
         if($1->temp_name == "System.out.println"){
             $$->type = "";
-
+            vector<string> funcArg = getFuncArgs($1->temp_name);
             //3ac
             int argsize=0;
             if($4!=NULL){
                 argsize=$4->size;
             }
-            emit(qid("call",NULL),qid("print 1",NULL),qid("",NULL),qid("",NULL),-1);
+            emit(qid("call",NULL),qid("print",NULL),qid(to_string(funcArg.size()),NULL),qid("",NULL),-1);
             qid rem=newtemp("int");
             emit(qid("=",NULL),qid(to_string(argsize),NULL),qid("",NULL),rem,-1);
             emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
@@ -969,11 +970,14 @@ ArgumentList:
         }
         else if($3->expType==5){
             qid tmp=newtemp($3->type);
+            cout << $3->type;
             emit(qid("=",NULL),qid($3->strVal,NULL),qid("",NULL),tmp,-1);
             $3->addr=tmp;
         }
-        emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
-        $$->size=$1->size+getSize($3->type);
+        else{
+            emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
+            $$->size=$1->size+getSize($3->type);
+        }
         
     }
     | Expression        {
@@ -4349,6 +4353,8 @@ int main(int argc, char* argv[]){
     starting_code();
 
     if(yyparse()) return 0;
+
+    print_string_labels();
     
     endAST();
     printSymbolTable(cur_table, "Global.csv");
