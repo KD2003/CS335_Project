@@ -8,7 +8,7 @@ void start_code();
 void gen_func_label(string );
 void generateCode(string func_name);
 
-void findBasicBlocks();
+void findleaders();
 void end_basic_block();
 void return_instruct();
 void end_func();
@@ -40,7 +40,7 @@ void return_op(quad*);
 void clear_regs();
 void call_func(quad&);
 void free_reg(string);
-void update_reg_desc(string, qid*);
+void update_reg_val(string, qid*);
 void initializeRegs();
 void print_str_labels();
 void save_rec_param();

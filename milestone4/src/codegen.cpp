@@ -59,21 +59,21 @@ void add_op(quad* line){
         long val = stol(line->arg1.first);
         string reg2 = getReg(&line->arg2);
         code_file << "\tadd $" << val << ", " << reg2 <<"\n";
-        update_reg_desc(reg2, &line->res);
+        update_reg_val(reg2, &line->res);
         return;
     }
     else if(all_int(line->arg2.first)){
         long val = stol(line->arg2.first);
         string reg1 = getReg(&line->arg1);
         code_file << "\tadd $" << val << ", " << reg1 <<"\n";
-        update_reg_desc(reg1, &line->res);
+        update_reg_val(reg1, &line->res);
         return;
     }
     string reg1 = getReg(&line->arg1);
     string mem2 = get_mem_location(&line->arg2, 0);
 
     code_file << "\tadd " << mem2 << ", " << reg1 <<"\n";
-    update_reg_desc(reg1, &line->res);
+    update_reg_val(reg1, &line->res);
 }
 
 void sub_op(quad* line){
@@ -88,21 +88,21 @@ void sub_op(quad* line){
         string reg2 = getReg(&line->arg2);
         code_file << "\tsub $" << val << ", " << reg2 <<"\n";
         code_file << "\t neg " << reg2 << "\n";
-        update_reg_desc(reg2, &line->res);
+        update_reg_val(reg2, &line->res);
         return;
     }
     else if(all_int(line->arg2.first)){
         long val = stol(line->arg2.first);
         string reg1 = getReg(&line->arg1);
         code_file << "\tsub $" << val << ", " << reg1 <<"\n";
-        update_reg_desc(reg1, &line->res);
+        update_reg_val(reg1, &line->res);
         return;
     }
     string reg1 = getReg(&line->arg1);
     string mem2 = get_mem_location(&line->arg2, 0);
     
     code_file << "\tsub " << mem2 << ", " << reg1 <<"\n";
-    update_reg_desc(reg1, &line->res);
+    update_reg_val(reg1, &line->res);
 }
 
 void mul_op(quad* line){
@@ -116,21 +116,21 @@ void mul_op(quad* line){
         long val = stol(line->arg1.first);
         string reg2 = getReg(&line->arg2);
         code_file << "\timul $" << val << ", " << reg2 <<"\n";
-        update_reg_desc(reg2, &line->res);
+        update_reg_val(reg2, &line->res);
         return;
     }
     else if(all_int(line->arg2.first)){
         long val = stol(line->arg2.first);
         string reg1 = getReg(&line->arg1);
         code_file << "\timul $" << val << ", " << reg1 <<"\n";
-        update_reg_desc(reg1, &line->res);
+        update_reg_val(reg1, &line->res);
         return;
     }
     string reg1 = getReg(&line->arg1);
     string mem2 = get_mem_location(&line->arg2, 0);
     
     code_file << "\timul " << mem2 << ", " << reg1 <<"\n";
-    update_reg_desc(reg1, &line->res);
+    update_reg_val(reg1, &line->res);
 }
 
 void div_op(quad* line){
@@ -226,7 +226,7 @@ void assign_op(quad* line){
         string mem = get_mem_location(&line->res, 1);
         if(reg_desc.find(mem) != reg_desc.end()){
             free_reg(mem);
-            update_reg_desc(mem, &line->res);
+            update_reg_val(mem, &line->res);
         }
         code_file << "\tmovl $"<< line->arg1.first << ", "<< mem <<"\n";
     }
@@ -263,7 +263,7 @@ void logic_or(quad *line){
             code_file << "\ttest " << reg2 << ", " << reg2 << "\n";
             code_file << "\tsetnz \%al\n";
             code_file << "\tmovzbq \%al, " << reg2 << "\n";
-            update_reg_desc(reg2, &line->res);
+            update_reg_val(reg2, &line->res);
         }
         return;
     }
@@ -277,7 +277,7 @@ void logic_or(quad *line){
             code_file << "\ttest " << reg1 << ", " << reg1 << "\n";
             code_file << "\tsetnz \%al\n";
             code_file << "\tmovzbq \%al, " << reg1 << "\n";
-            update_reg_desc(reg1, &line->res);
+            update_reg_val(reg1, &line->res);
         }
         return;
     }
@@ -287,7 +287,7 @@ void logic_or(quad *line){
     code_file << "\ttest " << reg << ", " << reg << "\n";
     code_file << "\tsetnz \%al\n";
     code_file << "\tmovzbq \%al, " << reg << "\n";
-    update_reg_desc(reg, &line->res);
+    update_reg_val(reg, &line->res);
 }
 
 void logic_and(quad *line){
@@ -313,7 +313,7 @@ void logic_and(quad *line){
             code_file << "\ttest " << reg2 << ", " << reg2 << "\n";
             code_file << "\tsetnz \%al\n";
             code_file << "\tmovzbq \%al, " << reg2 << "\n";
-            update_reg_desc(reg2, &line->res);
+            update_reg_val(reg2, &line->res);
         }
         return;
     }
@@ -327,7 +327,7 @@ void logic_and(quad *line){
             code_file << "\ttest " << reg1 << ", " << reg1 << "\n";
             code_file << "\tsetnz \%al\n";
             code_file << "\tmovzbq \%al, " << reg1 << "\n";
-            update_reg_desc(reg1, &line->res);
+            update_reg_val(reg1, &line->res);
         }
         return;
     }
@@ -338,7 +338,7 @@ void logic_and(quad *line){
     code_file << "\ttest " << reg << ", " << reg << "\n";
     code_file << "\tsetnz \%al\n";
     code_file << "\tmovzbq \%al, " << reg << "\n";
-    update_reg_desc(reg, &line->res);
+    update_reg_val(reg, &line->res);
 }
 
 void bitwise_op(quad* line){
@@ -360,20 +360,20 @@ void bitwise_op(quad* line){
         long val = stol(line->arg1.first);
         string reg2 = getReg(&line->arg2);
         code_file << "\t" << op_ins << " $" << val << ", "<< reg2 <<"\n";
-        update_reg_desc(reg2, &line->res);
+        update_reg_val(reg2, &line->res);
         return;
     }
     else if(all_int(line->arg2.first)){
         long val = stol(line->arg2.first);
         string reg1 = getReg(&line->arg1);
         code_file << "\t" << op_ins << " $" << val << ", "<< reg1 <<"\n";
-        update_reg_desc(reg1, &line->res);
+        update_reg_val(reg1, &line->res);
         return;
     }
     string reg = getReg(&line->arg1);
     string mem2 = get_mem_location(&line->arg2, 0);
     code_file << "\t" << op_ins << " " << mem2 << ", "<< reg <<"\n";
-    update_reg_desc(reg, &line->res);
+    update_reg_val(reg, &line->res);
 }
 
 void comparison_op(quad* line){
@@ -409,7 +409,7 @@ void comparison_op(quad* line){
         code_file << "\tcmp $"<< val <<", " << reg2 <<"\n";
         code_file << "\t"<< set_ins << " \%al\n";
         code_file << "\tmovzbq \%al, " << reg2 << "\n";
-        update_reg_desc(reg2, &line->res);
+        update_reg_val(reg2, &line->res);
         return;
     }
     else if(all_int(line->arg2.first)){
@@ -418,7 +418,7 @@ void comparison_op(quad* line){
         code_file << "\tcmp $"<< val <<", " << reg1 <<"\n";
         code_file << "\t"<< set_ins << " \%al\n";
         code_file << "\tmovzbq \%al, " << reg1 << "\n";
-        update_reg_desc(reg1, &line->res);
+        update_reg_val(reg1, &line->res);
         return;
     }
     string reg = getReg(&line->arg1);
@@ -426,7 +426,7 @@ void comparison_op(quad* line){
     code_file << "\tcmp "<< mem2 <<", " << reg <<"\n";
     code_file << "\t"<< set_ins << " \%al\n";
     code_file << "\tmovzbq \%al, " << reg << "\n";
-    update_reg_desc(reg, &line->res);
+    update_reg_val(reg, &line->res);
 }
 
 void shift_op(quad* line){
@@ -454,14 +454,14 @@ void shift_op(quad* line){
         code_file << "\tmov " << mem2 << ", %rcx\n";
         code_file << "\t" << shift_ins << " \%cl, " << reg <<"\n";
         exclude_this.clear();
-        update_reg_desc(reg, &line->res);
+        update_reg_val(reg, &line->res);
         return;
     }
     else if(all_int(line->arg2.first)){
         long val = stol(line->arg2.first);
         string reg1 = getReg(&line->arg1);
         code_file << "\t" << shift_ins << " $"<< val <<", " << reg1 <<"\n";
-        update_reg_desc(reg1, &line->res);
+        update_reg_val(reg1, &line->res);
         return;
     }
     exclude_this.insert("%rcx");
@@ -471,7 +471,7 @@ void shift_op(quad* line){
     code_file << "\tmov " << mem2 << ", %rcx\n";
     code_file << "\t" << shift_ins << " \%cl, " << reg1 <<"\n";
     exclude_this.clear();
-    update_reg_desc(reg1, &line->res);
+    update_reg_val(reg1, &line->res);
 }
 
 void unary_op(quad* line){
@@ -482,7 +482,7 @@ void unary_op(quad* line){
         else if(op == "--P") unary_ins = "dec";
         code_file<<"\t"<< unary_ins <<" "<< reg <<"\n";
         free_reg(reg);
-        update_reg_desc(reg, &line->arg1);
+        update_reg_val(reg, &line->arg1);
         
     }
     else if(op[0] == 'P'){
@@ -490,18 +490,18 @@ void unary_op(quad* line){
         else if(op == "P--") unary_ins = "dec";
         string reg1 = getTemporaryReg(&line->arg1);
         code_file<<"\tmov "<< reg <<", "<< reg1 <<"\n";
-        update_reg_desc(reg1, &line->arg1);
+        update_reg_val(reg1, &line->arg1);
         code_file<<"\t"<< unary_ins <<" "<< reg <<"\n";
         string str = get_mem_location(&line->arg1,-1);
         code_file<<"\tmov "<< reg <<", "<< str <<"\n";
     }
     else if(op == "~"){
         code_file << "\tnot " << reg <<"\n";
-        update_reg_desc(reg, &line->arg1);
+        update_reg_val(reg, &line->arg1);
     }
     else if(op == "-U"){
         code_file << "\tneg " << reg <<"\n";       
-        update_reg_desc(reg, &line->arg1);
+        update_reg_val(reg, &line->arg1);
     }
     else if(op == "+U"){
         reg_desc[reg].insert(line->res);
@@ -511,7 +511,7 @@ void unary_op(quad* line){
         code_file << "\ttest "<< reg <<", "<< reg <<"\n";
         code_file << "\tsete \%al\n";
         code_file << "\tmovzbq \%al, " << reg << "\n";
-        update_reg_desc(reg, &line->arg1);
+        update_reg_val(reg, &line->arg1);
     }
 }
 
@@ -572,7 +572,7 @@ void end_func(){
 
 void generateCode(string func_name){
     leaders.insert(make_pair(0,func_name));
-    findBasicBlocks();
+    findleaders();
     gen_func_label(func_name);
     int index = 0;
     for(auto it=leaders.begin(); it != leaders.end(); it++){
@@ -677,7 +677,7 @@ void save_rec_param(){
     // }
     rec_params.clear();
 }
-void update_reg_desc(string reg, qid* sym){
+void update_reg_val(string reg, qid* sym){
     for(auto it = reg_desc[reg].begin();it != reg_desc[reg].end(); it++){
         it->second->addr_descriptor.reg = "";
         qid temp = *it;
@@ -802,7 +802,7 @@ void gen_func_label(string func_name){
 }
 
 //finding leaders
-void findBasicBlocks(){
+void findleaders(){
     for(int i=0;i< (int)code.size(); i++){
         if(code[i].op.first == "goto"){
             leaders.insert(make_pair(code[i].idx, get_label()));
