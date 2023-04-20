@@ -7,4 +7,6 @@ milestone*/src/*.dot
 milestone*/src/*.pdf
 milestone*/src/*.csv
 milestone*/src/*.txt
+milestone*/src/sample.c
+milestone*/src/sample.s
 milestone*/tests/*/*

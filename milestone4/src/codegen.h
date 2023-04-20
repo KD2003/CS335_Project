@@ -4,22 +4,22 @@
 using namespace std;
 
 void gen_data_section();
-void starting_code();
+void start_code();
 void gen_func_label(string );
-void genCode(string func_name);
-void update_reg_desc(string, qid*);
-void initializeRegs();
-void findBasicBlocks();
+void generateCode(string func_name);
+
+void findleaders();
 void end_basic_block();
 void return_instruct();
 void end_func();
+int all_int(string);
+void base_assign(qid* );
 
-string get_mem_location(qid*, qid*, int);
+string get_mem_location(qid*, int);
 string getTemporaryReg(qid*);
-string getReg(qid*, qid*);
+string getReg(qid*);
 
-int is_integer(string);
-int giveArraySize(sym_entry*);
+// op
 void add_op(quad*);
 void sub_op(quad*);
 void mul_op(quad*);
@@ -32,12 +32,17 @@ void comparison_op(quad*);
 void shift_op(quad*);
 void unary_op(quad*);
 void assign_op(quad*);
-void member_access(quad*);
-void array_op(quad*);
 void goto_op(quad*);
 void return_op(quad*);
+
+
+// mem management
 void clear_regs();
 void call_func(quad&);
 void free_reg(string);
-string char_to_int(string);
-void print_string_labels();
+void update_reg_val(string, qid*);
+void initializeRegs();
+void print_str_labels();
+void save_rec_param();
+string assign_str_label();
+void jump_nxt(int );

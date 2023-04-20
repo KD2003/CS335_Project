@@ -1,6 +1,7 @@
 class PalindromeExample{
-    public static void main(String args[]){
+    public static void main(){
         int r, sum=0, temp;
+        String ans="";
         int n=454;
 
         temp = 5+n;
@@ -10,8 +11,9 @@ class PalindromeExample{
             n = n/10;
         }
         if(temp == sum)
-            System.out.println("Palindrome Number");
+            ans="Palindrome Number";
         else
-            System.out.println("Not a palindrome Number");
+            ans="Not a palindrome Number";
+        System.out.println(ans);
     }
 }

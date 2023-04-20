@@ -10,6 +10,7 @@ extern FILE* yyin;
 extern int yyrestart(FILE*);
 extern int yylineno;
 extern map<sym_table*, vector<pair<string,sym_table*>>> children_table;
+extern map<string,string> str_mp;
 
 bool gotinputfile, gotoutputfile, verbosemode;
 
@@ -830,13 +831,13 @@ MethodInvocation:
 
         if($1->temp_name == "System.out.println"){
             $$->type = "";
-
+            vector<string> funcArg = getFuncArgs($1->temp_name);
             //3ac
             int argsize=0;
             if($4!=NULL){
                 argsize=$4->size;
             }
-            emit(qid("call",NULL),qid("print 1",NULL),qid("",NULL),qid("",NULL),-1);
+            emit(qid("call",NULL),qid("print",NULL),qid(to_string(funcArg.size()),NULL),qid("",NULL),-1);
             qid rem=newtemp("int");
             emit(qid("=",NULL),qid(to_string(argsize),NULL),qid("",NULL),rem,-1);
             emit(qid("stackpointer--",NULL),rem,qid("",NULL),qid("",NULL),-1);
@@ -969,11 +970,14 @@ ArgumentList:
         }
         else if($3->expType==5){
             qid tmp=newtemp($3->type);
+            cout << $3->type;
             emit(qid("=",NULL),qid($3->strVal,NULL),qid("",NULL),tmp,-1);
             $3->addr=tmp;
         }
-        emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
-        $$->size=$1->size+getSize($3->type);
+        else{
+            emit(qid("param",NULL),$3->addr,qid("",NULL),qid("",NULL),-1);
+            $$->size=$1->size+getSize($3->type);
+        }
         
     }
     | Expression        {
@@ -1300,6 +1304,7 @@ Assignment:
                             emit(qid("=",NULL),qid(ans,NULL),qid("",NULL),tmp,-1);
                         }
                         emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1); 
+                        $$->addr=$1->addr;
                     }
                     else if(*$2=="*="){
                         if($3->expType==4)
@@ -1438,9 +1443,9 @@ Assignment:
 
                             emit(qid("=",NULL),cast,qid("",NULL),tmp,-1);
                         }
-                        // else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                        else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
                     }
-                    emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                 }
             }
             else{
@@ -1964,7 +1969,7 @@ AdditiveExpression:
                 $$->addr=tmp;
 
                 if(flag){
-                    emit(qid(*$2+"String",NULL),$1->addr,cast,tmp,-1);
+                    emit(qid(*$2,NULL),$1->addr,cast,tmp,-1);
                 }
                 else{
                     if($1->expType==4 && $3->expType==4){
@@ -2061,8 +2066,8 @@ MultiplicativeExpression:
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
                     else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
@@ -2070,8 +2075,8 @@ MultiplicativeExpression:
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
                     else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
@@ -2088,13 +2093,21 @@ MultiplicativeExpression:
                     }
                 else{
                     if($1->expType==4 && $3->expType==4){
-                        emit(qid(*$2,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        qid temp2=newtemp($3->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid(*$2,NULL),temp1,temp2,tmp,-1);
                     }
                     else if($3->expType==4){
-                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp2=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid(*$2,NULL),$1->addr,temp2,tmp,-1);
                     }
                     else if($1->expType==4){
-                        emit(qid(*$2,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid(*$2,NULL),temp1,$3->addr,tmp,-1);
                     }
                     else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -2154,13 +2167,21 @@ MultiplicativeExpression:
                     }
                 else{
                     if($1->expType==4 && $3->expType==4){
-                         emit(qid("*",NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        qid temp2=newtemp($3->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid("*",NULL),temp1,temp2,tmp,-1);
                     }
                     else if($3->expType==4){
-                        emit(qid("*",NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp2=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid("*",NULL),$1->addr,temp2,tmp,-1);
                     }
                     else if($1->expType==4){
-                        emit(qid("*",NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid("*",NULL),temp1,$3->addr,tmp,-1);
                     }
                     else emit(qid("*",NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -3253,7 +3274,7 @@ ConstructorIDEN:
 
         //3ac
         qid tmp=newtemp(type);
-        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        emit(qid("=",NULL),qid("base",NULL),qid("",NULL),tmp,-1);
         $$->addr=tmp;
         mp_param["this"]=tmp.first;
 
@@ -4059,7 +4080,7 @@ MethodIDEN:
 
         //3ac
         qid tmp=newtemp($$->type);
-        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        emit(qid("=",NULL),qid("base",NULL),qid("",NULL),tmp,-1);
         mp_param["this"]=tmp.first;
         $$->addr=tmp;
         delete $1;
@@ -4346,9 +4367,11 @@ int main(int argc, char* argv[]){
     code_file.open(file_path+code_file_name+".s");
     initializeRegs();
     gen_data_section();
-    starting_code();
+    start_code();
 
     if(yyparse()) return 0;
+
+    print_str_labels();
     
     endAST();
     printSymbolTable(cur_table, "Global.csv");

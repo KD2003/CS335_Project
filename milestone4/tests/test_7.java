@@ -5,7 +5,7 @@ class BinarySearchExample{
           if ( arr[mid] < key ){  
             first = mid + 1;     
           }else if ( arr[mid] == key ){  
-            System.out.println(mid);  
+            String ans="found";
             break;  
           }else{  
              last = mid - 1;  
@@ -13,7 +13,7 @@ class BinarySearchExample{
           mid = (first + last)/2;  
        }  
        if ( first > last ){  
-          System.out.println("Element is not found!");  
+        first=9999;
        }  
      }  
      public static void main(String args[]){  
@@ -23,6 +23,7 @@ class BinarySearchExample{
             }
             int key = 30;  
             int last=7;  
-            binarySearch(arr,0,last,key);     
+            int first =0;
+            binarySearch(arr,first,last,key);     
      }  
     }

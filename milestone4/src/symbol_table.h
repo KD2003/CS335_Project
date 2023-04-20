@@ -10,14 +10,11 @@ typedef struct sym_entry{
 	int size;
 	int offset;
 	map<string, sym_entry* > * entry;
-
 	struct desc { 
 		string reg;
 		bool stack;
 	} addr_descriptor;
-
 	int isArray = 0;
-	int is_derefer = 0;
 	vector<int> array_dims;
 	vector<int> modifiers = {1, 0, 0};		// public/private, static, final
 }sym_entry;
