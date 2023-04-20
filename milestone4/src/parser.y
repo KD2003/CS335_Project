@@ -4371,7 +4371,7 @@ int main(int argc, char* argv[]){
 
     if(yyparse()) return 0;
 
-    print_string_labels();
+    print_str_labels();
     
     endAST();
     printSymbolTable(cur_table, "Global.csv");
