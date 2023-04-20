@@ -41,5 +41,6 @@ void free_reg(string);
 void update_reg_desc(string, qid*);
 void initializeRegs();
 void print_str_labels();
+void save_rec_param();
 string assign_str_label();
 void jump_nxt(int );

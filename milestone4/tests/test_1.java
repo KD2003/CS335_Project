@@ -1,5 +1,5 @@
 class PalindromeExample{
-    public static void main(String args[]){
+    public static void main(){
         int r, sum=0, temp;
         int n=454;
 

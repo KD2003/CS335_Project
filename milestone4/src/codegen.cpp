@@ -3,6 +3,7 @@
 map<string, set<qid> > reg_desc;
 map<int ,string> leaders;
 vector<qid> params;
+vector<qid> rec_params;
 map<string,string> str_mp; // all the strings to it's name
 map<int, string> stringlabels; // all the labels to string
 map<string,string> str_temp; // temp_var -> it's string value
@@ -605,7 +606,12 @@ void generateCode(string func_name){
             else if(line.op.first == "stackpointer--") ;
             else if(line.op.first == "endfunc_") end_func();
             else if(line.op.first == "RETURN") return_instruct();
-            else if(line.arg1.first == "popparam");
+            else if(line.op.first=="=" && line.arg1.first.size()>7 && line.arg1.first.substr(0,7)=="cast_to");
+            else if(line.arg1.first == "popparam"){
+                rec_params.push_back(line.res);
+                if(i+1==end || code[i+1].arg1.first!="popparam") save_rec_param();
+                
+            }
             else if(line.op.first == "=" && line.res.second->type=="string"){
                 if(str_mp.find(line.arg1.first)==str_mp.end()){
                     str_mp[line.arg1.first] = assign_str_label();
@@ -661,7 +667,15 @@ void end_basic_block(){
     }
 }
 
-// add sym to variables stores in reg
+void save_rec_param(){
+    int offset=8;
+    for(auto i:rec_params) offset+=i.second->size;
+    for(auto i:rec_params){
+        offset+=i.second->size;
+        code_file << "\tmov "<< to_string(offset)+"(%rsp), " << get_mem_location(&i,-1) << '\n';
+    }
+    rec_params.clear();
+}
 void update_reg_desc(string reg, qid* sym){
     for(auto it = reg_desc[reg].begin();it != reg_desc[reg].end(); it++){
         it->second->addr_descriptor.reg = "";
