@@ -607,10 +607,10 @@ void generateCode(string func_name){
             else if(line.op.first == "endfunc_") end_func();
             else if(line.op.first == "RETURN") return_instruct();
             else if(line.op.first=="=" && line.arg1.first.size()>7 && line.arg1.first.substr(0,7)=="cast_to");
+            else if(line.arg1.first=="base") ;
             else if(line.arg1.first == "popparam"){
                 rec_params.push_back(line.res);
                 if(i+1==end || code[i+1].arg1.first!="popparam") save_rec_param();
-                
             }
             else if(line.op.first == "=" && line.res.second->type=="string"){
                 if(str_mp.find(line.arg1.first)==str_mp.end()){
@@ -667,13 +667,14 @@ void end_basic_block(){
     }
 }
 
+
 void save_rec_param(){
-    int offset=8;
-    for(auto i:rec_params) offset+=i.second->size;
-    for(auto i:rec_params){
-        offset+=i.second->size;
-        code_file << "\tmov "<< to_string(offset)+"(%rsp), " << get_mem_location(&i,-1) << '\n';
-    }
+    // int offset=8;
+    // for(auto i:rec_params) offset+=i.second->size;
+    // for(auto i:rec_params){
+    //     offset+=i.second->size;
+    //     code_file << "\tmov "<< to_string(offset)+"(%rsp), " << get_mem_location(&i,-1) << '\n';
+    // }
     rec_params.clear();
 }
 void update_reg_desc(string reg, qid* sym){

@@ -13,6 +13,7 @@ void end_basic_block();
 void return_instruct();
 void end_func();
 int all_int(string);
+void base_assign(qid* );
 
 string get_mem_location(qid*, int);
 string getTemporaryReg(qid*);
@@ -33,6 +34,7 @@ void unary_op(quad*);
 void assign_op(quad*);
 void goto_op(quad*);
 void return_op(quad*);
+
 
 // mem management
 void clear_regs();

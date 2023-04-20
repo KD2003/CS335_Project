@@ -3274,7 +3274,7 @@ ConstructorIDEN:
 
         //3ac
         qid tmp=newtemp(type);
-        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        emit(qid("=",NULL),qid("base",NULL),qid("",NULL),tmp,-1);
         $$->addr=tmp;
         mp_param["this"]=tmp.first;
 
@@ -4080,7 +4080,7 @@ MethodIDEN:
 
         //3ac
         qid tmp=newtemp($$->type);
-        emit(qid("=",NULL),qid("popparam",NULL),qid("",NULL),tmp,-1);
+        emit(qid("=",NULL),qid("base",NULL),qid("",NULL),tmp,-1);
         mp_param["this"]=tmp.first;
         $$->addr=tmp;
         delete $1;
