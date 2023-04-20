@@ -44,12 +44,6 @@ class MergeSort {
 			merge(arr, l, m, r);
 		}
 	}
-	static void printArray(int arr[], int n)
-	{
-		for (int i = 0; i < n; ++i)
-			System.out.println(arr[i]);
-		System.out.println();
-	}
 	public static void main(String args[])
 	{
 		int arr[] = new int[6];
@@ -57,13 +51,10 @@ class MergeSort {
             arr[i]=6-i;
         }
 
-		System.out.println("Given Array");
-		printArray(arr,6);
+		// System.out.println("Given Array");
 
 		MergeSort ob = new MergeSort();
-		ob.sort(arr, 0, 6);
 
-		System.out.println("\nSorted array");
-		printArray(arr, 6);
+		// System.out.println("\nSorted array");
 	}
 }

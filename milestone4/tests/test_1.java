@@ -9,9 +9,12 @@ class PalindromeExample{
             sum = (sum*10) + r;
             n = n/10;
         }
-        if(temp == sum)
-            System.out.println("Palindrome Number");
+        if(temp == sum){
+            temp=sum/2;
+        }
+            // System.out.println("Palindrome Number");
         else
-            System.out.println("Not a palindrome Number");
+            temp=2*sum;
+            // System.out.println("Not a palindrome Number");
     }
 }
