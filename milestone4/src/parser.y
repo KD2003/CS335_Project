@@ -1090,7 +1090,7 @@ Assignment:
                 int flag=0;
                 if($3->type!=t){
                     qid cast=newtemp(t);
-                    emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=t;
                     flag=1;
                 }
@@ -1415,7 +1415,7 @@ Assignment:
                 qid cast=newtemp(t);
                 int flag=0;
                 if($3->type!=t){
-                    emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=t;
                     flag=1;
                 }
@@ -1497,19 +1497,19 @@ ConditionalOrExpression:
                 qid cast=newtemp(temp);
                 if($4->type!=temp){
                     if($4->expType==4){
-                        if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -1552,19 +1552,19 @@ ConditionalAndExpression:
                 qid cast=newtemp(temp);
                 if($4->type!=temp){
                     if($4->expType==4){
-                        if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -1605,19 +1605,19 @@ AndExpression:
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -1696,19 +1696,19 @@ InclusiveOrExpression:
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -1949,18 +1949,18 @@ AdditiveExpression:
                 qid cast=newtemp("String");
                 if($1->type!="String"){
                     if($1->expType==4){
-                        if(isInt($1->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($1->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($1->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($1->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_String "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_String "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     flag=1;
                 }
                 if($3->type!="String"){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_String "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_String "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_String "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     flag=1;
                 }
                 
@@ -1969,7 +1969,7 @@ AdditiveExpression:
                 $$->addr=tmp;
 
                 if(flag){
-                    emit(qid(*$2+"String",NULL),$1->addr,cast,tmp,-1);
+                    emit(qid(*$2,NULL),$1->addr,cast,tmp,-1);
                 }
                 else{
                     if($1->expType==4 && $3->expType==4){
@@ -1992,19 +1992,19 @@ AdditiveExpression:
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -2066,19 +2066,19 @@ MultiplicativeExpression:
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -2093,13 +2093,21 @@ MultiplicativeExpression:
                     }
                 else{
                     if($1->expType==4 && $3->expType==4){
-                        emit(qid(*$2,NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        qid temp2=newtemp($3->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid(*$2,NULL),temp1,temp2,tmp,-1);
                     }
                     else if($3->expType==4){
-                        emit(qid(*$2,NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp2=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid(*$2,NULL),$1->addr,temp2,tmp,-1);
                     }
                     else if($1->expType==4){
-                        emit(qid(*$2,NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid(*$2,NULL),temp1,$3->addr,tmp,-1);
                     }
                     else emit(qid(*$2,NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -2132,19 +2140,19 @@ MultiplicativeExpression:
                 qid cast=newtemp(temp);
                 if($3->type!=temp){
                     if($3->expType==4){
-                        if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                        else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                        // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
                 if($1->type!=temp){
                     if($1->expType==4){
-                        if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
-                        else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
+                        // if($1->type=="int")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->intVal),NULL),qid("",NULL),cast,-1);
+                        // else if($1->type=="float")emit(qid("=",NULL),qid("cast_to_"+temp+" "+to_string($1->realVal),NULL),qid("",NULL),cast,-1);
                     }
-                    else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
+                    // else emit(qid("=",NULL),qid("cast_to_"+temp+" "+$1->temp_name,NULL),qid("",NULL),cast,-1);
                     add=temp;
                     flag=1;
                 }
@@ -2159,13 +2167,21 @@ MultiplicativeExpression:
                     }
                 else{
                     if($1->expType==4 && $3->expType==4){
-                         emit(qid("*",NULL),qid(to_string($1->intVal),NULL),qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        qid temp2=newtemp($3->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid("*",NULL),temp1,temp2,tmp,-1);
                     }
                     else if($3->expType==4){
-                        emit(qid("*",NULL),$1->addr,qid(to_string($3->intVal),NULL),tmp,-1);
+                        qid temp2=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($3->intVal),NULL),qid("",NULL),temp2,-1);
+                        emit(qid("*",NULL),$1->addr,temp2,tmp,-1);
                     }
                     else if($1->expType==4){
-                        emit(qid("*",NULL),qid(to_string($1->intVal),NULL),$3->addr,tmp,-1);
+                        qid temp1=newtemp($1->type);
+                        emit(qid("=",NULL),qid(to_string($1->intVal),NULL),qid("",NULL),temp1,-1);
+                        emit(qid("*",NULL),temp1,$3->addr,tmp,-1);
                     }
                     else emit(qid("*",NULL),$1->addr,$3->addr,tmp,-1);
                 }
@@ -2306,13 +2322,13 @@ CastExpression:
             //3ac
             qid cast=newtemp($2->type);
             if($4->expType==4){
-                if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
-                else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
+                // if($4->type=="int")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->intVal),NULL),qid("",NULL),cast,-1);
+                // else if($4->type=="float")emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+to_string($4->realVal),NULL),qid("",NULL),cast,-1);
             }
             else if($4->expType==5){
-                emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+$4->strVal,NULL),qid("",NULL),cast,-1);
+                // emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+$4->strVal,NULL),qid("",NULL),cast,-1);
             }
-            else emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
+            // else emit(qid("=",NULL),qid("cast_to_"+$2->type+" "+$4->temp_name,NULL),qid("",NULL),cast,-1);
             $$->addr=cast;
 		}
 		else{
@@ -3449,10 +3465,10 @@ VariableDeclarator2:
         qid cast=newtemp(t);
         if($3->type!=t){
             if($3->expType==4){
-                if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+t+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
-                else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+t+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
+                // if(isInt($3->type))emit(qid("=",NULL),qid("cast_to_"+t+" "+to_string($3->intVal),NULL),qid("",NULL),cast,-1);
+                // else if(isFloat($3->type))emit(qid("=",NULL),qid("cast_to_"+t+" "+to_string($3->realVal),NULL),qid("",NULL),cast,-1);
             }
-            else emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
+            // else emit(qid("=",NULL),qid("cast_to_"+t+" "+$3->temp_name,NULL),qid("",NULL),cast,-1);
             add=t;
             flag=1;
         }
