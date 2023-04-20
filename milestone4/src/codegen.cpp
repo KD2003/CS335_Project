@@ -630,7 +630,7 @@ void call_func(quad *instr){
 void return_func(quad* instr){
     
     string dest =  get_mem_location(&instr->res, &empty_var, -1);
-    code_file << "\tmov " << "%rax " << dest << '\n';
+    code_file << "\tmov " << "%rax, " << dest << '\n';
 
 }
 
@@ -742,6 +742,7 @@ void genCode(string func_name){
             else if(instr.op.first == "[ ]") array_op(&instr);
         }
     }
+    leaders.clear();
 
 }
 

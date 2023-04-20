@@ -1304,6 +1304,7 @@ Assignment:
                             emit(qid("=",NULL),qid(ans,NULL),qid("",NULL),tmp,-1);
                         }
                         emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1); 
+                        $$->addr=$1->addr;
                     }
                     else if(*$2=="*="){
                         if($3->expType==4)
@@ -1442,9 +1443,9 @@ Assignment:
 
                             emit(qid("=",NULL),cast,qid("",NULL),tmp,-1);
                         }
-                        // else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
+                        else emit(qid("=",NULL),$3->addr,qid("",NULL),tmp,-1);
                     }
-                    emit(qid("=",NULL),$3->addr,qid("",NULL),$1->addr,-1);
+                    emit(qid("=",NULL),tmp,qid("",NULL),$1->addr,-1);
                 }
             }
             else{
