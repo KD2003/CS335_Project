@@ -4,15 +4,15 @@
 using namespace std;
 
 void gen_data_section();
-void starting_code();
+void start_code();
 void gen_func_label(string );
-void genCode(string func_name);
+void generateCode(string func_name);
 
 void findBasicBlocks();
 void end_basic_block();
 void return_instruct();
 void end_func();
-int is_integer(string);
+int all_int(string);
 
 string get_mem_location(qid*, int);
 string getTemporaryReg(qid*);

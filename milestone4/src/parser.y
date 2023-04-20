@@ -4367,7 +4367,7 @@ int main(int argc, char* argv[]){
     code_file.open(file_path+code_file_name+".s");
     initializeRegs();
     gen_data_section();
-    starting_code();
+    start_code();
 
     if(yyparse()) return 0;
 
