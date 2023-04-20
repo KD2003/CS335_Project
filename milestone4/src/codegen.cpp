@@ -175,7 +175,7 @@ void div_op(quad* instr){
         exclude_this.insert("%rdx");
         string reg2 = getReg(&instr->arg2, &empty_var);
         exclude_this.clear();
-        code_file<<"\tidiv "<< reg2 <<"\n";
+        code_file<<"\tidivq "<< reg2 <<"\n";
     }
     else if(is_integer(instr->arg2.first)){
         long val = stol(instr->arg2.first);
@@ -184,7 +184,7 @@ void div_op(quad* instr){
         exclude_this.insert("%rax");
         exclude_this.insert("%rdx");
         exclude_this.clear();
-        code_file<<"\tidiv $"<< val <<"\n";
+        code_file<<"\tidivq $"<< val <<"\n";
     }
     else{
         string str = get_mem_location(&instr->arg1, &instr->arg2,0);
@@ -200,7 +200,7 @@ void div_op(quad* instr){
             code_file<<"\tmov "<< reg2 <<", [ "<< reg2 <<" ]\n";
         }
         exclude_this.clear();
-        code_file<<"\tidiv "<< reg2 <<"\n";
+        code_file<<"\tidivq "<< reg2 <<"\n";
     }
     instr->res.second->addr_descriptor.reg = "%rax";
     reg_desc["%rax"].clear();
@@ -224,7 +224,7 @@ void mod_op(quad* instr){
         exclude_this.insert("%rdx");
         string reg2 = getReg(&instr->arg2, &empty_var);
         exclude_this.clear();
-        code_file<<"\tidiv "<< reg2 <<"\n";
+        code_file<<"\tidivq "<< reg2 <<"\n";
     }
     else if(is_integer(instr->arg2.first)){
         long val = stol(instr->arg2.first);
@@ -233,7 +233,7 @@ void mod_op(quad* instr){
         exclude_this.insert("%rax");
         exclude_this.insert("%rdx");
         exclude_this.clear();
-        code_file<<"\tidiv $"<< val <<"\n";
+        code_file<<"\tidivq $"<< val <<"\n";
     }
     else{
         string str = get_mem_location(&instr->arg1, &instr->arg2, 0);
@@ -249,7 +249,7 @@ void mod_op(quad* instr){
             code_file<<"\tmov "<< reg2 <<", [ "<< reg2 <<" ]\n";
         }
         exclude_this.clear();
-        code_file <<"\tidiv "<< reg2 <<"\n";
+        code_file <<"\tidivq "<< reg2 <<"\n";
     }
     instr->res.second->addr_descriptor.reg = "%rdx";
     reg_desc["%rax"].clear();
@@ -278,7 +278,8 @@ void logic_or(quad *instr){
         }else{
             string reg2 = getReg(&instr->arg2, &instr->arg1);
             code_file << "\ttest " << reg2 << ", " << reg2 << "\n";
-            code_file << "\tsetnz " << reg2 << "\n";
+            code_file << "\tsetnz \%al\n";
+            code_file << "\tmovzbq \%al, " << reg2 << "\n";
             update_reg_desc(reg2, &instr->res);
         }
         return;
@@ -291,7 +292,8 @@ void logic_or(quad *instr){
         }else{
             string reg1 = getReg(&instr->arg1, &instr->arg2);
             code_file << "\ttest " << reg1 << ", " << reg1 << "\n";
-            code_file << "\tsetnz " << reg1 << "\n";
+            code_file << "\tsetnz \%al\n";
+            code_file << "\tmovzbq \%al, " << reg1 << "\n";
             update_reg_desc(reg1, &instr->res);
         }
         return;
@@ -300,7 +302,8 @@ void logic_or(quad *instr){
     string mem2 = getReg(&instr->arg2, &instr->arg1);
     code_file << "\tadd " << mem2 << ", " << reg << "\n";
     code_file << "\ttest " << reg << ", " << reg << "\n";
-    code_file << "\tsetnz " << reg << "\n";
+    code_file << "\tsetnz \%al\n";
+    code_file << "\tmovzbq \%al, " << reg << "\n";
     update_reg_desc(reg, &instr->res);
 }
 
@@ -325,7 +328,8 @@ void logic_and(quad *instr){
         }else{
             string reg2 = getReg(&instr->arg2, &instr->arg1);
             code_file << "\ttest " << reg2 << ", " << reg2 << "\n";
-            code_file << "\tsetnz " << reg2 << "\n";
+            code_file << "\tsetnz \%al\n";
+            code_file << "\tmovzbq \%al, " << reg2 << "\n";
             update_reg_desc(reg2, &instr->res);
         }
         return;
@@ -338,7 +342,8 @@ void logic_and(quad *instr){
         }else{
             string reg1 = getReg(&instr->arg1, &instr->arg2);
             code_file << "\ttest " << reg1 << ", " << reg1 << "\n";
-            code_file << "\tsetnz " << reg1 << "\n";
+            code_file << "\tsetnz \%al\n";
+            code_file << "\tmovzbq \%al, " << reg1 << "\n";
             update_reg_desc(reg1, &instr->res);
         }
         return;
@@ -348,7 +353,8 @@ void logic_and(quad *instr){
     code_file << "\ttest " << mem2 << ", " << mem2 << "\n";
     code_file << "\tcmovnz " << mem2 << ", " << reg << "\n";
     code_file << "\ttest " << reg << ", " << reg << "\n";
-    code_file << "\tsetnz " << reg << "\n";
+    code_file << "\tsetnz \%al\n";
+    code_file << "\tmovzbq \%al, " << reg << "\n";
     update_reg_desc(reg, &instr->res);
 }
 
@@ -418,7 +424,8 @@ void comparison_op(quad* instr){
         long val = stol(instr->arg1.first);
         string reg2 = getReg(&instr->arg2, &instr->arg1);
         code_file << "\tcmp $"<< val <<", " << reg2 <<"\n";
-        code_file << "\t"<< set_ins << " " << reg2 <<"\n";
+        code_file << "\t"<< set_ins << " \%al\n";
+        code_file << "\tmovzbq \%al, " << reg2 << "\n";
         update_reg_desc(reg2, &instr->res);
         return;
     }
@@ -426,14 +433,16 @@ void comparison_op(quad* instr){
         long val = stol(instr->arg2.first);
         string reg1 = getReg(&instr->arg1, &instr->arg2);
         code_file << "\tcmp $"<< val <<", " << reg1 <<"\n";
-        code_file << "\t"<< set_ins << " " << reg1 <<"\n";
+        code_file << "\t"<< set_ins << " \%al\n";
+        code_file << "\tmovzbq \%al, " << reg1 << "\n";
         update_reg_desc(reg1, &instr->res);
         return;
     }
     string reg = getReg(&instr->arg1, &instr->arg2);
     string mem2 = get_mem_location(&instr->arg2, &instr->arg1, 0);
     code_file << "\tcmp "<< mem2 <<", " << reg <<"\n";
-    code_file << "\t"<< set_ins << " " << reg <<"\n";
+    code_file << "\t"<< set_ins << " \%al\n";
+    code_file << "\tmovzbq \%al, " << reg << "\n";
     update_reg_desc(reg, &instr->res);
 }
 
@@ -517,7 +526,8 @@ void unary_op(quad* instr){
     }
     else if(op == "!"){
         code_file << "\ttest "<< reg <<", "<< reg <<"\n";
-        code_file << "\tsete "<< reg <<"\n";
+        code_file << "\tsete \%al\n";
+        code_file << "\tmovzbq \%al, " << reg << "\n";
         update_reg_desc(reg, &instr->arg1);
     }
 }
@@ -734,7 +744,7 @@ void genCode(string func_name){
                 }
                 print_str=str_mp[instr.arg1.first];
                 str_temp[instr.res.first]=instr.arg1.first;
-                cout << instr.res.first << " " << instr.arg1.first << ",,," << endl;
+                // cout << instr.res.first << " " << instr.arg1.first << ",,," << endl;
 
             }  
             else if(instr.op.first == "=")   {
