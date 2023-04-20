@@ -30,8 +30,8 @@ void gen_data_section(){
 }
 
 void starting_code(){
-    code_file << "\nsection .text\n";
-    code_file << "\tglobal main\n";
+    code_file << "\t.global main\n";
+    code_file << "\t.text\n";
 }
 
 int is_integer(string text){
@@ -529,7 +529,6 @@ void assign_op(quad* instr){
         code_file << "\tmov $"<< instr->arg1.first << ", "<< mem <<"\n";
     }
     else{
-        // cout << instr->res.first << ":" << instr->arg1.second->type << endl;
         string reg = getReg(&instr->arg1,&empty_var);
         reg_desc[reg].insert(instr->res);
         string prev_reg = instr->res.second->addr_descriptor.reg;
@@ -676,9 +675,8 @@ void genCode(string func_name){
         int ended = 0;
         int start = it->first;
         int end = it1->first;
-        cout << it->second << ":" << start << " " << end << endl;
         for(int idx=start; idx <= end; idx++){
-            if(idx==end && code[idx-1].op.first!="goto" && code[idx-1].res.first!="goto"){
+            if(idx!=0 && idx==end && code[idx-1].op.first!="goto" && code[idx-1].res.first!="goto"){
                 end_basic_block();
                 jump_nxt(idx);break;
             }
@@ -711,17 +709,16 @@ void genCode(string func_name){
             else if(instr.op.first[0] == '*') mul_op(&instr);
             else if(instr.op.first[0] == '/') div_op(&instr);
             else if(instr.op.first[0] == '%') mod_op(&instr);
-            else if(instr.op.first == "CALL") call_func(&instr);
+            else if(instr.op.first == "call") call_func(&instr);
             else if(instr.op.first == "param") params.push_back(instr.arg1);
             else if(instr.arg1.first == "popreturn") return_func(&instr);
             else if(instr.op.first == "stackpointer--") ;
             else if(instr.op.first == "endfunc_") end_func();
-            else if(instr.op.first == "return") return_instruct();
+            else if(instr.op.first == "RETURN") return_instruct();
             else if(instr.arg1.first == "popparam");
             else if(instr.op.first == "=" && instr.res.second->type=="string"){
                 if(str_mp.find(instr.arg1.first)==str_mp.end()){
                     str_mp[instr.arg1.first] = assign_str_label();
-                    cout << instr.arg1.first << endl;
                 }
 
             }  
@@ -776,7 +773,7 @@ string assign_str_label(){
 void print_string_labels(){
     for(auto it: str_mp){
         code_file<<it.second + ":\n";
-        code_file << "\t" <<": .asciz " << it.first<<"\n";
+        code_file << "\t" <<".asciz " << it.first<<"\n";
     }
 }
 
@@ -839,7 +836,7 @@ string get_mem_location(qid* sym, qid* sym2, int flag){
     sym->second->addr_descriptor.stack = true;
 
 
-    string str = "$"+to_string(-offset-8)+"(%rsp)";
+    string str = to_string(-offset-8)+"(%rsp)";
 
     // if(sym->second->is_derefer && flag != -1){
     //     string reg = getTemporaryReg(sym2);
@@ -931,7 +928,6 @@ void gen_func_label(string func_name){
 void findBasicBlocks(){
     for(int i=0;i< (int)code.size(); i++){
         if(code[i].op.first == "goto"){
-            cout << i << code[i].idx << endl;
             leaders.insert(make_pair(code[i].idx, get_label()));
             leaders.insert(make_pair(i+1, get_label()));
         }   
